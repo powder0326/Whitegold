@@ -1,6 +1,7 @@
 module gui.edit_window;
 
 import imports.all;
+version = DRAW_SAMPLE;
 
 /**
    エディット用ウインドウ
@@ -13,6 +14,7 @@ class EditWindow : MainWindow{
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
 		mainBox.packStart(new EditWindowToolArea(),false,false,0);
+		mainBox.packStart(new EditWindowEditArea(),true,true,0);
         add(mainBox);
     }
 /**
@@ -137,6 +139,64 @@ class EditWindow : MainWindow{
             ToggleButton gridButton = new ToggleButton();
             gridButton.setImage(new Image(new Pixbuf("dat/icon/grid.png")));
             packStart(gridButton , false, false, 2 );
+        }
+    }
+/**
+   エディット用ウインドウメインの編集領域
+
+   ここにマップチップを配置していく。
+*/
+    class EditWindowEditArea : ScrolledWindow{
+        Pixbuf sampleMapchipA;
+        Pixbuf sampleMapchipB;
+        this(){
+            super();
+            class EditDrawingArea : DrawingArea{
+                this(){
+                    super();
+                    addOnExpose(&exposeCallback);
+                    setSizeRequest(16 * 24, 16 * 24);
+                    sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png"); 
+                    sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png"); 
+                }
+                bool exposeCallback(GdkEventExpose* event, Widget widget){
+                    version(DRAW_SAMPLE){
+                        Drawable dr = getWindow();
+                        for(int y = 0 ; y < 24 ; ++ y){
+                            for(int x = 0 ; x < 24 ; ++ x){
+                                dr.drawPixbuf(null, sampleMapchipA, 16 * 7, 16 * 0, x * 16, y * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                            }
+                        }
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 10, 16 * 7, 8 * 16, 8 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 11, 16 * 7, 9 * 16, 8 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 12, 16 * 7, 10 * 16, 8 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 13, 16 * 7, 11 * 16, 8 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 10, 16 * 8, 8 * 16, 9 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 11, 16 * 8, 9 * 16, 9 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 12, 16 * 8, 10 * 16, 9 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 13, 16 * 8, 11 * 16, 9 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 10, 16 * 9, 8 * 16, 10 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 11, 16 * 9, 9 * 16, 10 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 12, 16 * 9, 10 * 16, 10 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 13, 16 * 9, 11 * 16, 10 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 10, 16 * 10, 8 * 16, 11 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 11, 16 * 10, 9 * 16, 11 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 12, 16 * 10, 10 * 16, 11 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 13, 16 * 10, 11 * 16, 11 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 10, 16 * 11, 8 * 16, 12 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 11, 16 * 11, 9 * 16, 12 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 12, 16 * 11, 10 * 16, 12 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, 16 * 13, 16 * 11, 11 * 16, 12 * 16, 16, 16, GdkRgbDither.NORMAL, 0, 0);
+
+                    }
+                    return true;
+                }
+            }
+            addWithViewport(new EditDrawingArea());
         }
     }
 }
