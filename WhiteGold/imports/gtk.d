@@ -21,6 +21,7 @@ public import gtk.Image;
 public import gtk.Menu;
 public import gtk.MenuItem;
 public import gtk.MenuShell;
+public import gtk.MenuBar;
 public import gtk.DrawingArea;
 public import gdk.Threads;
 public import gdk.Pixbuf;
