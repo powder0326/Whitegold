@@ -12,6 +12,7 @@ class EditWindow : MainWindow{
         super("エディットウインドウ");
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
+		mainBox.packStart(new EditWindowToolArea(),false,false,0);
         add(mainBox);
     }
 /**
@@ -26,7 +27,7 @@ class EditWindow : MainWindow{
         this(){
             super();
             AccelGroup accelGroup = new AccelGroup();
-            addAccelGroup(accelGroup);
+            this.outer.addAccelGroup(accelGroup);
             Menu fileMenu = append("ファイル");
             fileMenu.append(new MenuItem(&onMenuActivate, "新規作成","file.new", true, accelGroup, 'n'));
             fileMenu.append(new MenuItem(&onMenuActivate, "開く","file.open", true, accelGroup, 'o'));
@@ -82,6 +83,60 @@ class EditWindow : MainWindow{
             }
         }
         void onToggleWindowShow(CheckMenuItem checkMenuItem){
+        }
+    }
+/**
+   エディット用ウインドウ上部のツールボタン郡表示領域
+
+   ここの領域のボタンを押すといろいろ処理する。メニューとかぶる項目がほとんど。
+*/
+    class EditWindowToolArea : HBox{
+        this(){
+            super(false,0);
+            setBorderWidth(2);
+            // ファイル関連
+            Button fileNewButton = new Button();
+            fileNewButton.setImage(new Image(new Pixbuf("dat/icon/blue-document.png")));
+            packStart(fileNewButton , false, false, 2 );
+            Button fileOpenButton = new Button();
+            fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
+            packStart(fileOpenButton , false, false, 2 );
+            Button fileSaveButton = new Button();
+            fileSaveButton.setImage(new Image(new Pixbuf("dat/icon/disk.png")));
+            packStart(fileSaveButton , false, false, 2 );
+            Button fileSaveWithNameButton = new Button();
+            fileSaveWithNameButton.setImage(new Image(new Pixbuf("dat/icon/disk--pencil.png")));
+            packStart(fileSaveWithNameButton , false, false, 2 );
+            // 区切り線
+            packStart(new VSeparator() , false, false, 4 );
+            // Undo Redo
+            Button editUndoButton = new Button();
+            editUndoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return-180-left.png")));
+            packStart(editUndoButton , false, false, 2 );
+            Button editRedoButton = new Button();
+            editRedoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return.png")));
+            packStart(editRedoButton , false, false, 2 );
+            // 区切り線
+            packStart(new VSeparator() , false, false, 4 );
+            // ペン関連
+            ToggleButton penButton = new ToggleButton();
+            penButton.setImage(new Image(new Pixbuf("dat/icon/pencil.png")));
+            packStart(penButton , false, false, 2 );
+            ToggleButton tilingPenButton = new ToggleButton();
+            tilingPenButton.setImage(new Image(new Pixbuf("dat/icon/pencil--plus.png")));
+            packStart(tilingPenButton , false, false, 2 );
+            ToggleButton fillButton = new ToggleButton();
+            fillButton.setImage(new Image(new Pixbuf("dat/icon/paint-can.png")));
+            packStart(fillButton , false, false, 2 );
+            ToggleButton selectButton = new ToggleButton();
+            selectButton.setImage(new Image(new Pixbuf("dat/icon/selection.png")));
+            packStart(selectButton , false, false, 2 );
+            // 区切り線
+            packStart(new VSeparator() , false, false, 4 );
+            // グリッド関連
+            ToggleButton gridButton = new ToggleButton();
+            gridButton.setImage(new Image(new Pixbuf("dat/icon/grid.png")));
+            packStart(gridButton , false, false, 2 );
         }
     }
 }
