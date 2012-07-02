@@ -9,7 +9,7 @@ import imports.all;
  */
 class PartsWindow : MainWindow{
     this(){
-        super("パーツウインドウ");
+        super("パーツ");
 //         setSizeRequest(320, 320);
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new PartsWindowToolArea(),false,false,0);
