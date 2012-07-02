@@ -14,26 +14,54 @@ class EditWindow : MainWindow{
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
         add(mainBox);
     }
-}
-
 /**
    エディット用ウインドウ上部のメニュー
 
    ファイルの読み込みや保存等、メニューから行う処理を色々記述。
- */
-class EditWindowMenubar : MenuBar{
-    this(){
-        super();
-		Menu fileMenu = append("ファイル");
-		fileMenu.append(new MenuItem(&onMenuActivate, "開く","file.open", true));
-		fileMenu.append(new MenuItem(&onMenuActivate, "上書き保存","file.save", true));
-		fileMenu.append(new MenuItem(&onMenuActivate, "名前を付けて保存","file.save_with_name", true));
-    }
-	void onMenuActivate(MenuItem menuItem)
-	{
-		string action = menuItem.getActionName();
-		switch( action )
-		{
+*/
+    class EditWindowMenubar : MenuBar{
+        CheckMenuItem checkMenuItemPartsWindow = null;
+        CheckMenuItem checkMenuItemLayerWindow = null;
+        CheckMenuItem checkMenuItemOverviewWindow = null;
+        this(){
+            super();
+            AccelGroup accelGroup = new AccelGroup();
+            addAccelGroup(accelGroup);
+            Menu fileMenu = append("ファイル");
+            fileMenu.append(new MenuItem(&onMenuActivate, "新規作成","file.new", true, accelGroup, 'n'));
+            fileMenu.append(new MenuItem(&onMenuActivate, "開く","file.open", true, accelGroup, 'o'));
+            fileMenu.append(new MenuItem(&onMenuActivate, "名前を付けて保存","file.save_with_name", true, accelGroup, 's'));
+            fileMenu.append(new MenuItem(&onMenuActivate, "上書き保存","file.save", true, accelGroup, 's',GdkModifierType.CONTROL_MASK|GdkModifierType.SHIFT_MASK));
+            fileMenu.append(new SeparatorMenuItem());
+            fileMenu.append(new MenuItem(&onMenuActivate, "CSV読み込み","file.import_csv", true));
+            fileMenu.append(new MenuItem(&onMenuActivate, "CSV書き出し","file.export_csv", true));
+            fileMenu.append(new MenuItem(&onMenuActivate, "png書き出し","file.export_png", true, accelGroup, 'q'));
+            fileMenu.append(new SeparatorMenuItem());
+            fileMenu.append(new MenuItem(&onMenuActivate, "終了","file.quit", true));
+            Menu editMenu = append("編集");
+            editMenu.append(new MenuItem(&onMenuActivate, "取り消し","edit.undo", true, accelGroup, 'z'));
+            editMenu.append(new MenuItem(&onMenuActivate, "やり直し","edit.redo", true, accelGroup, 'y'));
+            editMenu.append(new SeparatorMenuItem());
+            editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
+            Menu windowMenu = append("ウインドウ");
+            checkMenuItemPartsWindow = new CheckMenuItem("パーツウインドウ", true);
+            checkMenuItemPartsWindow.addOnToggled(&onToggleWindowShow);
+            checkMenuItemPartsWindow.setActive(true);
+            windowMenu.append(checkMenuItemPartsWindow);
+            checkMenuItemLayerWindow = new CheckMenuItem("レイヤーウインドウ", true);
+            checkMenuItemLayerWindow.addOnToggled(&onToggleWindowShow);
+            checkMenuItemLayerWindow.setActive(true);
+            windowMenu.append(checkMenuItemLayerWindow);
+            checkMenuItemOverviewWindow = new CheckMenuItem("オーバービューウインドウ", true);
+            checkMenuItemOverviewWindow.addOnToggled(&onToggleWindowShow);
+            checkMenuItemOverviewWindow.setActive(true);
+            windowMenu.append(checkMenuItemOverviewWindow);
+        }
+        void onMenuActivate(MenuItem menuItem)
+        {
+            string action = menuItem.getActionName();
+            switch( action )
+            {
 // 			case "help.about":
 // 				GtkDAbout dlg = new GtkDAbout();
 // 				dlg.addOnResponse(&onDialogResponse);
@@ -49,6 +77,12 @@ class EditWindowMenubar : MenuBar{
 // 				d.run();
 // 				d.destroy();
 // 			break;
-		}
-	}
+            default:
+                break;
+            }
+        }
+        void onToggleWindowShow(CheckMenuItem checkMenuItem){
+        }
+    }
 }
+
