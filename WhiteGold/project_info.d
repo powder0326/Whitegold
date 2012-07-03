@@ -1,10 +1,23 @@
 module project_info;
+private import imports.all;
 
 class ProjectInfo{
     int horizontalNum = 20;
     int verticalNum = 20;
     int cellSize = 16;
+    // レイヤー関連
+    int currentLayerIndex = 0;
     LayerInfoBase layerInfos[];
+    LayerInfoBase currentLayerInfo(){
+        return layerInfos[currentLayerIndex];
+    }
+    // マップチップ関連
+    Pixbuf[string] mapchipPixbufList;
+    void AddMapchipFile(string mapchipFilePath){
+        if(mapchipFilePath !in mapchipPixbufList){
+            mapchipPixbufList[mapchipFilePath] = new Pixbuf(mapchipFilePath);
+        }
+    }
 }
 enum ELayerType{
     NORMAL,

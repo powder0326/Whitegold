@@ -1,6 +1,6 @@
 module gui.layer_window;
 
-import imports.all;
+private import imports.all;
 private import main;
 private import project_info;
 
@@ -56,18 +56,24 @@ class LayerWindow : MainWindow{
         this(){
             super(false,0);
             setBorderWidth(2);
-            Button fileNewButton = new Button();
-            fileNewButton.setImage(new Image(new Pixbuf("dat/icon/blue-document.png")));
-            packStart(fileNewButton , false, false, 2 );
-            Button fileOpenButton = new Button();
-            fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
-            packStart(fileOpenButton , false, false, 2 );
-            Button fileSaveButton = new Button();
-            fileSaveButton.setImage(new Image(new Pixbuf("dat/icon/disk.png")));
-            packStart(fileSaveButton , false, false, 2 );
-            Button fileSaveWithNameButton = new Button();
-            fileSaveWithNameButton.setImage(new Image(new Pixbuf("dat/icon/disk--pencil.png")));
-            packStart(fileSaveWithNameButton , false, false, 2 );
+            Button addLayerButton = new Button();
+            addLayerButton.setImage(new Image(new Pixbuf("dat/icon/layer--plus.png")));
+            packStart(addLayerButton , false, false, 2 );
+            Button deleteLayerButton = new Button();
+            deleteLayerButton.setImage(new Image(new Pixbuf("dat/icon/cross-circle.png")));
+            packStart(deleteLayerButton , false, false, 2 );
+            Button moveUpLayerButton = new Button();
+            moveUpLayerButton.setImage(new Image(new Pixbuf("dat/icon/arrow-090.png")));
+            packStart(moveUpLayerButton , false, false, 2 );
+            Button moveDownButton = new Button();
+            moveDownButton.setImage(new Image(new Pixbuf("dat/icon/arrow-270.png")));
+            packStart(moveDownButton , false, false, 2 );
+            Button editLayerButton = new Button();
+            editLayerButton.setImage(new Image(new Pixbuf("dat/icon/wrench-screwdriver.png")));
+            packStart(editLayerButton , false, false, 2 );
+            ToggleButton showHideLayerButton = new ToggleButton();
+            showHideLayerButton.setImage(new Image(new Pixbuf("dat/icon/eye.png")));
+            packStart(showHideLayerButton , false, false, 2 );
         }
     }
 /**
@@ -96,6 +102,13 @@ class LayerWindow : MainWindow{
                 listStore.setValue( it, EColumn.LAYER_NAME, layerInfo.name );
             }
             setModel(listStore);
+            TreeSelection treeSelection = getSelection();
+            treeSelection.setMode(SelectionMode.SINGLE);
+            treeSelection.addOnChanged((TreeSelection ts){
+                    TreeIter it = ts.getSelected();
+                    string value = listStore.getValueString(it, EColumn.LAYER_NAME);
+                    printf("OnChange %s\n",toMBSz(value));
+                });
             // 可視/非可視切り替え列
             CellRendererToggle cellRendererToggle = new CellRendererToggle();
             cellRendererToggle.setProperty( "active", 1 );

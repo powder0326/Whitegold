@@ -1,6 +1,8 @@
 module gui.parts_window;
 
-import imports.all;
+private import imports.all;
+private import main;
+private import project_info;
 
 /**
    パーツ用ウインドウ
@@ -8,13 +10,18 @@ import imports.all;
    レイヤー毎にマップチップ用のパーツを読み込んで表示する。ここから選択したパーツをエディット用ウインドウに配置する。
  */
 class PartsWindow : MainWindow{
+    PartsWindowMapchipArea mapchipArea;
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new PartsWindowToolArea(),false,false,0);
-		mainBox.packStart(new PartsWindowMapchipArea(),true,true,0);
+        mapchipArea = new PartsWindowMapchipArea();
+		mainBox.packStart(mapchipArea,true,true,0);
         add(mainBox);
+    }
+    void Reload(){
+        mapchipArea.Reload();
     }
 /**
    パーツ用ウインドウ上部のツールボタン郡表示領域
@@ -50,8 +57,11 @@ class PartsWindow : MainWindow{
                 this(){
                     super();
                     addOnExpose(&exposeCallback);
-                    mapchip = new Pixbuf("dat/sample/mapchip256_a.png");
-                    setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                    if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
+                        NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                        mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+                        setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                    }
                 }
                 bool exposeCallback(GdkEventExpose* event, Widget widget){
                     Drawable dr = getWindow();
@@ -62,6 +72,13 @@ class PartsWindow : MainWindow{
                 }
             }
             addWithViewport(new MapchipDrawingArea());
+        }
+        void Reload(){
+            if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
+                NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+                setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+            }
         }
     }
 }
