@@ -17,10 +17,10 @@ static if(true){
     {
         projectInfo = new ProjectInfo();
         Main.init(argv);
-        EditWindow editWindow = new EditWindow();
-        editWindow.showAll();
-        PartsWindow partsWindow = new PartsWindow();
-        partsWindow.showAll();
+//         EditWindow editWindow = new EditWindow();
+//         editWindow.showAll();
+//         PartsWindow partsWindow = new PartsWindow();
+//         partsWindow.showAll();
         LayerWindow layerWindow = new LayerWindow();
         layerWindow.showAll();
         Main.run();

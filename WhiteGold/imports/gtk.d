@@ -13,6 +13,7 @@ public import gtk.EventBox;
 public import gtk.Main;
 public import gtk.TreeView;
 public import gtk.TreeIter;
+public import gtk.TreePath;
 public import gtk.ListStore;
 public import gtk.Notebook;
 public import gtk.TreeViewColumn;

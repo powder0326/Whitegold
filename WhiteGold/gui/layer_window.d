@@ -75,31 +75,47 @@ class LayerWindow : MainWindow{
    https://live.gnome.org/Vala/GTKSample ここにチェックボックス付きリストビューのサンプルコードあり。
 */
     class LayerWindowListview : TreeView{
+        enum EColumn{
+            LAYER_VISIBLE,
+            LAYER_NAME,
+        }
         this(){
             super();
-            CellRendererToggle cellRendererToggle = new CellRendererToggle();
-            TreeViewColumn columnToggle = new TreeViewColumn();
-            columnToggle.packStart(cellRendererToggle, 0 );
-            columnToggle.setTitle( "表示" );
-            appendColumn(columnToggle);
-            CellRendererText cellRendererLayerName = new CellRendererText();
-            TreeViewColumn columnLayerName = new TreeViewColumn();
-            columnLayerName.packStart(cellRendererLayerName, 0 );
-            columnLayerName.setTitle( "レイヤー名" );
-            appendColumn(columnLayerName);
-
+            // データ設定
             static GType [2] columns = [
                 GType.INT,
                 GType.STRING,
                 ];
             ListStore listStore = new ListStore(columns);
             auto it = listStore.createIter();
-            listStore.setValue( it, 0, 0 );
-            listStore.setValue( it, 1, "layer0" );
+            listStore.setValue( it, EColumn.LAYER_VISIBLE, 1 );
+            listStore.setValue( it, EColumn.LAYER_NAME, "レイヤー0" );
             it = listStore.createIter();
-            listStore.setValue( it, 0, 0 );
-            listStore.setValue( it, 1, "layer1" );
+            listStore.setValue( it, EColumn.LAYER_VISIBLE, 1 );
+            listStore.setValue( it, EColumn.LAYER_NAME, "レイヤー1" );
             setModel(listStore);
+            // 可視/非可視切り替え列
+            CellRendererToggle cellRendererToggle = new CellRendererToggle();
+            cellRendererToggle.setProperty( "active", 1 );
+            cellRendererToggle.setProperty( "activatable", 1 );
+            TreeViewColumn columnToggle = new TreeViewColumn();
+            columnToggle.packStart(cellRendererToggle, 0 );
+            columnToggle.addAttribute(cellRendererToggle, "active", EColumn.LAYER_VISIBLE);
+            columnToggle.setTitle( "表示" );
+            appendColumn(columnToggle);
+            CellRendererText cellRendererLayerName = new CellRendererText();
+            // change value in store on toggle event
+            cellRendererToggle.addOnToggled( delegate void(string p, CellRendererToggle){
+                    auto path = new TreePath( p );
+                    auto it = new TreeIter( listStore, path );
+                    listStore.setValue(it, EColumn.LAYER_VISIBLE, it.getValueInt( EColumn.LAYER_VISIBLE ) ? 0 : 1 );
+                });
+            // レイヤー名列
+            TreeViewColumn columnLayerName = new TreeViewColumn();
+            columnLayerName.packStart(cellRendererLayerName, 0 );
+            columnLayerName.addAttribute(cellRendererLayerName, "text", EColumn.LAYER_NAME);
+            columnLayerName.setTitle( "レイヤー名" );
+            appendColumn(columnLayerName);
         }
     }
 }
