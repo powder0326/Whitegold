@@ -73,11 +73,17 @@ class PartsWindow : MainWindow{
             }
             addWithViewport(new MapchipDrawingArea());
         }
+        /**
+           再読み込み
+
+           選択レイヤが変更された時等に呼ばれる。mapchip画像を再設定して再描画を行う。
+         */
         void Reload(){
             if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                 NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                 mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
                 setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                queueDraw();
             }
         }
     }

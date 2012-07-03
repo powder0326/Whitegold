@@ -1,5 +1,8 @@
 module project_info;
 private import imports.all;
+private import gui.edit_window;
+private import gui.layer_window;
+private import gui.parts_window;
 
 class ProjectInfo{
     int horizontalNum = 20;
@@ -17,6 +20,26 @@ class ProjectInfo{
         if(mapchipFilePath !in mapchipPixbufList){
             mapchipPixbufList[mapchipFilePath] = new Pixbuf(mapchipFilePath);
         }
+    }
+    // 各種ウインドウ
+    EditWindow editWindow = null;
+    LayerWindow layerWindow = null;
+    PartsWindow partsWindow = null;
+    // 各種処理関数
+    void SetEditWindow(EditWindow editWindow){
+        this.editWindow = editWindow;
+    }
+    void SetLayerWindow(LayerWindow layerWindow){
+        this.layerWindow = layerWindow;
+        this.layerWindow.onSelectedLayerChanged = &onSelectedLayerChanged;
+
+    }
+    void SetPartsWindow(PartsWindow partsWindow){
+        this.partsWindow = partsWindow;
+    }
+    void onSelectedLayerChanged(int index){
+        currentLayerIndex = index;
+        partsWindow.Reload();
     }
 }
 enum ELayerType{

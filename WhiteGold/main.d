@@ -18,10 +18,13 @@ int main(string[] argv){
         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
     }
     EditWindow editWindow = new EditWindow();
+    projectInfo.SetEditWindow(editWindow);
     editWindow.showAll();
     PartsWindow partsWindow = new PartsWindow();
+    projectInfo.SetPartsWindow(partsWindow);
     partsWindow.showAll();
     LayerWindow layerWindow = new LayerWindow();
+    projectInfo.SetLayerWindow(layerWindow);
     layerWindow.showAll();
     Main.run();
     return 0;
