@@ -2,6 +2,7 @@ module gui.edit_window;
 
 import imports.all;
 import main;
+import project_info;
 version = DRAW_SAMPLE;
 
 /**
@@ -11,6 +12,7 @@ version = DRAW_SAMPLE;
  */
 class EditWindow : MainWindow{
     void delegate() onHideFunction;
+    void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
@@ -33,9 +35,13 @@ class EditWindow : MainWindow{
    ファイルの読み込みや保存等、メニューから行う処理を色々記述。
 */
     class EditWindowMenubar : MenuBar{
-        CheckMenuItem checkMenuItemPartsWindow = null;
-        CheckMenuItem checkMenuItemLayerWindow = null;
-        CheckMenuItem checkMenuItemOverviewWindow = null;
+        class CustomCheckMenuItem : CheckMenuItem{
+            EWindowType windowType;
+            this(string label, bool active, EWindowType windowType){
+                super(label, active);
+                this.windowType = windowType;
+            }
+        }
         this(){
             super();
             AccelGroup accelGroup = new AccelGroup();
@@ -57,16 +63,16 @@ class EditWindow : MainWindow{
             editMenu.append(new SeparatorMenuItem());
             editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
             Menu windowMenu = append("ウインドウ");
-            checkMenuItemPartsWindow = new CheckMenuItem("パーツウインドウ", true);
-            checkMenuItemPartsWindow.addOnToggled(&onToggleWindowShow);
+            CustomCheckMenuItem checkMenuItemPartsWindow = new CustomCheckMenuItem("パーツウインドウ", true, EWindowType.PARTS);
+            checkMenuItemPartsWindow.addOnToggled(&onWindowShowHide);
             checkMenuItemPartsWindow.setActive(true);
             windowMenu.append(checkMenuItemPartsWindow);
-            checkMenuItemLayerWindow = new CheckMenuItem("レイヤーウインドウ", true);
-            checkMenuItemLayerWindow.addOnToggled(&onToggleWindowShow);
+            CustomCheckMenuItem checkMenuItemLayerWindow = new CustomCheckMenuItem("レイヤーウインドウ", true, EWindowType.LAYER);
+            checkMenuItemLayerWindow.addOnToggled(&onWindowShowHide);
             checkMenuItemLayerWindow.setActive(true);
             windowMenu.append(checkMenuItemLayerWindow);
-            checkMenuItemOverviewWindow = new CheckMenuItem("オーバービューウインドウ", true);
-            checkMenuItemOverviewWindow.addOnToggled(&onToggleWindowShow);
+            CustomCheckMenuItem checkMenuItemOverviewWindow = new CustomCheckMenuItem("オーバービューウインドウ", true, EWindowType.OVERVIEW);
+            checkMenuItemOverviewWindow.addOnToggled(&onWindowShowHide);
             checkMenuItemOverviewWindow.setActive(true);
             windowMenu.append(checkMenuItemOverviewWindow);
         }
@@ -94,7 +100,11 @@ class EditWindow : MainWindow{
                 break;
             }
         }
-        void onToggleWindowShow(CheckMenuItem checkMenuItem){
+        void onWindowShowHide(CheckMenuItem checkMenuItem){
+            CustomCheckMenuItem customCheckMenuItem = cast(CustomCheckMenuItem)checkMenuItem;
+            if(this.outer.onWindowShowHideFunction !is null){
+                this.outer.onWindowShowHideFunction(customCheckMenuItem.windowType, customCheckMenuItem.getActive() == 1);
+            }
         }
     }
 /**

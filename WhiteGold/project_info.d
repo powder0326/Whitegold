@@ -5,6 +5,13 @@ private import gui.layer_window;
 private import gui.parts_window;
 private import gui.overview_window;
 
+enum EWindowType{
+    EDIT,
+    LAYER,
+    PARTS,
+    OVERVIEW,
+}
+
 class ProjectInfo{
     int horizontalNum = 20;
     int verticalNum = 20;
@@ -31,6 +38,7 @@ class ProjectInfo{
     void SetEditWindow(EditWindow editWindow){
         this.editWindow = editWindow;
         this.editWindow.onHideFunction = &onHideEditWindow;
+        this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -48,6 +56,22 @@ class ProjectInfo{
     }
     void onHideEditWindow(){
         Main.quit();
+    }
+    void onWindowShowHide(EWindowType windowType, bool show){
+        final switch(windowType){
+        case EWindowType.EDIT:
+            show ? editWindow.show() : editWindow.hide();
+            break;
+        case EWindowType.PARTS:
+            show ? partsWindow.show() : partsWindow.hide();
+            break;
+        case EWindowType.LAYER:
+            show ? layerWindow.show() : layerWindow.hide();
+            break;
+        case EWindowType.OVERVIEW:
+            show ? overviewWindow.show() : overviewWindow.hide();
+            break;
+        }
     }
 }
 enum ELayerType{
