@@ -12,6 +12,7 @@ version = DRAW_SAMPLE;
 class EditWindow : MainWindow{
     this(){
         super("エディットウインドウ");
+//         setSizeRequest(320, 320);
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
 		mainBox.packStart(new EditWindowToolArea(),false,false,0);
@@ -148,8 +149,10 @@ class EditWindow : MainWindow{
    ここにマップチップを配置していく。
 */
     class EditWindowEditArea : ScrolledWindow{
-        Pixbuf sampleMapchipA;
-        Pixbuf sampleMapchipB;
+        version(DRAW_SAMPLE){
+            Pixbuf sampleMapchipA;
+            Pixbuf sampleMapchipB;
+        }
         this(){
             super();
             class EditDrawingArea : DrawingArea{
@@ -157,8 +160,10 @@ class EditWindow : MainWindow{
                     super();
                     addOnExpose(&exposeCallback);
                     setSizeRequest(globalData.cellSize * globalData.horizontalNum, globalData.cellSize * globalData.verticalNum);
-                    sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png"); 
-                    sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png"); 
+                    version(DRAW_SAMPLE){
+                        sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png");
+                        sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png");
+                    }
                 }
                 bool exposeCallback(GdkEventExpose* event, Widget widget){
                     version(DRAW_SAMPLE){
