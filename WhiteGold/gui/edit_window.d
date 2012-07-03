@@ -159,7 +159,7 @@ class EditWindow : MainWindow{
                 this(){
                     super();
                     addOnExpose(&exposeCallback);
-                    setSizeRequest(globalData.cellSize * globalData.horizontalNum, globalData.cellSize * globalData.verticalNum);
+                    setSizeRequest(projectInfo.cellSize * projectInfo.horizontalNum, projectInfo.cellSize * projectInfo.verticalNum);
                     version(DRAW_SAMPLE){
                         sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png");
                         sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png");
@@ -168,35 +168,35 @@ class EditWindow : MainWindow{
                 bool exposeCallback(GdkEventExpose* event, Widget widget){
                     version(DRAW_SAMPLE){
                         Drawable dr = getWindow();
-                        for(int y = 0 ; y < globalData.verticalNum ; ++ y){
-                            for(int x = 0 ; x < globalData.verticalNum ; ++ x){
-                                dr.drawPixbuf(null, sampleMapchipA, globalData.cellSize * 7, globalData.cellSize * 0, x * globalData.cellSize, y * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        for(int y = 0 ; y < projectInfo.verticalNum ; ++ y){
+                            for(int x = 0 ; x < projectInfo.verticalNum ; ++ x){
+                                dr.drawPixbuf(null, sampleMapchipA, projectInfo.cellSize * 7, projectInfo.cellSize * 0, x * projectInfo.cellSize, y * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
                             }
                         }
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 10, globalData.cellSize * 7, 8 * globalData.cellSize, 8 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 11, globalData.cellSize * 7, 9 * globalData.cellSize, 8 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 12, globalData.cellSize * 7, 10 * globalData.cellSize, 8 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 13, globalData.cellSize * 7, 11 * globalData.cellSize, 8 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 10, projectInfo.cellSize * 7, 8 * projectInfo.cellSize, 8 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 11, projectInfo.cellSize * 7, 9 * projectInfo.cellSize, 8 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 12, projectInfo.cellSize * 7, 10 * projectInfo.cellSize, 8 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 13, projectInfo.cellSize * 7, 11 * projectInfo.cellSize, 8 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
 
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 10, globalData.cellSize * 8, 8 * globalData.cellSize, 9 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 11, globalData.cellSize * 8, 9 * globalData.cellSize, 9 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 12, globalData.cellSize * 8, 10 * globalData.cellSize, 9 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 13, globalData.cellSize * 8, 11 * globalData.cellSize, 9 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 10, projectInfo.cellSize * 8, 8 * projectInfo.cellSize, 9 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 11, projectInfo.cellSize * 8, 9 * projectInfo.cellSize, 9 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 12, projectInfo.cellSize * 8, 10 * projectInfo.cellSize, 9 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 13, projectInfo.cellSize * 8, 11 * projectInfo.cellSize, 9 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
 
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 10, globalData.cellSize * 9, 8 * globalData.cellSize, 10 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 11, globalData.cellSize * 9, 9 * globalData.cellSize, 10 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 12, globalData.cellSize * 9, 10 * globalData.cellSize, 10 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 13, globalData.cellSize * 9, 11 * globalData.cellSize, 10 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 10, projectInfo.cellSize * 9, 8 * projectInfo.cellSize, 10 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 11, projectInfo.cellSize * 9, 9 * projectInfo.cellSize, 10 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 12, projectInfo.cellSize * 9, 10 * projectInfo.cellSize, 10 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 13, projectInfo.cellSize * 9, 11 * projectInfo.cellSize, 10 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
 
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 10, globalData.cellSize * 10, 8 * globalData.cellSize, 11 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 11, globalData.cellSize * 10, 9 * globalData.cellSize, 11 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 12, globalData.cellSize * 10, 10 * globalData.cellSize, 11 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 13, globalData.cellSize * 10, 11 * globalData.cellSize, 11 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 10, projectInfo.cellSize * 10, 8 * projectInfo.cellSize, 11 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 11, projectInfo.cellSize * 10, 9 * projectInfo.cellSize, 11 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 12, projectInfo.cellSize * 10, 10 * projectInfo.cellSize, 11 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 13, projectInfo.cellSize * 10, 11 * projectInfo.cellSize, 11 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
 
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 10, globalData.cellSize * 11, 8 * globalData.cellSize, 12 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 11, globalData.cellSize * 11, 9 * globalData.cellSize, 12 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 12, globalData.cellSize * 11, 10 * globalData.cellSize, 12 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
-                        dr.drawPixbuf(null, sampleMapchipB, globalData.cellSize * 13, globalData.cellSize * 11, 11 * globalData.cellSize, 12 * globalData.cellSize, globalData.cellSize, globalData.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 10, projectInfo.cellSize * 11, 8 * projectInfo.cellSize, 12 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 11, projectInfo.cellSize * 11, 9 * projectInfo.cellSize, 12 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 12, projectInfo.cellSize * 11, 10 * projectInfo.cellSize, 12 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
+                        dr.drawPixbuf(null, sampleMapchipB, projectInfo.cellSize * 13, projectInfo.cellSize * 11, 11 * projectInfo.cellSize, 12 * projectInfo.cellSize, projectInfo.cellSize, projectInfo.cellSize, GdkRgbDither.NORMAL, 0, 0);
 
                     }
                     return true;

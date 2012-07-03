@@ -18,6 +18,7 @@ public import gtk.Notebook;
 public import gtk.TreeViewColumn;
 public import gtk.ScrolledWindow;
 public import gtk.CellRendererText;
+public import gtk.CellRendererToggle;
 public import gtk.Image;
 public import gtk.Menu;
 public import gtk.MenuItem;

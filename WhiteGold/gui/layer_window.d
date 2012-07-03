@@ -74,9 +74,32 @@ class LayerWindow : MainWindow{
    レイヤー毎にレイヤー名を表示。左のチェックボックスクリックで可視、非可視の切り替え可能。
    https://live.gnome.org/Vala/GTKSample ここにチェックボックス付きリストビューのサンプルコードあり。
 */
-    class LayerWindowToolArea : HBox{
+    class LayerWindowListview : TreeView{
         this(){
-            super(false,0);
-            setBorderWidth(2);
+            super();
+            CellRendererToggle cellRendererToggle = new CellRendererToggle();
+            TreeViewColumn columnToggle = new TreeViewColumn();
+            columnToggle.packStart(cellRendererToggle, 0 );
+            columnToggle.setTitle( "表示" );
+            appendColumn(columnToggle);
+            CellRendererText cellRendererLayerName = new CellRendererText();
+            TreeViewColumn columnLayerName = new TreeViewColumn();
+            columnLayerName.packStart(cellRendererLayerName, 0 );
+            columnLayerName.setTitle( "レイヤー名" );
+            appendColumn(columnLayerName);
+
+            static GType [2] columns = [
+                GType.INT,
+                GType.STRING,
+                ];
+            ListStore listStore = new ListStore(columns);
+            auto it = listStore.createIter();
+            listStore.setValue( it, 0, 0 );
+            listStore.setValue( it, 1, "layer0" );
+            it = listStore.createIter();
+            listStore.setValue( it, 0, 0 );
+            listStore.setValue( it, 1, "layer1" );
+            setModel(listStore);
+        }
     }
 }
