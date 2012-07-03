@@ -43,12 +43,15 @@ class ProjectInfo{
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
         this.layerWindow.onSelectedLayerChangedFunction = &onSelectedLayerChanged;
+        this.layerWindow.onWindowShowHideFunction = &onWindowShowHide;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
+        this.partsWindow.onWindowShowHideFunction = &onWindowShowHide;
     }
     void SetOverviewWindow(OverviewWindow overviewWindow){
         this.overviewWindow = overviewWindow;
+        this.overviewWindow.onWindowShowHideFunction = &onWindowShowHide;
     }
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
