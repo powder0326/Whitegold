@@ -5,6 +5,7 @@ private import project_info;
 private import gui.edit_window;
 private import gui.parts_window;
 private import gui.layer_window;
+private import gui.overview_window;
 
 ProjectInfo projectInfo = null;
 
@@ -26,6 +27,9 @@ int main(string[] argv){
     LayerWindow layerWindow = new LayerWindow();
     projectInfo.SetLayerWindow(layerWindow);
     layerWindow.showAll();
+    OverviewWindow overviewWindow = new OverviewWindow();
+    projectInfo.SetOverviewWindow(overviewWindow);
+    overviewWindow.showAll();
     Main.run();
     return 0;
 }

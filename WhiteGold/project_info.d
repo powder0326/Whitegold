@@ -3,6 +3,7 @@ private import imports.all;
 private import gui.edit_window;
 private import gui.layer_window;
 private import gui.parts_window;
+private import gui.overview_window;
 
 class ProjectInfo{
     int horizontalNum = 20;
@@ -25,6 +26,7 @@ class ProjectInfo{
     EditWindow editWindow = null;
     LayerWindow layerWindow = null;
     PartsWindow partsWindow = null;
+    OverviewWindow overviewWindow = null;
     // 各種処理関数
     void SetEditWindow(EditWindow editWindow){
         this.editWindow = editWindow;
@@ -36,6 +38,9 @@ class ProjectInfo{
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
+    }
+    void SetOverviewWindow(OverviewWindow overviewWindow){
+        this.overviewWindow = overviewWindow;
     }
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
