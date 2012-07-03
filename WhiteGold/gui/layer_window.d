@@ -1,6 +1,8 @@
 module gui.layer_window;
 
 import imports.all;
+private import main;
+private import project_info;
 
 /**
    レイヤー用ウインドウ
@@ -87,12 +89,12 @@ class LayerWindow : MainWindow{
                 GType.STRING,
                 ];
             ListStore listStore = new ListStore(columns);
-            auto it = listStore.createIter();
-            listStore.setValue( it, EColumn.LAYER_VISIBLE, 1 );
-            listStore.setValue( it, EColumn.LAYER_NAME, "レイヤー0" );
-            it = listStore.createIter();
-            listStore.setValue( it, EColumn.LAYER_VISIBLE, 1 );
-            listStore.setValue( it, EColumn.LAYER_NAME, "レイヤー1" );
+            TreeIter it;
+            foreach(layerInfo ; projectInfo.layerInfos){
+                it = listStore.createIter();
+                listStore.setValue( it, EColumn.LAYER_VISIBLE, layerInfo.visible );
+                listStore.setValue( it, EColumn.LAYER_NAME, layerInfo.name );
+            }
             setModel(listStore);
             // 可視/非可視切り替え列
             CellRendererToggle cellRendererToggle = new CellRendererToggle();
