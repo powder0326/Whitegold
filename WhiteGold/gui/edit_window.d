@@ -10,6 +10,7 @@ version = DRAW_SAMPLE;
    マップチップを配置していくウインドウ。このウインドウはアプリ起動時に開かれ、アプリを終了するまで閉じない。
  */
 class EditWindow : MainWindow{
+    void delegate() onHideFunction;
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
@@ -18,6 +19,13 @@ class EditWindow : MainWindow{
 		mainBox.packStart(new EditWindowToolArea(),false,false,0);
 		mainBox.packStart(new EditWindowEditArea(),true,true,0);
         add(mainBox);
+        addOnHide(&onHide);
+    }
+    void onHide(Widget widget){
+        printf("EditWindow.onHide\n");
+        if(onHideFunction !is null){
+            onHideFunction();
+        }
     }
 /**
    エディット用ウインドウ上部のメニュー

@@ -28,11 +28,11 @@ class ProjectInfo{
     // 各種処理関数
     void SetEditWindow(EditWindow editWindow){
         this.editWindow = editWindow;
+        this.editWindow.onHideFunction = &onHideEditWindow;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
-        this.layerWindow.onSelectedLayerChanged = &onSelectedLayerChanged;
-
+        this.layerWindow.onSelectedLayerChangedFunction = &onSelectedLayerChanged;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
@@ -40,6 +40,9 @@ class ProjectInfo{
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
         partsWindow.Reload();
+    }
+    void onHideEditWindow(){
+        Main.quit();
     }
 }
 enum ELayerType{

@@ -10,7 +10,7 @@ private import project_info;
    カレントレイヤーの選択やレイヤーの可視、非可視を切り替えるウインドウ。
  */
 class LayerWindow : MainWindow{
-    void delegate(int index) onSelectedLayerChanged;
+    void delegate(int index) onSelectedLayerChangedFunction;
     this(){
         super("レイヤー");
 //         setSizeRequest(320, 320);
@@ -110,8 +110,8 @@ class LayerWindow : MainWindow{
                     string value = listStore.getValueString(it, EColumn.LAYER_NAME);
                     TreePath path = listStore.getPath(it);
                     int indices[] = path.getIndices;
-                    if(this.outer.onSelectedLayerChanged !is null){
-                        this.outer.onSelectedLayerChanged(indices[0]);
+                    if(this.outer.onSelectedLayerChangedFunction !is null){
+                        this.outer.onSelectedLayerChangedFunction(indices[0]);
                     }
                 });
             // 可視/非可視切り替え列
