@@ -13,8 +13,8 @@ enum EWindowType{
 }
 
 class ProjectInfo{
-    int horizontalNum = 20;
-    int verticalNum = 20;
+    int mapSizeH = 20;
+    int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
     // レイヤー関連
@@ -40,6 +40,7 @@ class ProjectInfo{
         this.editWindow = editWindow;
         this.editWindow.onHideFunction = &onHideEditWindow;
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
+        this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -73,6 +74,13 @@ class ProjectInfo{
             show ? overviewWindow.show() : overviewWindow.hide();
             break;
         }
+    }
+    void onMapSizeAndPartsSizeChanged(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
+        this.mapSizeH = mapSizeH;
+        this.mapSizeV = mapSizeV;
+        this.partsSizeH = partsSizeH;
+        this.partsSizeV = partsSizeV;
+        // Todo! 各種ウインドウの更新
     }
 }
 enum ELayerType{

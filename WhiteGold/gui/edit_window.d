@@ -14,6 +14,7 @@ version = DRAW_SAMPLE;
 class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
+    void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
@@ -34,7 +35,9 @@ class EditWindow : MainWindow{
         NewProjectDialog dialog = new NewProjectDialog();
         dialog.setModal(true);
         dialog.showAll();
-//         dialog.run();
+        if(onMapSizeAndPartsSizeChangedFunction !is null){
+            dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
+        }
     }
 /**
    エディット用ウインドウ上部のメニュー
@@ -188,7 +191,7 @@ class EditWindow : MainWindow{
                 this(){
                     super();
                     addOnExpose(&exposeCallback);
-                    setSizeRequest(projectInfo.partsSizeH * projectInfo.horizontalNum, projectInfo.partsSizeV * projectInfo.verticalNum);
+                    setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                     version(DRAW_SAMPLE){
                         sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png");
                         sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png");
@@ -197,8 +200,8 @@ class EditWindow : MainWindow{
                 bool exposeCallback(GdkEventExpose* event, Widget widget){
                     version(DRAW_SAMPLE){
                         Drawable dr = getWindow();
-                        for(int y = 0 ; y < projectInfo.verticalNum ; ++ y){
-                            for(int x = 0 ; x < projectInfo.verticalNum ; ++ x){
+                        for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
+                            for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
                                 dr.drawPixbuf(null, sampleMapchipA, projectInfo.partsSizeH * 7, projectInfo.partsSizeV * 0, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, GdkRgbDither.NORMAL, 0, 0);
                             }
                         }
