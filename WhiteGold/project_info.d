@@ -98,13 +98,13 @@ class NormalLayerInfo : LayerInfoBase{
         return name_;
     }
     void name(string value){
-        return name_ = value;
+        name_ = value;
     }
     bool visible(){
         return visible_;
     }
     void visible(bool value){
-        return visible_ = value;
+        visible_ = value;
     }
     string mapchipFilePath = "";
 private:
