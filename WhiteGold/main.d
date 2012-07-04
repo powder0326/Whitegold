@@ -21,15 +21,15 @@ int main(string[] argv){
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
     editWindow.showAll();
-    PartsWindow partsWindow = new PartsWindow();
-    projectInfo.SetPartsWindow(partsWindow);
-    partsWindow.showAll();
-    LayerWindow layerWindow = new LayerWindow();
-    projectInfo.SetLayerWindow(layerWindow);
-    layerWindow.showAll();
-    OverviewWindow overviewWindow = new OverviewWindow();
-    projectInfo.SetOverviewWindow(overviewWindow);
-    overviewWindow.showAll();
+//     PartsWindow partsWindow = new PartsWindow();
+//     projectInfo.SetPartsWindow(partsWindow);
+//     partsWindow.showAll();
+//     LayerWindow layerWindow = new LayerWindow();
+//     projectInfo.SetLayerWindow(layerWindow);
+//     layerWindow.showAll();
+//     OverviewWindow overviewWindow = new OverviewWindow();
+//     projectInfo.SetOverviewWindow(overviewWindow);
+//     overviewWindow.showAll();
     Main.run();
     return 0;
 }

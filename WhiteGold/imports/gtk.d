@@ -1,10 +1,15 @@
 module imports.gtk;
 
 public import gtk.MainWindow;
+public import gtk.Window;
 public import gtk.Dialog;
 public import gtk.Widget;
 public import gtk.Label;
 public import gtk.TextView;
+public import gtk.Entry;
+public import gtk.Table;
+public import gtk.SpinButton;
+public import gtk.Adjustment;
 public import gtk.Button;
 public import gtk.ToggleButton;
 public import gtk.VBox;

@@ -32,8 +32,9 @@ class EditWindow : MainWindow{
     }
     void OpenNewProject(){
         NewProjectDialog dialog = new NewProjectDialog();
-//         dialog.showAll();
-        dialog.run();
+        dialog.setModal(true);
+        dialog.showAll();
+//         dialog.run();
     }
 /**
    エディット用ウインドウ上部のメニュー
