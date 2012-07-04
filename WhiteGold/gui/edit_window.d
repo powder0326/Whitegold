@@ -3,6 +3,7 @@ module gui.edit_window;
 import imports.all;
 import main;
 import project_info;
+import dialog.new_project_dialog;
 version = DRAW_SAMPLE;
 
 /**
@@ -28,6 +29,11 @@ class EditWindow : MainWindow{
         if(onHideFunction !is null){
             onHideFunction();
         }
+    }
+    void OpenNewProject(){
+        NewProjectDialog dialog = new NewProjectDialog();
+//         dialog.showAll();
+        dialog.run();
     }
 /**
    エディット用ウインドウ上部のメニュー
@@ -81,6 +87,9 @@ class EditWindow : MainWindow{
             string action = menuItem.getActionName();
             switch( action )
             {
+            case "file.new":
+                OpenNewProject();
+                break;
 // 			case "help.about":
 // 				GtkDAbout dlg = new GtkDAbout();
 // 				dlg.addOnResponse(&onDialogResponse);
@@ -119,6 +128,7 @@ class EditWindow : MainWindow{
             // ファイル関連
             Button fileNewButton = new Button();
             fileNewButton.setImage(new Image(new Pixbuf("dat/icon/blue-document.png")));
+            fileNewButton.addOnClicked((Button button){OpenNewProject();});
             packStart(fileNewButton , false, false, 2 );
             Button fileOpenButton = new Button();
             fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
