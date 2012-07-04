@@ -11,7 +11,6 @@ private import project_info;
  */
 class LayerWindow : MainWindow{
     void delegate(int index) onSelectedLayerChangedFunction;
-    void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     this(){
         super("レイヤー");
 //         setSizeRequest(320, 320);
@@ -20,14 +19,7 @@ class LayerWindow : MainWindow{
 		mainBox.packStart(new LayerWindowToolArea(),false,false,0);
 		mainBox.packStart(new LayerWindowListview(),true,true,0);
         add(mainBox);
-        addOnDelete(&onDelete);
-    }
-    /// 右上の×ボタンが押されても破棄せずに非表示にするだけ
-    bool onDelete(Event event, Widget widget){
-        if(onWindowShowHideFunction !is null){
-            onWindowShowHideFunction(EWindowType.LAYER, false);
-        }
-        return true;
+        setDeletable(false);
     }
 /**
    レイヤー用ウインドウ上部のメニュー

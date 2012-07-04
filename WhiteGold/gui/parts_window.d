@@ -11,7 +11,6 @@ private import project_info;
  */
 class PartsWindow : MainWindow{
     PartsWindowMapchipArea mapchipArea;
-    void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
@@ -20,14 +19,7 @@ class PartsWindow : MainWindow{
         mapchipArea = new PartsWindowMapchipArea();
 		mainBox.packStart(mapchipArea,true,true,0);
         add(mainBox);
-        addOnDelete(&onDelete);
-    }
-    /// 右上の×ボタンが押されても破棄せずに非表示にするだけ
-    bool onDelete(Event event, Widget widget){
-        if(onWindowShowHideFunction !is null){
-            onWindowShowHideFunction(EWindowType.PARTS, false);
-        }
-        return true;
+        setDeletable(false);
     }
     void Reload(){
         mapchipArea.Reload();
