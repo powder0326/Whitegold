@@ -15,7 +15,8 @@ enum EWindowType{
 class ProjectInfo{
     int horizontalNum = 20;
     int verticalNum = 20;
-    int cellSize = 16;
+    int partsSizeH = 16;
+    int partsSizeV = 16;
     // レイヤー関連
     int currentLayerIndex = 0;
     LayerInfoBase layerInfos[];
