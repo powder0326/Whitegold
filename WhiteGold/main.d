@@ -33,3 +33,13 @@ int main(string[] argv){
     Main.run();
     return 0;
 }
+
+/*
+  GTKの参考ページ
+  ■HBox,VBox
+  http://www.kmc.gr.jp/~ranran/memo/gtk.1998-1.html
+  
+  ■SpinButton関連
+  http://www.geocities.jp/tiplinux/gtk/gtk_spin_button.html
+  http://book.geocities.jp/gtkmm_ja/docs/tutorial/html/sec-spinbutton.html
+ */
