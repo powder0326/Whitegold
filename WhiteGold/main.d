@@ -1,3 +1,13 @@
+/*
+  GTKの参考ページ
+  ■HBox,VBox
+  http://www.kmc.gr.jp/~ranran/memo/gtk.1998-1.html
+  
+  ■SpinButton関連
+  http://www.geocities.jp/tiplinux/gtk/gtk_spin_button.html
+  http://book.geocities.jp/gtkmm_ja/docs/tutorial/html/sec-spinbutton.html
+ */
+
 module main;
 
 private import imports.all;
@@ -95,12 +105,47 @@ Pixbuf CreatePixbufFromLayout(int layerIndex){
     }
     return ret;
 }
-/*
-  GTKの参考ページ
-  ■HBox,VBox
-  http://www.kmc.gr.jp/~ranran/memo/gtk.1998-1.html
-  
-  ■SpinButton関連
-  http://www.geocities.jp/tiplinux/gtk/gtk_spin_button.html
-  http://book.geocities.jp/gtkmm_ja/docs/tutorial/html/sec-spinbutton.html
- */
+
+// dmd.2.053ってまだTuple返せないのね……
+void ParseCsv(string csvFilePath, ref Tuple!(int,int,int,int,int[][]) outProjectInfoTuple){
+    int mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerNum;
+    int chipLayouts[][];
+    void ReadProjectInfo(string projectInfoText){
+        string splited[] = projectInfoText.split(",");
+        mapSizeH = std.conv.to!(int)(splited[0]);
+        mapSizeV = std.conv.to!(int)(splited[1]);
+        partsSizeH = std.conv.to!(int)(splited[2]);
+        partsSizeV = std.conv.to!(int)(splited[3]);
+        layerNum = std.conv.to!(int)(splited[4]);
+        printf("ReadProjectInfo %d,%d,%d,%d,%d\n",mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerNum);
+    }
+    string readedText = std.file.readText(csvFilePath);
+    string texts[] = readedText.split("\r\n");
+    printf("1 texts.length = %d\n",texts.length);
+    // 最初の一行目がプロジェクト情報領域
+    string projectInfoText = texts[0];
+    ReadProjectInfo(projectInfoText);
+    texts = texts[1..$];
+    printf("2 texts.length = %d\n",texts.length);
+    // それぞれのレイヤーのテキスト取得
+    int chipLayout[];
+    int appendCount = 0;
+    foreach(text;texts){
+        string splited[] = text.split(",");
+        foreach(tmp;splited){
+            chipLayout ~= std.conv.to!(int)(tmp);
+            ++ appendCount;
+            // 現在のレイヤー分は格納し終わったので次のレイヤー分取得開始
+            if(appendCount >= mapSizeH * mapSizeV){
+                chipLayouts ~= chipLayout;
+                chipLayout.clear;
+                appendCount = 0;
+            }
+        }
+    }
+    outProjectInfoTuple[0] = mapSizeH;
+    outProjectInfoTuple[1] = mapSizeV;
+    outProjectInfoTuple[2] = partsSizeH;
+    outProjectInfoTuple[3] = partsSizeV;
+    outProjectInfoTuple[4] = chipLayouts;
+}

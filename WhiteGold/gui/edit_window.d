@@ -98,21 +98,19 @@ class EditWindow : MainWindow{
             case "file.new":
                 OpenNewProject();
                 break;
-// 			case "help.about":
-// 				GtkDAbout dlg = new GtkDAbout();
-// 				dlg.addOnResponse(&onDialogResponse);
-// 				dlg.showAll();
-// 				break;
-// 			default:
-// 				MessageDialog d = new MessageDialog(
-// 					this,
-// 					GtkDialogFlags.MODAL,
-// 					MessageType.INFO,
-// 					ButtonsType.OK,
-// 					"You pressed menu item "~action);
-// 				d.run();
-// 				d.destroy();
-// 			break;
+            case "file.import_csv":
+                string[] a;
+                ResponseType[] r;
+                FileChooserDialog fs = new FileChooserDialog("File Selection", this.outer, FileChooserAction.OPEN, a, r);
+//                 fs.setCurrentFolderUri("file:///C:/Programing");
+                if( fs.run() != ResponseType.GTK_RESPONSE_CANCEL )
+                {
+                    Tuple!(int,int,int,int,int[][]) projectInfoTuple;
+                    ParseCsv(fs.getFilename(), projectInfoTuple);
+                    printf("projectInfoTuple[0] = %d\n",projectInfoTuple[0]);
+                }
+                fs.hide();
+                break;
             default:
                 break;
             }
