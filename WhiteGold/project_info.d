@@ -80,7 +80,7 @@ class ProjectInfo{
         this.mapSizeV = mapSizeV;
         this.partsSizeH = partsSizeH;
         this.partsSizeV = partsSizeV;
-        // Todo! 各種ウインドウの更新
+        editWindow.Reload();
     }
 }
 enum ELayerType{
