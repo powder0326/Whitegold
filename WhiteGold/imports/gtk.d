@@ -40,6 +40,8 @@ public import gtk.VSeparator;
 public import gdk.Event;
 public import gdk.Threads;
 public import gdk.Pixbuf;
+public import gdk.Pixmap;
+public import gdk.Color;
 public import gdk.Drawable;
 public import gdk.GC;
 public import glib.Idle;

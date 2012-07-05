@@ -185,6 +185,7 @@ class EditWindow : MainWindow{
    ここにマップチップを配置していく。
 */
     class EditWindowEditArea : ScrolledWindow{
+        Pixmap bgPixmap = null;
         class EditDrawingArea : DrawingArea{
             this(){
                 super();
@@ -193,6 +194,33 @@ class EditWindow : MainWindow{
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
                 Drawable dr = getWindow();
+                GC gc = new GC(dr);
+                // 透過色パターンの背景作成(初回のみ)
+                if(bgPixmap is null){
+                    bgPixmap = new Pixmap(dr, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV, -1);
+                    Color color1 = new Color(200,200,200);
+                    Color color2 = new Color(255,255,255);
+                    for(int y = 0 ; y < projectInfo.mapSizeV * projectInfo.partsSizeV / 4 ; ++ y){
+                        for(int x = 0 ; x < projectInfo.mapSizeH * projectInfo.partsSizeH / 4 ; ++ x){
+                            if(y % 2 == 0){
+                                if(x % 2 == 0){
+                                    gc.setRgbFgColor(color1);
+                                }else{
+                                    gc.setRgbFgColor(color2);
+                                }
+                            }else{
+                                if(x % 2 == 0){
+                                    gc.setRgbFgColor(color2);
+                                }else{
+                                    gc.setRgbFgColor(color1);
+                                }
+                            }
+                            bgPixmap.drawRectangle(gc, true, x * 4, y * 4, 4, 4);
+                        }
+                    }
+
+                }
+                dr.drawDrawable(gc, bgPixmap, 0, 0, 0, 0, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
                     if(layerInfo.type != ELayerType.NORMAL || !layerInfo.visible){
