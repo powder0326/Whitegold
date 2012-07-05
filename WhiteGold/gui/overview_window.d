@@ -9,13 +9,17 @@ import project_info;
    マップ全体の縮小表示。
  */
 class OverviewWindow : MainWindow{
+    static const double ZOOM_MIN = 0.1f;
+    static const double ZOOM_MAX = 1.0f;
     double zoomRate = 0.5;
+    OverviewWindowViewArea viewArea = null;
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new OverviewWindowToolArea(),false,false,0);
-		mainBox.packStart(new OverviewWindowViewArea(),true,true,0);
+        viewArea = new OverviewWindowViewArea();
+		mainBox.packStart(viewArea,true,true,0);
         add(mainBox);
         setDeletable(false);
     }
@@ -31,8 +35,16 @@ class OverviewWindow : MainWindow{
             // 拡大縮小
             Button zoomPlusButton = new Button();
             zoomPlusButton.setImage(new Image(new Pixbuf("dat/icon/magnifier-zoom-in.png")));
+            zoomPlusButton.addOnClicked((Button button){
+                    zoomRate = min(zoomRate + 0.1, ZOOM_MAX);
+                    viewArea.Reload();
+                });
             packStart(zoomPlusButton , false, false, 2 );
             Button zoomMinusButton = new Button();
+            zoomMinusButton.addOnClicked((Button button){
+                    zoomRate = max(zoomRate - 0.1, ZOOM_MIN);
+                    viewArea.Reload();
+                });
             zoomMinusButton.setImage(new Image(new Pixbuf("dat/icon/magnifier-zoom-out.png")));
             packStart(zoomMinusButton , false, false, 2 );
         }
@@ -74,7 +86,7 @@ class OverviewWindow : MainWindow{
         void Reload(){
             double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * zoomRate; 
             double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * zoomRate; 
-            setSizeRequest(cast(int)width, cast(int)height);
+            drawingArea.setSizeRequest(cast(int)width, cast(int)height);
             queueDraw();
         }
     }

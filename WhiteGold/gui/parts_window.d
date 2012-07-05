@@ -51,39 +51,41 @@ class PartsWindow : MainWindow{
    ここに読み込んだマップチップを表示する。クリックで選択。
 */
     class PartsWindowMapchipArea : ScrolledWindow{
+        class MapchipDrawingArea : DrawingArea{
+            this(){
+                super();
+                addOnExpose(&exposeCallback);
+                if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
+                    NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+                    setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                }
+            }
+            bool exposeCallback(GdkEventExpose* event, Widget widget){
+                Drawable dr = getWindow();
+                version(DRAW_SAMPLE){
+                    dr.drawPixbuf(mapchip, 0, 0);
+                }
+                return true;
+            }
+        }
+        MapchipDrawingArea drawingArea = null;
         Pixbuf mapchip;
         this(){
             super();
-            class MapchipDrawingArea : DrawingArea{
-                this(){
-                    super();
-                    addOnExpose(&exposeCallback);
-                    if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
-                        NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                        mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
-                        setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
-                    }
-                }
-                bool exposeCallback(GdkEventExpose* event, Widget widget){
-                    Drawable dr = getWindow();
-                    version(DRAW_SAMPLE){
-                        dr.drawPixbuf(mapchip, 0, 0);
-                    }
-                    return true;
-                }
-            }
-            addWithViewport(new MapchipDrawingArea());
+            drawingArea = new MapchipDrawingArea();
+            addWithViewport(drawingArea);
         }
         /**
            再読み込み
 
            選択レイヤが変更された時等に呼ばれる。mapchip画像を再設定して再描画を行う。
-         */
+        */
         void Reload(){
             if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                 NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                 mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
-                setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                drawingArea.setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
                 queueDraw();
             }
         }
