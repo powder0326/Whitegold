@@ -9,10 +9,11 @@ import project_info;
    マップ全体の縮小表示。
  */
 class OverviewWindow : MainWindow{
-    static const double ZOOM_MIN = 0.1f;
-    static const double ZOOM_MAX = 1.0f;
-    double zoomRate = 0.5;
+    static const int ZOOM_MIN = 10;
+    static const int ZOOM_MAX = 100;
+    int zoomRate = 50;
     OverviewWindowViewArea viewArea = null;
+    Statusbar statusbar = null;
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
@@ -21,6 +22,9 @@ class OverviewWindow : MainWindow{
         viewArea = new OverviewWindowViewArea();
 		mainBox.packStart(viewArea,true,true,0);
         add(mainBox);
+        statusbar = new Statusbar();
+        statusbar.push(1, format("表示倍率:%d%%",zoomRate));
+		mainBox.packStart(statusbar,false,false,0);
         setDeletable(false);
     }
 /**
@@ -36,13 +40,17 @@ class OverviewWindow : MainWindow{
             Button zoomPlusButton = new Button();
             zoomPlusButton.setImage(new Image(new Pixbuf("dat/icon/magnifier-zoom-in.png")));
             zoomPlusButton.addOnClicked((Button button){
-                    zoomRate = min(zoomRate + 0.1, ZOOM_MAX);
+                    zoomRate = min(zoomRate + 10, ZOOM_MAX);
+                    statusbar.pop(1);
+                    statusbar.push(1, format("表示倍率:%d%%",zoomRate));
                     viewArea.Reload();
                 });
             packStart(zoomPlusButton , false, false, 2 );
             Button zoomMinusButton = new Button();
             zoomMinusButton.addOnClicked((Button button){
-                    zoomRate = max(zoomRate - 0.1, ZOOM_MIN);
+                    zoomRate = max(zoomRate - 10, ZOOM_MIN);
+                    statusbar.pop(1);
+                    statusbar.push(1, format("表示倍率:%d%%",zoomRate));
                     viewArea.Reload();
                 });
             zoomMinusButton.setImage(new Image(new Pixbuf("dat/icon/magnifier-zoom-out.png")));
@@ -59,8 +67,8 @@ class OverviewWindow : MainWindow{
             this(){
                 super();
                 addOnExpose(&exposeCallback);
-                double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * zoomRate; 
-                double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * zoomRate; 
+                double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * (cast(double)zoomRate / 100.0); 
+                double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * (cast(double)zoomRate / 100.0); 
                 setSizeRequest(cast(int)width, cast(int)height);
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
@@ -84,8 +92,8 @@ class OverviewWindow : MainWindow{
             addWithViewport(drawingArea);
         }
         void Reload(){
-            double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * zoomRate; 
-            double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * zoomRate; 
+            double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * (cast(double)zoomRate / 100.0); 
+            double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * (cast(double)zoomRate / 100.0); 
             drawingArea.setSizeRequest(cast(int)width, cast(int)height);
             queueDraw();
         }

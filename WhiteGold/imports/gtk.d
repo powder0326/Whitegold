@@ -31,6 +31,7 @@ public import gtk.Menu;
 public import gtk.MenuItem;
 public import gtk.CheckMenuItem;
 public import gtk.SeparatorMenuItem;
+public import gtk.Statusbar;
 public import gtk.AccelGroup;
 public import gtk.MenuShell;
 public import gtk.MenuBar;
