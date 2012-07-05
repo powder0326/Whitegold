@@ -1,5 +1,6 @@
 module project_info;
 private import imports.all;
+private import main;
 private import gui.edit_window;
 private import gui.layer_window;
 private import gui.parts_window;
@@ -41,6 +42,7 @@ class ProjectInfo{
         this.editWindow.onHideFunction = &onHideEditWindow;
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
         this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
+        this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -49,6 +51,7 @@ class ProjectInfo{
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
+        this.partsWindow.onMapchipFileLoadedFunction = &onMapchipFileLoaded;
     }
     void SetOverviewWindow(OverviewWindow overviewWindow){
         this.overviewWindow = overviewWindow;
@@ -87,6 +90,27 @@ class ProjectInfo{
         this.partsSizeV = partsSizeV;
         editWindow.Reload();
     }
+    void onCsvLoaded(Tuple!(int,int,int,int,int[][]) projectInfoTuple){
+        mapSizeH = projectInfoTuple[0];
+        mapSizeV = projectInfoTuple[1];
+        partsSizeH = projectInfoTuple[2];
+        partsSizeV = projectInfoTuple[3];
+        layerInfos.clear;
+        foreach(i,chipLayout;projectInfoTuple[4]){
+            NormalLayerInfo normalLayerInfo = new NormalLayerInfo(format("レイヤー%d",i), true, "");
+            normalLayerInfo.chipLayout = chipLayout;
+            layerInfos ~= normalLayerInfo;
+        }
+        editWindow.Reload();
+    }
+    void onMapchipFileLoaded(string mapchipFilePath){
+        AddMapchipFile(mapchipFilePath);
+        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        normalLayerInfo.mapchipFilePath = mapchipFilePath;
+        normalLayerInfo.layoutPixbuf = CreatePixbufFromLayout(currentLayerIndex);
+        partsWindow.Reload();
+        editWindow.Reload();
+    }
 }
 enum ELayerType{
     NORMAL,
@@ -108,16 +132,16 @@ class NormalLayerInfo : LayerInfoBase{
     override ELayerType type(){
         return ELayerType.NORMAL;
     }
-    string name(){
+    override string name(){
         return name_;
     }
-    void name(string value){
+    override void name(string value){
         name_ = value;
     }
-    bool visible(){
+    override bool visible(){
         return visible_;
     }
-    void visible(bool value){
+    override void visible(bool value){
         visible_ = value;
     }
     string mapchipFilePath = "";

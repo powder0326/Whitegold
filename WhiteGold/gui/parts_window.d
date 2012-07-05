@@ -11,6 +11,7 @@ private import project_info;
  */
 class PartsWindow : MainWindow{
     PartsWindowMapchipArea mapchipArea;
+    void delegate(string mapchipFilePath) onMapchipFileLoadedFunction;
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
@@ -36,6 +37,17 @@ class PartsWindow : MainWindow{
             // ファイル関連
             Button fileOpenButton = new Button();
             fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
+            fileOpenButton.addOnClicked((Button button){
+                    FileChooserDialog fs = new FileChooserDialog("マップチップファイル選択", this.outer, FileChooserAction.OPEN);
+                    if( fs.run() == ResponseType.GTK_RESPONSE_OK )
+                    {
+                        if(this.outer.onMapchipFileLoadedFunction !is null){
+                            this.outer.onMapchipFileLoadedFunction(fs.getFilename());
+                        }
+                    }
+                    fs.hide();
+
+                });
             packStart(fileOpenButton , false, false, 2 );
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );

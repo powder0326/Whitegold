@@ -14,6 +14,7 @@ class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
+    void delegate(Tuple!(int,int,int,int,int[][])) onCsvLoadedFunction;
     EditWindowEditArea editArea = null;
     this(){
         super("エディットウインドウ");
@@ -99,15 +100,15 @@ class EditWindow : MainWindow{
                 OpenNewProject();
                 break;
             case "file.import_csv":
-                string[] a;
-                ResponseType[] r;
-                FileChooserDialog fs = new FileChooserDialog("File Selection", this.outer, FileChooserAction.OPEN, a, r);
+                FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.OPEN);
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
-                if( fs.run() != ResponseType.GTK_RESPONSE_CANCEL )
+                if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
                     Tuple!(int,int,int,int,int[][]) projectInfoTuple;
                     ParseCsv(fs.getFilename(), projectInfoTuple);
-                    printf("projectInfoTuple[0] = %d\n",projectInfoTuple[0]);
+                    if(this.outer.onCsvLoadedFunction !is null){
+                        this.outer.onCsvLoadedFunction(projectInfoTuple);
+                    }
                 }
                 fs.hide();
                 break;
