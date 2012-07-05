@@ -195,24 +195,11 @@ class EditWindow : MainWindow{
                 Drawable dr = getWindow();
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
-                    if(layerInfo.type != ELayerType.NORMAL){
-                        continue;
-                    }
-                    if(!layerInfo.visible){
+                    if(layerInfo.type != ELayerType.NORMAL || !layerInfo.visible){
                         continue;
                     }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-                    // マップチップの横分割数
-                    Pixbuf mapChip = projectInfo.mapchipPixbufList[normalLayerInfo.mapchipFilePath];
-                    int chipDivNumH = mapChip.getWidth() / projectInfo.partsSizeH;
-                    for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
-                        for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
-                            int chipIndex = normalLayerInfo.chipLayout[x + y * projectInfo.mapSizeH];
-                            int chipSrcOffsetX = chipIndex % chipDivNumH;
-                            int chipSrcOffsetY = chipIndex / chipDivNumH;
-                            dr.drawPixbuf(null, mapChip, projectInfo.partsSizeH * chipSrcOffsetX, projectInfo.partsSizeV * chipSrcOffsetY, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, GdkRgbDither.NORMAL, 0, 0);
-                        }
-                    }
+                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
                 }
                 return true;
             }

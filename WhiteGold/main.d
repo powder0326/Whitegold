@@ -59,6 +59,8 @@ int main(string[] argv){
         projectInfo.layerInfos ~= layerInfo2;
         projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
+        layerInfo1.layoutPixbuf = CreatePixbufFromLayout(0);
+        layerInfo2.layoutPixbuf = CreatePixbufFromLayout(1);
     }
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
@@ -76,6 +78,23 @@ int main(string[] argv){
     return 0;
 }
 
+Pixbuf CreatePixbufFromLayout(int layerIndex){
+    Pixbuf ret = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
+    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.layerInfos[layerIndex];
+    Pixbuf mapChip = projectInfo.mapchipPixbufList[normalLayerInfo.mapchipFilePath];
+    int chipLayout[] = normalLayerInfo.chipLayout;
+    // マップチップの横分割数
+    int chipDivNumH = mapChip.getWidth() / projectInfo.partsSizeH;
+    for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
+        for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
+            int chipIndex = normalLayerInfo.chipLayout[x + y * projectInfo.mapSizeH];
+            int chipSrcOffsetX = chipIndex % chipDivNumH;
+            int chipSrcOffsetY = chipIndex / chipDivNumH;
+            mapChip.copyArea(projectInfo.partsSizeH * chipSrcOffsetX, projectInfo.partsSizeV * chipSrcOffsetY, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+        }
+    }
+    return ret;
+}
 /*
   GTKの参考ページ
   ■HBox,VBox

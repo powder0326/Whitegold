@@ -122,6 +122,7 @@ class NormalLayerInfo : LayerInfoBase{
     }
     string mapchipFilePath = "";
     int chipLayout[];
+    Pixbuf layoutPixbuf;
 private:
     string name_ = "layer";
     bool visible_ = true;
