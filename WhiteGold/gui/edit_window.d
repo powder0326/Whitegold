@@ -14,7 +14,7 @@ class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
-    void delegate(Tuple!(int,int,int,int,int[][])) onCsvLoadedFunction;
+    void delegate(CsvProjectInfo) onCsvLoadedFunction;
     EditWindowEditArea editArea = null;
     this(){
         super("エディットウインドウ");
@@ -104,10 +104,9 @@ class EditWindow : MainWindow{
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
                 if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
-                    Tuple!(int,int,int,int,int[][]) projectInfoTuple;
-                    ParseCsv(fs.getFilename(), projectInfoTuple);
+                    CsvProjectInfo info = ParseCsv(fs.getFilename());
                     if(this.outer.onCsvLoadedFunction !is null){
-                        this.outer.onCsvLoadedFunction(projectInfoTuple);
+                        this.outer.onCsvLoadedFunction(info);
                     }
                 }
                 fs.hide();

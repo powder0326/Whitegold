@@ -90,18 +90,19 @@ class ProjectInfo{
         this.partsSizeV = partsSizeV;
         editWindow.Reload();
     }
-    void onCsvLoaded(Tuple!(int,int,int,int,int[][]) projectInfoTuple){
-        mapSizeH = projectInfoTuple[0];
-        mapSizeV = projectInfoTuple[1];
-        partsSizeH = projectInfoTuple[2];
-        partsSizeV = projectInfoTuple[3];
+    void onCsvLoaded(CsvProjectInfo info){
+        mapSizeH = info.mapSizeH;
+        mapSizeV = info.mapSizeV;
+        partsSizeH = info.partsSizeH;
+        partsSizeV = info.partsSizeV;
         layerInfos.clear;
-        foreach(i,chipLayout;projectInfoTuple[4]){
+        foreach(i,chipLayout;info.chipLayouts){
             NormalLayerInfo normalLayerInfo = new NormalLayerInfo(format("レイヤー%d",i), true, "");
             normalLayerInfo.chipLayout = chipLayout;
             layerInfos ~= normalLayerInfo;
         }
         editWindow.Reload();
+        partsWindow.Reload();
     }
     void onMapchipFileLoaded(string mapchipFilePath){
         AddMapchipFile(mapchipFilePath);

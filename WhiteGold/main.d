@@ -106,8 +106,12 @@ Pixbuf CreatePixbufFromLayout(int layerIndex){
     return ret;
 }
 
+struct CsvProjectInfo{
+    int mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerNum;
+    int chipLayouts[][];
+}
 // dmd.2.053ってまだTuple返せないのね……
-void ParseCsv(string csvFilePath, ref Tuple!(int,int,int,int,int[][]) outProjectInfoTuple){
+CsvProjectInfo ParseCsv(string csvFilePath){
     int mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerNum;
     int chipLayouts[][];
     void ReadProjectInfo(string projectInfoText){
@@ -143,9 +147,11 @@ void ParseCsv(string csvFilePath, ref Tuple!(int,int,int,int,int[][]) outProject
             }
         }
     }
-    outProjectInfoTuple[0] = mapSizeH;
-    outProjectInfoTuple[1] = mapSizeV;
-    outProjectInfoTuple[2] = partsSizeH;
-    outProjectInfoTuple[3] = partsSizeV;
-    outProjectInfoTuple[4] = chipLayouts;
+    CsvProjectInfo ret;
+    ret.mapSizeH = mapSizeH;
+    ret.mapSizeV = mapSizeV;
+    ret.partsSizeH = partsSizeH;
+    ret.partsSizeV = partsSizeV;
+    ret.chipLayouts = chipLayouts;
+    return ret;
 }

@@ -69,13 +69,19 @@ class PartsWindow : MainWindow{
                 addOnExpose(&exposeCallback);
                 if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                     NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                    mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
-                    setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                    if(layerInfo.mapchipFilePath !is null && layerInfo.mapchipFilePath in projectInfo.mapchipPixbufList){
+                        mapchip =  projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+                    }else{
+                        mapchip =  null;
+                    }
+                    if(mapchip){
+                        setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                    }
                 }
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
                 Drawable dr = getWindow();
-                version(DRAW_SAMPLE){
+                if(mapchip !is null){
                     dr.drawPixbuf(mapchip, 0, 0);
                 }
                 return true;
@@ -96,8 +102,14 @@ class PartsWindow : MainWindow{
         void Reload(){
             if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                 NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                mapchip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
-                drawingArea.setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                if(layerInfo.mapchipFilePath !is null && layerInfo.mapchipFilePath in projectInfo.mapchipPixbufList){
+                    mapchip =  projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+                }else{
+                    mapchip =  null;
+                }
+                if(mapchip){
+                    drawingArea.setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
+                }
                 queueDraw();
             }
         }
