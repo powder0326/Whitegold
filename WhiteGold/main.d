@@ -13,23 +13,31 @@ int main(string[] argv){
     Main.init(argv);
     projectInfo = new ProjectInfo();
     version(DRAW_SAMPLE){
-        projectInfo.layerInfos ~= new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
+        NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
+        projectInfo.layerInfos ~= layerInfo1;
+        for(int i = 0 ; i < projectInfo.mapSizeH * projectInfo.mapSizeV ; ++ i){
+            layerInfo1.chipLayout ~= 0;
+        }
+        NormalLayerInfo layerInfo2 = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
+        for(int i = 0 ; i < projectInfo.mapSizeH * projectInfo.mapSizeV ; ++ i){
+            layerInfo2.chipLayout ~= 16 * 8 + 3;
+        }
+        projectInfo.layerInfos ~= layerInfo2;
         projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
-        projectInfo.layerInfos ~= new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
     }
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
     editWindow.showAll();
-//     PartsWindow partsWindow = new PartsWindow();
-//     projectInfo.SetPartsWindow(partsWindow);
-//     partsWindow.showAll();
-//     LayerWindow layerWindow = new LayerWindow();
-//     projectInfo.SetLayerWindow(layerWindow);
-//     layerWindow.showAll();
-//     OverviewWindow overviewWindow = new OverviewWindow();
-//     projectInfo.SetOverviewWindow(overviewWindow);
-//     overviewWindow.showAll();
+    PartsWindow partsWindow = new PartsWindow();
+    projectInfo.SetPartsWindow(partsWindow);
+    partsWindow.showAll();
+    LayerWindow layerWindow = new LayerWindow();
+    projectInfo.SetLayerWindow(layerWindow);
+    layerWindow.showAll();
+    OverviewWindow overviewWindow = new OverviewWindow();
+    projectInfo.SetOverviewWindow(overviewWindow);
+    overviewWindow.showAll();
     Main.run();
     return 0;
 }

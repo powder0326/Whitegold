@@ -4,7 +4,6 @@ import imports.all;
 import main;
 import project_info;
 import dialog.new_project_dialog;
-version = DRAW_SAMPLE;
 
 /**
    エディット用ウインドウ
@@ -186,53 +185,31 @@ class EditWindow : MainWindow{
    ここにマップチップを配置していく。
 */
     class EditWindowEditArea : ScrolledWindow{
-        version(DRAW_SAMPLE){
-            Pixbuf sampleMapchipA;
-            Pixbuf sampleMapchipB;
-        }
         class EditDrawingArea : DrawingArea{
             this(){
                 super();
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
-                version(DRAW_SAMPLE){
-                    sampleMapchipA = new Pixbuf("dat/sample/mapchip256_a.png");
-                    sampleMapchipB = new Pixbuf("dat/sample/mapchip256_b.png");
-                }
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
-                version(DRAW_SAMPLE){
-                    Drawable dr = getWindow();
+                Drawable dr = getWindow();
+                // 全てのレイヤーに対して
+                foreach(layerInfo;projectInfo.layerInfos){
+                    if(layerInfo.type != ELayerType.NORMAL){
+                        continue;
+                    }
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
+                    // マップチップの横分割数
+                    Pixbuf mapChip = projectInfo.mapchipPixbufList[normalLayerInfo.mapchipFilePath];
+                    int chipDivNumH = mapChip.getWidth() / projectInfo.partsSizeH;
                     for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
                         for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
-                            dr.drawPixbuf(null, sampleMapchipA, projectInfo.partsSizeH * 7, projectInfo.partsSizeV * 0, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, GdkRgbDither.NORMAL, 0, 0);
+                            int chipIndex = normalLayerInfo.chipLayout[x + y * projectInfo.mapSizeH];
+                            int chipSrcOffsetX = chipIndex % chipDivNumH;
+                            int chipSrcOffsetY = chipIndex / chipDivNumH;
+                            dr.drawPixbuf(null, mapChip, projectInfo.partsSizeH * chipSrcOffsetX, projectInfo.partsSizeV * chipSrcOffsetY, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, GdkRgbDither.NORMAL, 0, 0);
                         }
                     }
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 10, projectInfo.partsSizeH * 7, 8 * projectInfo.partsSizeH, 8 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 11, projectInfo.partsSizeH * 7, 9 * projectInfo.partsSizeH, 8 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 12, projectInfo.partsSizeH * 7, 10 * projectInfo.partsSizeH, 8 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 13, projectInfo.partsSizeH * 7, 11 * projectInfo.partsSizeH, 8 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 10, projectInfo.partsSizeH * 8, 8 * projectInfo.partsSizeH, 9 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 11, projectInfo.partsSizeH * 8, 9 * projectInfo.partsSizeH, 9 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 12, projectInfo.partsSizeH * 8, 10 * projectInfo.partsSizeH, 9 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 13, projectInfo.partsSizeH * 8, 11 * projectInfo.partsSizeH, 9 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 10, projectInfo.partsSizeH * 9, 8 * projectInfo.partsSizeH, 10 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 11, projectInfo.partsSizeH * 9, 9 * projectInfo.partsSizeH, 10 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 12, projectInfo.partsSizeH * 9, 10 * projectInfo.partsSizeH, 10 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 13, projectInfo.partsSizeH * 9, 11 * projectInfo.partsSizeH, 10 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 10, projectInfo.partsSizeH * 10, 8 * projectInfo.partsSizeH, 11 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 11, projectInfo.partsSizeH * 10, 9 * projectInfo.partsSizeH, 11 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 12, projectInfo.partsSizeH * 10, 10 * projectInfo.partsSizeH, 11 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 13, projectInfo.partsSizeH * 10, 11 * projectInfo.partsSizeH, 11 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 10, projectInfo.partsSizeH * 11, 8 * projectInfo.partsSizeH, 12 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 11, projectInfo.partsSizeH * 11, 9 * projectInfo.partsSizeH, 12 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 12, projectInfo.partsSizeH * 11, 10 * projectInfo.partsSizeH, 12 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-                    dr.drawPixbuf(null, sampleMapchipB, projectInfo.partsSizeH * 13, projectInfo.partsSizeH * 11, 11 * projectInfo.partsSizeH, 12 * projectInfo.partsSizeH, projectInfo.partsSizeH, projectInfo.partsSizeH, GdkRgbDither.NORMAL, 0, 0);
-
                 }
                 return true;
             }
