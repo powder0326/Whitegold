@@ -198,6 +198,9 @@ class EditWindow : MainWindow{
                     if(layerInfo.type != ELayerType.NORMAL){
                         continue;
                     }
+                    if(!layerInfo.visible){
+                        continue;
+                    }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
                     // マップチップの横分割数
                     Pixbuf mapChip = projectInfo.mapchipPixbufList[normalLayerInfo.mapchipFilePath];

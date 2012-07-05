@@ -11,6 +11,7 @@ private import project_info;
  */
 class LayerWindow : MainWindow{
     void delegate(int index) onSelectedLayerChangedFunction;
+    void delegate(int index, bool visible) onLayerVisibilityChangedFunction;
     this(){
         super("レイヤー");
 //         setSizeRequest(320, 320);
@@ -129,7 +130,11 @@ class LayerWindow : MainWindow{
             cellRendererToggle.addOnToggled( delegate void(string p, CellRendererToggle){
                     auto path = new TreePath( p );
                     auto it = new TreeIter( listStore, path );
+                    int indices[] = path.getIndices;
                     listStore.setValue(it, EColumn.LAYER_VISIBLE, it.getValueInt( EColumn.LAYER_VISIBLE ) ? 0 : 1 );
+                    if(this.outer.onLayerVisibilityChangedFunction !is null){
+                        this.outer.onLayerVisibilityChangedFunction(indices[0], it.getValueInt( EColumn.LAYER_VISIBLE ) == 1);
+                    }
                 });
             // レイヤー名列
             TreeViewColumn columnLayerName = new TreeViewColumn();

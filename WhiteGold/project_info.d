@@ -45,6 +45,7 @@ class ProjectInfo{
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
         this.layerWindow.onSelectedLayerChangedFunction = &onSelectedLayerChanged;
+        this.layerWindow.onLayerVisibilityChangedFunction = &onLayerVisibilityChanged;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
@@ -55,6 +56,10 @@ class ProjectInfo{
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
         partsWindow.Reload();
+    }
+    void onLayerVisibilityChanged(int index, bool visible){
+        layerInfos[index].visible = visible;
+        editWindow.Reload();
     }
     void onHideEditWindow(){
         Main.quit();
