@@ -16,7 +16,10 @@ class EditWindow : MainWindow{
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
+    void delegate() onUndoFunction;
+    void delegate() onRedoFunction;
     EditWindowEditArea editArea = null;
+    EditWindowToolArea toolArea = null;
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
@@ -24,7 +27,8 @@ class EditWindow : MainWindow{
         setIcon(new Pixbuf("dat/icon/application--pencil.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
-		mainBox.packStart(new EditWindowToolArea(),false,false,0);
+        toolArea = new EditWindowToolArea();
+		mainBox.packStart(toolArea,false,false,0);
         editArea = new EditWindowEditArea();
 		mainBox.packStart(editArea,true,true,0);
 		mainBox.packStart(new EditWindowStatusbarArea(),false,false,0);
@@ -144,6 +148,8 @@ class EditWindow : MainWindow{
         ToggleButton selectButton = null;
         bool selectButtonUpByOther = false;
         bool selectButtonDownBySelf = false;
+        Button editUndoButton = null;
+        Button editRedoButton = null;
         this(){
             super(false,0);
             setBorderWidth(2);
@@ -164,13 +170,23 @@ class EditWindow : MainWindow{
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
             // Undo Redo
-            Button editUndoButton = new Button();
+            editUndoButton = new Button();
             editUndoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return-180-left.png")));
             editUndoButton.setSensitive(false);
+            editUndoButton.addOnClicked((Button button){
+                    if(this.outer.onUndoFunction !is null){
+                        this.outer.onUndoFunction();
+                    }
+                });
             packStart(editUndoButton , false, false, 2 );
-            Button editRedoButton = new Button();
+            editRedoButton = new Button();
             editRedoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return.png")));
             editRedoButton.setSensitive(false);
+            editRedoButton.addOnClicked((Button button){
+                    if(this.outer.onRedoFunction !is null){
+                        this.outer.onRedoFunction();
+                    }
+                });
             packStart(editRedoButton , false, false, 2 );
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );

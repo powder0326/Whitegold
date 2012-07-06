@@ -25,6 +25,18 @@ struct ChipReplaceInfo{
         this.newChipGridY = newChipGridY;
     }
 }
+struct EditInfo{
+    this(int layerIndex, int layoutIndex, int oldChipId, int newChipId){
+        this.layerIndex = layerIndex;
+        this.layoutIndex = layoutIndex;
+        this.oldChipId = oldChipId;
+        this.newChipId = newChipId;
+    }
+    int layerIndex;
+    int layoutIndex;
+    int oldChipId;
+    int newChipId;
+}
 
 class ProjectInfo{
     int mapSizeH = 20;
@@ -44,6 +56,9 @@ class ProjectInfo{
             mapchipPixbufList[mapchipFilePath] = new Pixbuf(mapchipFilePath);
         }
     }
+    // Undo/Redo関連
+    EditInfo[][] undoQueue;
+    EditInfo[][] redoQueue;
     // 各種ウインドウ
     EditWindow editWindow = null;
     LayerWindow layerWindow = null;
@@ -57,6 +72,8 @@ class ProjectInfo{
         this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
+        this.editWindow.onUndoFunction = &onUndo;
+        this.editWindow.onRedoFunction = &onRedo;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -140,12 +157,41 @@ class ProjectInfo{
     }
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        EditInfo editInfos[];
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
-                normalLayerInfo.ReplaceChip(gridX,gridY,newChipGridX,newChipGridY);
+                int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
+                Pixbuf mapchip = mapchipPixbufList[normalLayerInfo.mapchipFilePath];
+                int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
+                int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
+                int layoutIndex = gridX + gridY * mapSizeH;
+                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                normalLayerInfo.ReplaceChip(gridX,gridY,newChipId);
             }
         }
+        undoQueue ~= editInfos;
+        updateUndoRedo();
         editWindow.queueDraw();
+    }
+    void updateUndoRedo(){
+        editWindow.toolArea.editUndoButton.setSensitive(undoQueue.length >= 1);
+        editWindow.toolArea.editRedoButton.setSensitive(redoQueue.length >= 1);
+    }
+    void onUndo(){
+        if(undoQueue.length >= 1){
+            EditInfo editInfos[] = undoQueue[$ - 1];
+            foreach(editInfo;editInfos){
+                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                int gridX = editInfo.layoutIndex % mapSizeH;
+                int gridY = editInfo.layoutIndex / mapSizeH;
+                normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.oldChipId);
+            }
+            undoQueue = undoQueue[0..$ - 1];
+            updateUndoRedo();
+            editWindow.queueDraw();
+        }
+    }
+    void onRedo(){
     }
 }
 enum ELayerType{
@@ -191,11 +237,16 @@ class NormalLayerInfo : LayerInfoBase{
     int chipLayout[];
     Pixbuf layoutPixbuf;
     GridSelection gridSelection = null;
-    void ReplaceChip(int gridX, int gridY, int newChipGridX, int newChipGridY){
+    void ReplaceChip(int gridX, int gridY, int newChipId){
         Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
-        mapchip.copyArea(projectInfo.partsSizeH * newChipGridX, projectInfo.partsSizeV * newChipGridY, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
         int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
-        chipLayout[gridX + gridY * projectInfo.mapSizeH] = newChipGridX + newChipGridY * mapchipDivNumH;
+        int newChipGridX = newChipId % mapchipDivNumH;
+        int newChipGridY = newChipId / mapchipDivNumH;
+        mapchip.copyArea(projectInfo.partsSizeH * newChipGridX, projectInfo.partsSizeV * newChipGridY, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
+        chipLayout[gridX + gridY * projectInfo.mapSizeH] = newChipId;
+    }
+    int GetChipId(int gridX, int gridY){
+        return chipLayout[gridX + gridY * projectInfo.mapSizeH];
     }
 private:
     string name_ = "layer";
