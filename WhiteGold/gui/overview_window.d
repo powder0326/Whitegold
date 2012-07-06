@@ -27,6 +27,9 @@ class OverviewWindow : MainWindow{
 		mainBox.packStart(statusbar,false,false,0);
         setDeletable(false);
     }
+    void Reload(){
+        viewArea.Reload();
+    }
 /**
    オーバービュー用ウインドウ上部のツールボタン郡表示領域
 
@@ -79,8 +82,10 @@ class OverviewWindow : MainWindow{
                         continue;
                     }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-                    Pixbuf scaledPixbuf = normalLayerInfo.layoutPixbuf.scaleSimple(cast(int)getWidth(), cast(int)getHeight(), GdkInterpType.NEAREST/*,TILES,BILINEAR,HYPER*/);
-                    dr.drawPixbuf(scaledPixbuf, 0, 0);
+                    if(normalLayerInfo.layoutPixbuf !is null){
+                        Pixbuf scaledPixbuf = normalLayerInfo.layoutPixbuf.scaleSimple(cast(int)getWidth(), cast(int)getHeight(), GdkInterpType.NEAREST/*,TILES,BILINEAR,HYPER*/);
+                        dr.drawPixbuf(scaledPixbuf, 0, 0);
+                    }
                 }
                 return true;
             }

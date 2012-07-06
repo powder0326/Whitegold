@@ -12,15 +12,26 @@ private import project_info;
 class LayerWindow : MainWindow{
     void delegate(int index) onSelectedLayerChangedFunction;
     void delegate(int index, bool visible) onLayerVisibilityChangedFunction;
+    LayerWindowListview layerWindowListview = null;
     this(){
         super("レイヤー");
 //         setSizeRequest(320, 320);
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new LayerWindowMenubar(),false,false,0);
 		mainBox.packStart(new LayerWindowToolArea(),false,false,0);
-		mainBox.packStart(new LayerWindowListview(),true,true,0);
+        layerWindowListview = new LayerWindowListview();
+		mainBox.packStart(layerWindowListview,true,true,0);
         add(mainBox);
         setDeletable(false);
+    }
+    void Reload(){
+        layerWindowListview.listStore.clear;
+        TreeIter it;
+        foreach(layerInfo ; projectInfo.layerInfos){
+            it = layerWindowListview.listStore.createIter();
+            layerWindowListview.listStore.setValue( it, LayerWindowListview.EColumn.LAYER_VISIBLE, layerInfo.visible );
+            layerWindowListview.listStore.setValue( it, LayerWindowListview.EColumn.LAYER_NAME, layerInfo.name );
+        }
     }
 /**
    レイヤー用ウインドウ上部のメニュー
@@ -90,6 +101,7 @@ class LayerWindow : MainWindow{
             LAYER_VISIBLE,
             LAYER_NAME,
         }
+        ListStore listStore = null;
         this(){
             super();
             // データ設定
@@ -97,7 +109,7 @@ class LayerWindow : MainWindow{
                 GType.INT,
                 GType.STRING,
                 ];
-            ListStore listStore = new ListStore(columns);
+            listStore = new ListStore(columns);
             TreeIter it;
             foreach(layerInfo ; projectInfo.layerInfos){
                 it = listStore.createIter();

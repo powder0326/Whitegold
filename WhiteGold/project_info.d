@@ -103,6 +103,8 @@ class ProjectInfo{
         }
         editWindow.Reload();
         partsWindow.Reload();
+        layerWindow.Reload();
+        overviewWindow.Reload();
     }
     void onMapchipFileLoaded(string mapchipFilePath){
         AddMapchipFile(mapchipFilePath);
@@ -111,6 +113,7 @@ class ProjectInfo{
         normalLayerInfo.layoutPixbuf = CreatePixbufFromLayout(currentLayerIndex);
         partsWindow.Reload();
         editWindow.Reload();
+        overviewWindow.Reload();
     }
 }
 enum ELayerType{
