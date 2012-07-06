@@ -16,6 +16,7 @@ class PartsWindow : MainWindow{
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
+        setDefaultSize(240, 240);
         setIcon(new Pixbuf("dat/icon/palette.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new PartsWindowToolArea(),false,false,0);

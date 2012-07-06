@@ -16,6 +16,7 @@ class LayerWindow : MainWindow{
     this(){
         super("レイヤー");
 //         setSizeRequest(320, 320);
+        setDefaultSize(240, 240);
         setIcon(new Pixbuf("dat/icon/layers.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new LayerWindowMenubar(),false,false,0);
