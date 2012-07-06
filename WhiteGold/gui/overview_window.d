@@ -17,6 +17,7 @@ class OverviewWindow : MainWindow{
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
+        setIcon(new Pixbuf("dat/icon/picture-sunset.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new OverviewWindowToolArea(),false,false,0);
         viewArea = new OverviewWindowViewArea();
