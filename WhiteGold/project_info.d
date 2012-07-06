@@ -72,6 +72,7 @@ class ProjectInfo{
         this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
+        this.editWindow.onChipReplaceCompletedFunction = &onChipReplaceCompleted;
         this.editWindow.onUndoFunction = &onUndo;
         this.editWindow.onRedoFunction = &onRedo;
     }
@@ -155,9 +156,14 @@ class ProjectInfo{
         normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
         partsWindow.queueDraw();
     }
+    /**
+       ある場所のチップのIndexを入れ替えてPixbufも更新。
+
+       tmpEditInfosに入れ替え履歴を入れるが、undoQueueへの代入はonChipReplaceCompletedが呼ばれるまで待つ。これは1ストローク分の履歴を1回のUndoで戻せるようにしたいため。
+     */
+    EditInfo tmpEditInfos[];
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
-        EditInfo editInfos[];
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
                 int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
@@ -165,13 +171,22 @@ class ProjectInfo{
                 int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
                 int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
-                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                tmpEditInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
                 normalLayerInfo.ReplaceChip(gridX,gridY,newChipId);
             }
         }
-        undoQueue ~= editInfos;
-        updateUndoRedo();
         editWindow.queueDraw();
+    }
+    /**
+       チップの入れ替え確定
+
+       tmpEditInfosの内容をundoQueueに反映する。
+       */
+    void onChipReplaceCompleted(){
+        undoQueue ~= tmpEditInfos;
+        redoQueue.clear;
+        tmpEditInfos.clear;
+        updateUndoRedo();
     }
     void updateUndoRedo(){
         editWindow.toolArea.editUndoButton.setSensitive(undoQueue.length >= 1);
@@ -180,6 +195,7 @@ class ProjectInfo{
     void onUndo(){
         if(undoQueue.length >= 1){
             EditInfo editInfos[] = undoQueue[$ - 1];
+            redoQueue ~= editInfos;
             foreach(editInfo;editInfos){
                 NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
                 int gridX = editInfo.layoutIndex % mapSizeH;
@@ -192,6 +208,19 @@ class ProjectInfo{
         }
     }
     void onRedo(){
+        if(redoQueue.length >= 1){
+            EditInfo editInfos[] = redoQueue[$ - 1];
+            undoQueue ~= editInfos;
+            foreach(editInfo;editInfos){
+                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                int gridX = editInfo.layoutIndex % mapSizeH;
+                int gridY = editInfo.layoutIndex / mapSizeH;
+                normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.newChipId);
+            }
+            redoQueue = redoQueue[0..$ - 1];
+            updateUndoRedo();
+            editWindow.queueDraw();
+        }
     }
 }
 enum ELayerType{

@@ -16,6 +16,7 @@ class EditWindow : MainWindow{
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
+    void delegate() onChipReplaceCompletedFunction;
     void delegate() onUndoFunction;
     void delegate() onRedoFunction;
     EditWindowEditArea editArea = null;
@@ -349,6 +350,9 @@ class EditWindow : MainWindow{
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
                     pressed = false;
+                    if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
+                        this.outer.outer.outer.onChipReplaceCompletedFunction();
+                    }
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
