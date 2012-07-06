@@ -165,6 +165,7 @@ class PartsWindow : MainWindow{
         Pixbuf mapchip;
         this(){
             super();
+            setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
             drawingArea = new MapchipDrawingArea();
             addWithViewport(drawingArea);
         }

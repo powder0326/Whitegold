@@ -382,6 +382,7 @@ class EditWindow : MainWindow{
             ChipDrawStrategyBase chipDrawStrategy = null;
             this(){
                 super();
+                setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
                 addOnButtonPress(&onButtonPress);
                 addOnButtonRelease(&onButtonRelease);
                 addOnMotionNotify(&onMotionNotify);

@@ -95,6 +95,7 @@ class OverviewWindow : MainWindow{
         EditDrawingArea drawingArea = null;
         this(){
             super();
+            setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
             drawingArea = new EditDrawingArea();
             addWithViewport(drawingArea);
         }
