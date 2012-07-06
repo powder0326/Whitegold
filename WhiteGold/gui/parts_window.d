@@ -12,6 +12,7 @@ private import project_info;
 class PartsWindow : MainWindow{
     PartsWindowMapchipArea mapchipArea;
     void delegate(string mapchipFilePath) onMapchipFileLoadedFunction;
+    void delegate(double startX, double startY, double endX, double endY) onSelectionChangedFunction;
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
@@ -65,9 +66,18 @@ class PartsWindow : MainWindow{
 */
     class PartsWindowMapchipArea : ScrolledWindow{
         class MapchipDrawingArea : DrawingArea{
+            enum EMode{
+                NORMAL,
+                DRAGGING,
+            }
+            EMode mode = EMode.NORMAL;
+            double selectStartX = 0;
+            double selectStartY = 0;
             this(){
                 super();
                 addOnExpose(&exposeCallback);
+                addOnButtonPress(&onButtonPress);
+                addOnButtonRelease(&onButtonRelease);
                 addOnMotionNotify(&onMotionNotify);
                 if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                     NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
@@ -90,8 +100,8 @@ class PartsWindow : MainWindow{
                 NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                 int x = layerInfo.gridSelection.startGridX * projectInfo.partsSizeH;
                 int y = layerInfo.gridSelection.startGridY * projectInfo.partsSizeV;
-                int width = projectInfo.partsSizeH * (layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX) - 1;
-                int height = projectInfo.partsSizeV * (layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY) - 1;
+                int width = projectInfo.partsSizeH * (layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1) - 1;
+                int height = projectInfo.partsSizeV * (layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1) - 1;
                 GC gc = new GC(dr);
                 gc.setRgbFgColor(new Color(255,255,255));
                 dr.drawRectangle(gc, false, x, y, width, height);
@@ -99,20 +109,29 @@ class PartsWindow : MainWindow{
             }
             bool onButtonPress(GdkEventButton* event, Widget widget)
             {
-                printf("onButtonPress event.button = %d\n");
+                // 押されたら選択開始
+                printf("onButtonPress event.button = %d\n",event.button);
                 if ( event.button == 1 ){
+                    selectStartX = event.x;
+                    selectStartY = event.y;
+                    mode = EMode.DRAGGING;
                 }
                 return false;
             }
             bool onButtonRelease(GdkEventButton* event, Widget widget)
             {
-                printf("onButtonRelease event.button = %d\n");
+                // 離されたら選択終了
+                printf("onButtonRelease event.button = %d\n",event.button);
                 if ( event.button == 1 ){
+                    if(this.outer.outer.onSelectionChangedFunction !is null){
+                        this.outer.outer.onSelectionChangedFunction(min(selectStartX,event.x), min(selectStartY,event.y), max(selectStartX,event.x), max(selectStartY,event.y),);
+                    }
+                    mode = EMode.NORMAL;
                 }
                 return false;
             }
             bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                printf("onMotionNotify (%f,%f)\n",event.x,event.y);
+//                 printf("onMotionNotify (%f,%f)\n",event.x,event.y);
                 return true;
             }
         }

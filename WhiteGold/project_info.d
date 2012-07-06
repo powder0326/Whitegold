@@ -52,6 +52,7 @@ class ProjectInfo{
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
         this.partsWindow.onMapchipFileLoadedFunction = &onMapchipFileLoaded;
+        this.partsWindow.onSelectionChangedFunction = &onSelectionChanged;
     }
     void SetOverviewWindow(OverviewWindow overviewWindow){
         this.overviewWindow = overviewWindow;
@@ -115,6 +116,14 @@ class ProjectInfo{
         editWindow.Reload();
         overviewWindow.Reload();
     }
+    void onSelectionChanged(double startX, double startY, double endX, double endY){
+        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        normalLayerInfo.gridSelection.startGridX = cast(int)(startX / partsSizeH);
+        normalLayerInfo.gridSelection.startGridY = cast(int)(startY / partsSizeV);
+        normalLayerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
+        normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
+        partsWindow.queueDraw();
+    }
 }
 enum ELayerType{
     NORMAL,
@@ -131,8 +140,8 @@ class NormalLayerInfo : LayerInfoBase{
     class GridSelection{
         int startGridX = 0;
         int startGridY = 0;
-        int endGridX = 2;
-        int endGridY = 1;
+        int endGridX = 0;
+        int endGridY = 0;
     }
     this(string name, bool visible, string mapchipFilePath){
         this.name_ = name;
