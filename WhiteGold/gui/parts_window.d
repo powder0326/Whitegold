@@ -67,6 +67,7 @@ class PartsWindow : MainWindow{
             this(){
                 super();
                 addOnExpose(&exposeCallback);
+                addOnMotionNotify(&onMotionNotify);
                 if(projectInfo.currentLayerInfo.type == ELayerType.NORMAL){
                     NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                     if(layerInfo.mapchipFilePath !is null && layerInfo.mapchipFilePath in projectInfo.mapchipPixbufList){
@@ -84,6 +85,33 @@ class PartsWindow : MainWindow{
                 if(mapchip !is null){
                     dr.drawPixbuf(mapchip, 0, 0);
                 }
+                // 選択領域描画
+                NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                int x = layerInfo.gridSelection.startGridX * projectInfo.partsSizeH;
+                int y = layerInfo.gridSelection.startGridY * projectInfo.partsSizeV;
+                int width = projectInfo.partsSizeH * (layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX) - 1;
+                int height = projectInfo.partsSizeV * (layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY) - 1;
+                GC gc = new GC(dr);
+                gc.setRgbFgColor(new Color(255,255,255));
+                dr.drawRectangle(gc, false, x, y, width, height);
+                return true;
+            }
+            bool onButtonPress(GdkEventButton* event, Widget widget)
+            {
+                printf("onButtonPress event.button = %d\n");
+                if ( event.button == 1 ){
+                }
+                return false;
+            }
+            bool onButtonRelease(GdkEventButton* event, Widget widget)
+            {
+                printf("onButtonRelease event.button = %d\n");
+                if ( event.button == 1 ){
+                }
+                return false;
+            }
+            bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                printf("onMotionNotify (%f,%f)\n",event.x,event.y);
                 return true;
             }
         }

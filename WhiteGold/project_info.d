@@ -128,10 +128,17 @@ abstract class LayerInfoBase{
     abstract void visible(bool value);
 }
 class NormalLayerInfo : LayerInfoBase{
+    class GridSelection{
+        int startGridX = 0;
+        int startGridY = 0;
+        int endGridX = 2;
+        int endGridY = 1;
+    }
     this(string name, bool visible, string mapchipFilePath){
         this.name_ = name;
         this.visible_ = visible;
         this.mapchipFilePath = mapchipFilePath;
+        gridSelection = new GridSelection();
     }
     override ELayerType type(){
         return ELayerType.NORMAL;
@@ -151,6 +158,7 @@ class NormalLayerInfo : LayerInfoBase{
     string mapchipFilePath = "";
     int chipLayout[];
     Pixbuf layoutPixbuf;
+    GridSelection gridSelection = null;
 private:
     string name_ = "layer";
     bool visible_ = true;
