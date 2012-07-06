@@ -21,6 +21,7 @@ class EditWindow : MainWindow{
     void delegate() onRedoFunction;
     EditWindowEditArea editArea = null;
     EditWindowToolArea toolArea = null;
+    bool showGrid = false;
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
@@ -214,6 +215,10 @@ class EditWindow : MainWindow{
             // グリッド関連
             ToggleButton gridButton = new ToggleButton();
             gridButton.setImage(new Image(new Pixbuf("dat/icon/grid.png")));
+            gridButton.addOnToggled((ToggleButton toggleButton){
+                    showGrid = toggleButton.getActive() == 1;
+                    this.outer.editArea.queueDraw();
+                });
             packStart(gridButton , false, false, 2 );
         }
         void onDrawButtonToggled(ToggleButton toggleButton){
@@ -429,6 +434,22 @@ class EditWindow : MainWindow{
                     }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
                     dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+                }
+                // グリッド描画
+                if(showGrid){
+//                     GdkPoint points[];
+                    gc.setLineAttributes (1, GdkLineStyle.ON_OFF_DASH, GdkCapStyle.NOT_LAST, GdkJoinStyle.MITER);
+                    gc.setRgbFgColor(new Color(80,80,80));
+                    int width = projectInfo.partsSizeH * projectInfo.mapSizeH;
+                    int height = projectInfo.partsSizeV * projectInfo.mapSizeV;
+                    for(int y = 0 ; y < height ; y += projectInfo.partsSizeV){
+                        for(int x = 0 ; x < width ; x += projectInfo.partsSizeH){
+//                             points ~= GdkPoint(x, y);
+                            dr.drawLine(gc, -4, y, width, y);
+                            dr.drawLine(gc, x, -4, x, height);
+                        }
+                    }
+//                     dr.drawLines(gc, points);
                 }
                 return true;
             }
