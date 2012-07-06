@@ -25,13 +25,7 @@ class LayerWindow : MainWindow{
         setDeletable(false);
     }
     void Reload(){
-        layerWindowListview.listStore.clear;
-        TreeIter it;
-        foreach(layerInfo ; projectInfo.layerInfos){
-            it = layerWindowListview.listStore.createIter();
-            layerWindowListview.listStore.setValue( it, LayerWindowListview.EColumn.LAYER_VISIBLE, layerInfo.visible );
-            layerWindowListview.listStore.setValue( it, LayerWindowListview.EColumn.LAYER_NAME, layerInfo.name );
-        }
+        layerWindowListview.Reload();
     }
 /**
    レイヤー用ウインドウ上部のメニュー
@@ -111,16 +105,23 @@ class LayerWindow : MainWindow{
                 ];
             listStore = new ListStore(columns);
             TreeIter it;
-            foreach(layerInfo ; projectInfo.layerInfos){
+            TreePath firstPath = null;
+            foreach(i,layerInfo ; projectInfo.layerInfos){
                 it = listStore.createIter();
                 listStore.setValue( it, EColumn.LAYER_VISIBLE, layerInfo.visible );
                 listStore.setValue( it, EColumn.LAYER_NAME, layerInfo.name );
+                if(i == 0){
+                    firstPath = listStore.getPath(it);
+                }
             }
             setModel(listStore);
             TreeSelection treeSelection = getSelection();
             treeSelection.setMode(SelectionMode.SINGLE);
             treeSelection.addOnChanged((TreeSelection ts){
                     TreeIter it = ts.getSelected();
+                    if(it is null){
+                        return;
+                    }
                     string value = listStore.getValueString(it, EColumn.LAYER_NAME);
                     TreePath path = listStore.getPath(it);
                     int indices[] = path.getIndices;
@@ -128,6 +129,10 @@ class LayerWindow : MainWindow{
                         this.outer.onSelectedLayerChangedFunction(indices[0]);
                     }
                 });
+            // 一番上を選択しておく
+            if(firstPath !is null){
+                treeSelection.selectPath(firstPath);
+            }
             // 可視/非可視切り替え列
             CellRendererToggle cellRendererToggle = new CellRendererToggle();
             cellRendererToggle.setProperty( "active", 1 );
@@ -154,6 +159,24 @@ class LayerWindow : MainWindow{
             columnLayerName.addAttribute(cellRendererLayerName, "text", EColumn.LAYER_NAME);
             columnLayerName.setTitle( "レイヤー名" );
             appendColumn(columnLayerName);
+        }
+        void Reload(){
+            TreeSelection treeSelection = getSelection();
+            treeSelection.unselectAll();
+            listStore.clear;
+            TreeIter it;
+            TreePath selectPath = null;
+            foreach(i,layerInfo ; projectInfo.layerInfos){
+                it = listStore.createIter();
+                listStore.setValue( it, LayerWindowListview.EColumn.LAYER_VISIBLE, layerInfo.visible );
+                listStore.setValue( it, LayerWindowListview.EColumn.LAYER_NAME, layerInfo.name );
+                if(i == projectInfo.currentLayerIndex){
+                    selectPath = listStore.getPath(it);
+                }
+            }
+            if(selectPath !is null){
+                treeSelection.selectPath(selectPath);
+            }
         }
     }
 }
