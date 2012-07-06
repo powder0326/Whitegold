@@ -131,6 +131,10 @@ class EditWindow : MainWindow{
    ここの領域のボタンを押すといろいろ処理する。メニューとかぶる項目がほとんど。
 */
     class EditWindowToolArea : HBox{
+        ToggleButton penButton = null;
+        ToggleButton tilingPenButton = null;
+        ToggleButton fillButton = null;
+        ToggleButton selectButton = null;
         this(){
             super(false,0);
             setBorderWidth(2);
@@ -160,24 +164,31 @@ class EditWindow : MainWindow{
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
             // ペン関連
-            ToggleButton penButton = new ToggleButton();
+            penButton = new ToggleButton();
             penButton.setImage(new Image(new Pixbuf("dat/icon/pencil.png")));
+            penButton.addOnToggled(&onDrawButtonToggled);
             packStart(penButton , false, false, 2 );
-            ToggleButton tilingPenButton = new ToggleButton();
+            tilingPenButton = new ToggleButton();
             tilingPenButton.setImage(new Image(new Pixbuf("dat/icon/pencil--plus.png")));
+            tilingPenButton.addOnToggled(&onDrawButtonToggled);
             packStart(tilingPenButton , false, false, 2 );
-            ToggleButton fillButton = new ToggleButton();
+            fillButton = new ToggleButton();
             fillButton.setImage(new Image(new Pixbuf("dat/icon/paint-can.png")));
+            fillButton.addOnToggled(&onDrawButtonToggled);
             packStart(fillButton , false, false, 2 );
-            ToggleButton selectButton = new ToggleButton();
+            selectButton = new ToggleButton();
             selectButton.setImage(new Image(new Pixbuf("dat/icon/selection.png")));
+            selectButton.addOnToggled(&onDrawButtonToggled);
             packStart(selectButton , false, false, 2 );
+            penButton.setActive(1);
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
             // グリッド関連
             ToggleButton gridButton = new ToggleButton();
             gridButton.setImage(new Image(new Pixbuf("dat/icon/grid.png")));
             packStart(gridButton , false, false, 2 );
+        }
+        void onDrawButtonToggled(ToggleButton toggleButton){
         }
     }
 /**
