@@ -324,7 +324,14 @@ class EditWindow : MainWindow{
                     int gridX = cast(int)(event.x / projectInfo.partsSizeH);
                     int gridY = cast(int)(event.y / projectInfo.partsSizeV);
                     ChipReplaceInfo[] chipReplaceInfos;
-                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, 1, 1);
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    with(normalLayerInfo.gridSelection){
+                        for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
+                            for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y);
+                            }
+                        }
+                    }
                     if(this.outer.outer.outer.onChipReplacedFunction !is null){
                         this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
                     }
