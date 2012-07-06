@@ -24,6 +24,7 @@ class EditWindow : MainWindow{
 		mainBox.packStart(new EditWindowToolArea(),false,false,0);
         editArea = new EditWindowEditArea();
 		mainBox.packStart(editArea,true,true,0);
+		mainBox.packStart(new EditWindowStatusbarArea(),false,false,0);
         add(mainBox);
         addOnHide(&onHide);
     }
@@ -212,12 +213,12 @@ class EditWindow : MainWindow{
                                 bgPixmap.drawRectangle(gc, true, x * 4, y * 4, 4, 4);
                             }
                         }
+//                         widget.getWindow().setBackPixmap(bgPixmap,0);
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
-                // 透過色パターンの背景作成(初回のみ)
                 dr.drawDrawable(gc, bgPixmap, 0, 0, 0, 0, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
@@ -239,6 +240,24 @@ class EditWindow : MainWindow{
         void Reload(){
             drawingArea.setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
             queueDraw();
+        }
+    }
+/**
+   エディット用ステータスバー領域。
+
+   現在のグリッド座標とかを表示。
+*/
+    class EditWindowStatusbarArea : HBox{
+        this(){
+            super(true,0);
+            Statusbar statusbar1 = new Statusbar();
+            statusbar1.setHasResizeGrip(0);
+            packStart(statusbar1, true, true, 1);
+            Statusbar statusbar2 = new Statusbar();
+            statusbar2.setHasResizeGrip(0);
+            packStart(statusbar2, true, true, 1);
+            Statusbar statusbar3 = new Statusbar();
+            packStart(statusbar3, true, true, 1);
         }
     }
 }
