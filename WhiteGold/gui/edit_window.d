@@ -319,10 +319,34 @@ class EditWindow : MainWindow{
                 abstract bool onMotionNotify(GdkEventMotion* event, Widget widget);
             }
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
+                int lastGridX,lastGridY;
+                bool pressed = false;
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    pressed = true;
                     // チップ配置
-                    int gridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    int gridY = cast(int)(event.y / projectInfo.partsSizeV);
+                    int gridX = lastGridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    int gridY = lastGridY = cast(int)(event.y / projectInfo.partsSizeV);
+                    drawChip(gridX, gridY);
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    pressed = false;
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    if(pressed){
+                        // グリッドが変わったら描画
+                        int gridX = cast(int)(event.x / projectInfo.partsSizeH);
+                        int gridY = cast(int)(event.y / projectInfo.partsSizeV);
+                        if(gridX != lastGridX || gridY != lastGridY){
+                            lastGridX = gridX;
+                            lastGridY = gridY;
+                            drawChip(gridX, gridY);
+                        }
+                    }
+                    return true;
+                }
+                void drawChip(int gridX, int gridY){
                     ChipReplaceInfo[] chipReplaceInfos;
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                     with(normalLayerInfo.gridSelection){
@@ -335,13 +359,6 @@ class EditWindow : MainWindow{
                     if(this.outer.outer.outer.onChipReplacedFunction !is null){
                         this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
                     }
-                    return true;
-                }
-                override bool onButtonRelease(GdkEventButton* event, Widget widget){
-                    return true;
-                }
-                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    return true;
                 }
             }
             ChipDrawStrategyBase chipDrawStrategy = null;
