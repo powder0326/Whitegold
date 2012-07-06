@@ -57,8 +57,11 @@ class ProjectInfo{
         }
     }
     // Undo/Redo関連
-    EditInfo[][] undoQueue;
-    EditInfo[][] redoQueue;
+    // [] 1回のUndoで戻す単位
+    // [][] 1回のUndoで戻す単位の中に含まれている編集リスト(左クリックで移動しつつ描いた場合などの１ストローク単位で管理するので複数ありうる)
+    // [][][] 各編集内容(チップが複数選択されていた場合があるので複数ありうる)
+    EditInfo[][][] undoQueue;
+    EditInfo[][][] redoQueue;
     // 各種ウインドウ
     EditWindow editWindow = null;
     LayerWindow layerWindow = null;
@@ -159,10 +162,11 @@ class ProjectInfo{
     /**
        ある場所のチップのIndexを入れ替えてPixbufも更新。
 
-       tmpEditInfosに入れ替え履歴を入れるが、undoQueueへの代入はonChipReplaceCompletedが呼ばれるまで待つ。これは1ストローク分の履歴を1回のUndoで戻せるようにしたいため。
+       tmpEditInfosTreeに入れ替え履歴を入れるが、undoQueueへの代入はonChipReplaceCompletedが呼ばれるまで待つ。これは1ストローク分の履歴を1回のUndoで戻せるようにしたいため。
      */
-    EditInfo tmpEditInfos[];
+    EditInfo tmpEditInfosTree[][];
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
+        EditInfo editInfos[];
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
@@ -171,10 +175,11 @@ class ProjectInfo{
                 int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
                 int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
-                tmpEditInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
                 normalLayerInfo.ReplaceChip(gridX,gridY,newChipId);
             }
         }
+        tmpEditInfosTree ~= editInfos;
         editWindow.queueDraw();
     }
     /**
@@ -183,9 +188,9 @@ class ProjectInfo{
        tmpEditInfosの内容をundoQueueに反映する。
        */
     void onChipReplaceCompleted(){
-        undoQueue ~= tmpEditInfos;
+        undoQueue ~= tmpEditInfosTree;
         redoQueue.clear;
-        tmpEditInfos.clear;
+        tmpEditInfosTree.clear;
         updateUndoRedo();
     }
     void updateUndoRedo(){
@@ -194,13 +199,15 @@ class ProjectInfo{
     }
     void onUndo(){
         if(undoQueue.length >= 1){
-            EditInfo editInfos[] = undoQueue[$ - 1];
-            redoQueue ~= editInfos;
-            foreach(editInfo;editInfos){
-                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
-                int gridX = editInfo.layoutIndex % mapSizeH;
-                int gridY = editInfo.layoutIndex / mapSizeH;
-                normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.oldChipId);
+            EditInfo editInfosTree[][] = undoQueue[$ - 1];
+            redoQueue ~= editInfosTree;
+            foreach_reverse(editInfos;editInfosTree){
+                foreach(editInfo;editInfos){
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                    int gridX = editInfo.layoutIndex % mapSizeH;
+                    int gridY = editInfo.layoutIndex / mapSizeH;
+                    normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.oldChipId);
+                }
             }
             undoQueue = undoQueue[0..$ - 1];
             updateUndoRedo();
@@ -209,13 +216,15 @@ class ProjectInfo{
     }
     void onRedo(){
         if(redoQueue.length >= 1){
-            EditInfo editInfos[] = redoQueue[$ - 1];
-            undoQueue ~= editInfos;
-            foreach(editInfo;editInfos){
-                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
-                int gridX = editInfo.layoutIndex % mapSizeH;
-                int gridY = editInfo.layoutIndex / mapSizeH;
-                normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.newChipId);
+            EditInfo editInfosTree[][] = redoQueue[$ - 1];
+            undoQueue ~= editInfosTree;
+            foreach_reverse(editInfos;editInfosTree){
+                foreach(editInfo;editInfos){
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                    int gridX = editInfo.layoutIndex % mapSizeH;
+                    int gridY = editInfo.layoutIndex / mapSizeH;
+                    normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.newChipId);
+                }
             }
             redoQueue = redoQueue[0..$ - 1];
             updateUndoRedo();
