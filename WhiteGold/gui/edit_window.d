@@ -186,19 +186,18 @@ class EditWindow : MainWindow{
    ここにマップチップを配置していく。
 */
     class EditWindowEditArea : ScrolledWindow{
-        Pixmap bgPixmap = null;
         class EditDrawingArea : DrawingArea{
             this(){
                 super();
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 addOnRealize((Widget widget){
-                        bgPixmap = new Pixmap(widget.getWindow(), projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV, -1);
+                        Pixmap bgPixmap = new Pixmap(widget.getWindow(), 4 * 2, 4 * 2, -1);
                         GC gc = new GC(widget.getWindow());
                         Color color1 = new Color(200,200,200);
                         Color color2 = new Color(255,255,255);
-                        for(int y = 0 ; y < projectInfo.mapSizeV * projectInfo.partsSizeV / 4 ; ++ y){
-                            for(int x = 0 ; x < projectInfo.mapSizeH * projectInfo.partsSizeH / 4 ; ++ x){
+                        for(int y = 0 ; y < 4 * 2 ; ++ y){
+                            for(int x = 0 ; x < 4 * 2 ; ++ x){
                                 if(y % 2 == 0){
                                     if(x % 2 == 0){
                                         gc.setRgbFgColor(color1);
@@ -215,13 +214,12 @@ class EditWindow : MainWindow{
                                 bgPixmap.drawRectangle(gc, true, x * 4, y * 4, 4, 4);
                             }
                         }
-//                         widget.getWindow().setBackPixmap(bgPixmap,0);
+                        widget.getWindow().setBackPixmap(bgPixmap,0);
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
-                dr.drawDrawable(gc, bgPixmap, 0, 0, 0, 0, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
                     if(layerInfo.type != ELayerType.NORMAL || !layerInfo.visible){

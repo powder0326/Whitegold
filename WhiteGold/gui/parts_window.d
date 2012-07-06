@@ -91,6 +91,31 @@ class PartsWindow : MainWindow{
                         setSizeRequest(mapchip.getWidth(), mapchip.getHeight());
                     }
                 }
+                addOnRealize((Widget widget){
+                        Pixmap bgPixmap = new Pixmap(widget.getWindow(), 4 * 2, 4 * 2, -1);
+                        GC gc = new GC(widget.getWindow());
+                        Color color1 = new Color(200,200,200);
+                        Color color2 = new Color(255,255,255);
+                        for(int y = 0 ; y < 4 * 2 ; ++ y){
+                            for(int x = 0 ; x < 4 * 2 ; ++ x){
+                                if(y % 2 == 0){
+                                    if(x % 2 == 0){
+                                        gc.setRgbFgColor(color1);
+                                    }else{
+                                        gc.setRgbFgColor(color2);
+                                    }
+                                }else{
+                                    if(x % 2 == 0){
+                                        gc.setRgbFgColor(color2);
+                                    }else{
+                                        gc.setRgbFgColor(color1);
+                                    }
+                                }
+                                bgPixmap.drawRectangle(gc, true, x * 4, y * 4, 4, 4);
+                            }
+                        }
+                        widget.getWindow().setBackPixmap(bgPixmap,0);
+                    });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
                 Drawable dr = getWindow();
