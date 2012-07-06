@@ -132,7 +132,11 @@ class EditWindow : MainWindow{
 */
     class EditWindowToolArea : HBox{
         ToggleButton penButton = null;
+        bool penButtonUpByOther = false;
+        bool penButtonDownBySelf = false;
         ToggleButton tilingPenButton = null;
+        bool tilingPenButtonUpByOther = false;
+        bool tilingPenButtonDownBySelf = false;
         ToggleButton fillButton = null;
         ToggleButton selectButton = null;
         this(){
@@ -180,7 +184,7 @@ class EditWindow : MainWindow{
             selectButton.setImage(new Image(new Pixbuf("dat/icon/selection.png")));
             selectButton.addOnToggled(&onDrawButtonToggled);
             packStart(selectButton , false, false, 2 );
-            penButton.setActive(1);
+//             penButton.setActive(1);
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
             // グリッド関連
@@ -189,6 +193,59 @@ class EditWindow : MainWindow{
             packStart(gridButton , false, false, 2 );
         }
         void onDrawButtonToggled(ToggleButton toggleButton){
+            printf("enter pen(other:%d self:%d) tiling(other:%d,self:%d)\n",penButtonUpByOther,penButtonDownBySelf,tilingPenButtonUpByOther,tilingPenButtonDownBySelf);
+            if(toggleButton is penButton){
+                printf(toMBSz("ペンボタンが"));
+                if(penButton.getActive()){
+                    printf(toMBSz("アクティブになった。"));
+                    if(!penButtonDownBySelf){
+                        printf(toMBSz("非アクティブ状態からアクティブになったので他を非アクティブに。\n"));
+                        if(tilingPenButton.getActive()){
+                            tilingPenButtonUpByOther = true;
+                            tilingPenButton.setActive(0);
+                        }
+                    }else{
+                        printf(toMBSz("アクティブ状態からアクティブになったのでなにもしない。\n"));
+                        penButtonDownBySelf = false;
+                    }
+                }else{
+                    printf(toMBSz("非アクティブになった。"));
+                    if(!penButtonUpByOther){
+                        printf(toMBSz("他からの依頼でないのでまたアクティブにする。\n"));
+                        penButtonDownBySelf = true;
+                        penButton.setActive(1);
+                    }else{
+                        printf(toMBSz("他からの依頼なので何もしない。\n"));
+                        penButtonUpByOther = false;
+                    }
+                }
+            }
+            if(toggleButton is tilingPenButton){
+                printf(toMBSz("タイリングボタンが"));
+                if(tilingPenButton.getActive()){
+                    printf(toMBSz("アクティブになった。"));
+                    if(!penButtonDownBySelf){
+                        printf(toMBSz("非アクティブ状態からアクティブになったので他を非アクティブに。\n"));
+                        if(penButton.getActive()){
+                            penButtonUpByOther = true;
+                            penButton.setActive(0);
+                        }
+                    }else{
+                        printf(toMBSz("アクティブ状態からアクティブになったのでなにもしない。\n"));
+                        tilingPenButtonDownBySelf = false;
+                    }
+                }else{
+                    printf(toMBSz("非アクティブになった。またアクティブにする。\n"));
+                    if(!tilingPenButtonUpByOther){
+                        printf(toMBSz("他からの依頼でないのでまたアクティブにする。\n"));
+                        tilingPenButton.setActive(1);
+                    }else{
+                        printf(toMBSz("他からの依頼なので何もしない。\n"));
+                        tilingPenButtonUpByOther = false;
+                    }
+                }
+            }
+            printf("leave pen(other:%d self:%d) tiling(other:%d,self:%d)\n",penButtonUpByOther,penButtonDownBySelf,tilingPenButtonUpByOther,tilingPenButtonDownBySelf);
         }
     }
 /**
