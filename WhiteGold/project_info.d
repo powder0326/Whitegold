@@ -13,6 +13,19 @@ enum EWindowType{
     OVERVIEW,
 }
 
+struct ChipReplaceInfo{
+    int gridX;
+    int gridY;
+    int newChipGridX;
+    int newChipGridY;
+    this(int gridX,int gridY,int newChipGridX,int newChipGridY){
+        this.gridX = gridX;
+        this.gridY = gridY;
+        this.newChipGridX = newChipGridX;
+        this.newChipGridY = newChipGridY;
+    }
+}
+
 class ProjectInfo{
     int mapSizeH = 20;
     int mapSizeV = 20;
@@ -43,6 +56,7 @@ class ProjectInfo{
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
         this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
+        this.editWindow.onChipReplacedFunction = &onChipReplaced;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -124,6 +138,15 @@ class ProjectInfo{
         normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
         partsWindow.queueDraw();
     }
+    void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
+        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        foreach(chipReplaceInfo;chipReplaceInfos){
+            with(chipReplaceInfo){
+                normalLayerInfo.ReplaceChip(gridX,gridY,newChipGridX,newChipGridY);
+            }
+        }
+        editWindow.queueDraw();
+    }
 }
 enum ELayerType{
     NORMAL,
@@ -168,6 +191,12 @@ class NormalLayerInfo : LayerInfoBase{
     int chipLayout[];
     Pixbuf layoutPixbuf;
     GridSelection gridSelection = null;
+    void ReplaceChip(int gridX, int gridY, int newChipGridX, int newChipGridY){
+        Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
+        mapchip.copyArea(projectInfo.partsSizeH * newChipGridX, projectInfo.partsSizeV * newChipGridY, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
+        int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
+        chipLayout[gridX + gridY * projectInfo.mapSizeH] = newChipGridX + newChipGridY * mapchipDivNumH;
+    }
 private:
     string name_ = "layer";
     bool visible_ = true;

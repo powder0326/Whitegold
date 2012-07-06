@@ -15,6 +15,7 @@ class EditWindow : MainWindow{
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
+    void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
     EditWindowEditArea editArea = null;
     this(){
         super("エディットウインドウ");
@@ -240,6 +241,7 @@ class EditWindow : MainWindow{
                             selectButton.setActive(0);
                         }
                     }else{
+
                         tilingPenButtonDownBySelf = false;
                     }
                 }else{
@@ -311,10 +313,39 @@ class EditWindow : MainWindow{
 */
     class EditWindowEditArea : ScrolledWindow{
         class EditDrawingArea : DrawingArea{
+            abstract class ChipDrawStrategyBase{
+                abstract bool onButtonPress(GdkEventButton* event, Widget widget);
+                abstract bool onButtonRelease(GdkEventButton* event, Widget widget);
+                abstract bool onMotionNotify(GdkEventMotion* event, Widget widget);
+            }
+            class ChipDrawStrategyPen : ChipDrawStrategyBase{
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    // チップ配置
+                    int gridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    int gridY = cast(int)(event.y / projectInfo.partsSizeV);
+                    ChipReplaceInfo[] chipReplaceInfos;
+                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, 1, 1);
+                    if(this.outer.outer.outer.onChipReplacedFunction !is null){
+                        this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                    }
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    return true;
+                }
+            }
+            ChipDrawStrategyBase chipDrawStrategy = null;
             this(){
                 super();
+                addOnButtonPress(&onButtonPress);
+                addOnButtonRelease(&onButtonRelease);
+                addOnMotionNotify(&onMotionNotify);
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
+                chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         Pixmap bgPixmap = new Pixmap(widget.getWindow(), 4 * 2, 4 * 2, -1);
                         GC gc = new GC(widget.getWindow());
@@ -353,6 +384,17 @@ class EditWindow : MainWindow{
                     dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
                 }
                 return true;
+            }
+            bool onButtonPress(GdkEventButton* event, Widget widget)
+            {
+                return chipDrawStrategy.onButtonPress(event, widget);
+            }
+            bool onButtonRelease(GdkEventButton* event, Widget widget)
+            {
+                return chipDrawStrategy.onButtonRelease(event, widget);
+            }
+            bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                return chipDrawStrategy.onMotionNotify(event, widget);
             }
         }
         EditDrawingArea drawingArea = null;
