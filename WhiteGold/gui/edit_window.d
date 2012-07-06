@@ -166,9 +166,11 @@ class EditWindow : MainWindow{
             // Undo Redo
             Button editUndoButton = new Button();
             editUndoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return-180-left.png")));
+            editUndoButton.setSensitive(false);
             packStart(editUndoButton , false, false, 2 );
             Button editRedoButton = new Button();
             editRedoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return.png")));
+            editRedoButton.setSensitive(false);
             packStart(editRedoButton , false, false, 2 );
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
