@@ -429,15 +429,78 @@ class EditWindow : MainWindow{
             }
             class ChipDrawStrategyFill : ChipDrawStrategyBase{
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategyFill.onButtonPress\n");
+                    int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    int cursorGridY = cast(int)(event.y / projectInfo.partsSizeV);
+                    NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    int layoutIndex = cursorGridY * projectInfo.mapSizeH + cursorGridX;
+                    int startChipId = layerInfo.chipLayout[layoutIndex];
+                    int newChipId = -1;
+                    if(layerInfo.gridSelection !is null){
+                        newChipId = layerInfo.GetChipIdInMapchip(layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
+                    }
+                    if(startChipId == newChipId){
+                        // 同じチップIDなら塗りつぶす意味が無い。
+                        return true;
+                    }
+                    struct Info{
+                        this(int gridX, int gridY){
+                            this.gridX = gridX;
+                            this.gridY = gridY;
+                        }
+                        int gridX = 0;
+                        int gridY = 0;
+                    }
+                    EditInfo editInfos[];
+                    Info infos[];
+                    infos ~= Info(cursorGridX, cursorGridY); 
+                    int i = 0;
+                    ChipReplaceInfo[] chipReplaceInfos;
+                    int[] tmpChipLayout = layerInfo.chipLayout.dup;
+                    while(infos.length>= 1){
+                        Info info = infos[$-1];
+                        infos = infos[0..$-1]; // あってる？
+                        int tmpLayoutIndex = info.gridY * projectInfo.mapSizeH + info.gridX;
+                        int currentChipId = tmpChipLayout[tmpLayoutIndex];
+                        if(currentChipId == startChipId){
+                            editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
+                            tmpChipLayout[tmpLayoutIndex] = newChipId;
+                            chipReplaceInfos ~= ChipReplaceInfo(info.gridX, info.gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
+                            // 領域を超えない範囲で周り4方向のキュー追加
+                            int leftGridX = info.gridX - 1;
+                            int leftGridY = info.gridY;
+                            if(leftGridX >= 0){
+                                infos ~= Info(leftGridX, leftGridY);
+                            }
+                            int rightGridX = info.gridX + 1;
+                            int rightGridY = info.gridY;
+                            if(rightGridX < projectInfo.mapSizeH){
+                                infos ~= Info(rightGridX, rightGridY);
+                            }
+                            int upGridX = info.gridX;
+                            int upGridY = info.gridY - 1;
+                            if(upGridY >= 0){
+                                infos ~= Info(upGridX, upGridY);
+                            }
+                            int downGridX = info.gridX;
+                            int downGridY = info.gridY + 1;
+                            if(downGridY < projectInfo.mapSizeV){
+                                infos ~= Info(downGridX, downGridY);
+                            }
+                        }
+                        ++ i;
+                    }
+                    if(this.outer.outer.outer.onChipReplacedFunction){
+                        this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                    }
+                    if(this.outer.outer.outer.onChipReplaceCompletedFunction){
+                        this.outer.outer.outer.onChipReplaceCompletedFunction();
+                    }
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategyFill.onButtonRelease\n");
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    printf("ChipDrawStrategyFill.onMotionNotify\n");
                     return true;
                 }
             }

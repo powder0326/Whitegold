@@ -181,6 +181,7 @@ class ProjectInfo{
         }
         tmpEditInfosTree ~= editInfos;
         editWindow.queueDraw();
+        overviewWindow.queueDraw();
     }
     /**
        チップの入れ替え確定
@@ -285,6 +286,11 @@ class NormalLayerInfo : LayerInfoBase{
     }
     int GetChipId(int gridX, int gridY){
         return chipLayout[gridX + gridY * projectInfo.mapSizeH];
+    }
+    int GetChipIdInMapchip(int gridX, int gridY){
+        Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
+        int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
+        return gridX + gridY * mapchipDivNumH;
     }
 private:
     string name_ = "layer";
