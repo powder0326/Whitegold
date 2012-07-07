@@ -10,6 +10,13 @@ import dialog.new_project_dialog;
 
    マップチップを配置していくウインドウ。このウインドウはアプリ起動時に開かれ、アプリを終了するまで閉じない。
  */
+
+enum EDrawingType{
+    PEN,
+    TILING_PEN,
+    FILL,
+    SELECT,
+}
 class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
@@ -34,6 +41,7 @@ class EditWindow : MainWindow{
         editArea = new EditWindowEditArea();
 		mainBox.packStart(editArea,true,true,0);
 		mainBox.packStart(new EditWindowStatusbarArea(),false,false,0);
+        toolArea.penButton.setActive(1);
         add(mainBox);
         addOnHide(&onHide);
     }
@@ -209,7 +217,6 @@ class EditWindow : MainWindow{
             selectButton.setImage(new Image(new Pixbuf("dat/icon/selection.png")));
             selectButton.addOnToggled(&onDrawButtonToggled);
             packStart(selectButton , false, false, 2 );
-            penButton.setActive(1);
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
             // グリッド関連
@@ -225,6 +232,7 @@ class EditWindow : MainWindow{
             if(toggleButton is penButton){
                 if(penButton.getActive()){
                     if(!penButtonDownBySelf){
+                        this.outer.editArea.drawingArea.ChangeDrawingType(EDrawingType.PEN);
                         if(tilingPenButton.getActive()){
                             tilingPenButtonUpByOther = true;
                             tilingPenButton.setActive(0);
@@ -252,6 +260,7 @@ class EditWindow : MainWindow{
             if(toggleButton is tilingPenButton){
                 if(tilingPenButton.getActive()){
                     if(!penButtonDownBySelf){
+                        this.outer.editArea.drawingArea.ChangeDrawingType(EDrawingType.TILING_PEN);
                         if(penButton.getActive()){
                             penButtonUpByOther = true;
                             penButton.setActive(0);
@@ -279,6 +288,7 @@ class EditWindow : MainWindow{
             if(toggleButton is fillButton){
                 if(fillButton.getActive()){
                     if(!penButtonDownBySelf){
+                        this.outer.editArea.drawingArea.ChangeDrawingType(EDrawingType.FILL);
                         if(penButton.getActive()){
                             penButtonUpByOther = true;
                             penButton.setActive(0);
@@ -305,6 +315,7 @@ class EditWindow : MainWindow{
             if(toggleButton is selectButton){
                 if(selectButton.getActive()){
                     if(!penButtonDownBySelf){
+                        this.outer.editArea.drawingArea.ChangeDrawingType(EDrawingType.SELECT);
                         if(penButton.getActive()){
                             penButtonUpByOther = true;
                             penButton.setActive(0);
@@ -388,7 +399,65 @@ class EditWindow : MainWindow{
                     }
                 }
             }
+            class ChipDrawStrategyTilingPen : ChipDrawStrategyBase{
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategyTilingPen.onButtonPress\n");
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategyTilingPen.onButtonRelease\n");
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    printf("ChipDrawStrategyTilingPen.onMotionNotify\n");
+                    return true;
+                }
+            }
+            class ChipDrawStrategySelect : ChipDrawStrategyBase{
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategySelect.onButtonPress\n");
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategySelect.onButtonRelease\n");
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    printf("ChipDrawStrategySelect.onMotionNotify\n");
+                    return true;
+                }
+            }
+            class ChipDrawStrategyFill : ChipDrawStrategyBase{
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategyFill.onButtonPress\n");
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    printf("ChipDrawStrategyFill.onButtonRelease\n");
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    printf("ChipDrawStrategyFill.onMotionNotify\n");
+                    return true;
+                }
+            }
             ChipDrawStrategyBase chipDrawStrategy = null;
+            void ChangeDrawingType(EDrawingType type){
+                final switch(type){
+                case EDrawingType.PEN:
+                    chipDrawStrategy = new ChipDrawStrategyPen();
+                    break;
+                case EDrawingType.TILING_PEN:
+                    chipDrawStrategy = new ChipDrawStrategyTilingPen();
+                    break;
+                case EDrawingType.FILL:
+                    chipDrawStrategy = new ChipDrawStrategyFill();
+                    break;
+                case EDrawingType.SELECT:
+                    chipDrawStrategy = new ChipDrawStrategySelect();
+                    break;
+                }
+            }
             this(){
                 super();
                 setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
