@@ -154,11 +154,18 @@ class ProjectInfo{
     }
     void onSelectionChanged(double startX, double startY, double endX, double endY){
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        int oldStartGridX = normalLayerInfo.gridSelection.startGridX;
+        int oldStartGridY = normalLayerInfo.gridSelection.startGridY;
+        int oldEndGridX = normalLayerInfo.gridSelection.endGridX;
+        int oldEndGridY = normalLayerInfo.gridSelection.endGridY;
         normalLayerInfo.gridSelection.startGridX = cast(int)(startX / partsSizeH);
         normalLayerInfo.gridSelection.startGridY = cast(int)(startY / partsSizeV);
         normalLayerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
         normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
-        partsWindow.queueDraw();
+        // グリッド座標が変わっていない場合は再描画必要ない
+        if(oldStartGridX != normalLayerInfo.gridSelection.startGridX || oldStartGridY != normalLayerInfo.gridSelection.startGridY || oldEndGridX != normalLayerInfo.gridSelection.endGridX || oldEndGridY != normalLayerInfo.gridSelection.endGridY){
+            partsWindow.queueDraw();
+        }
     }
     /**
        ある場所のチップのIndexを入れ替えてPixbufも更新。

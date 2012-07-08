@@ -179,14 +179,18 @@ class PartsWindow : MainWindow{
                 printf("onButtonRelease event.button = %d\n",event.button);
                 if ( event.button == 1 ){
                     if(this.outer.outer.onSelectionChangedFunction !is null){
-                        this.outer.outer.onSelectionChangedFunction(min(selectStartX,event.x), min(selectStartY,event.y), max(selectStartX,event.x), max(selectStartY,event.y),);
+                        this.outer.outer.onSelectionChangedFunction(min(selectStartX,event.x), min(selectStartY,event.y), max(selectStartX,event.x), max(selectStartY,event.y));
                     }
                     mode = EMode.NORMAL;
                 }
                 return false;
             }
             bool onMotionNotify(GdkEventMotion* event, Widget widget){
-//                 printf("onMotionNotify (%f,%f)\n",event.x,event.y);
+                if(mode == EMode.DRAGGING){
+                    if(this.outer.outer.onSelectionChangedFunction !is null){
+                        this.outer.outer.onSelectionChangedFunction(min(selectStartX,event.x), min(selectStartY,event.y), max(selectStartX,event.x), max(selectStartY,event.y));
+                    }
+                }
                 return true;
             }
         }
