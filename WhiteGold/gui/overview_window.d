@@ -14,6 +14,7 @@ class OverviewWindow : MainWindow{
     int zoomRate = 50;
     OverviewWindowViewArea viewArea = null;
     Statusbar statusbar = null;
+    void delegate(double centerX, double cneterY) onChangeScrollCenterFunction;
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
@@ -70,8 +71,16 @@ class OverviewWindow : MainWindow{
 */
     class OverviewWindowViewArea : ScrolledWindow{
         class EditDrawingArea : DrawingArea{
+            enum EMode{
+                NORMAL,
+                DRAGGING,
+            }
+            EMode mode = EMode.NORMAL;
             this(){
                 super();
+                addOnButtonPress(&onButtonPress);
+                addOnButtonRelease(&onButtonRelease);
+                addOnMotionNotify(&onMotionNotify);
                 addOnExpose(&exposeCallback);
                 double width = cast(double)projectInfo.partsSizeH * cast(double)projectInfo.mapSizeH * (cast(double)zoomRate / 100.0); 
                 double height = cast(double)projectInfo.partsSizeV * cast(double)projectInfo.mapSizeV * (cast(double)zoomRate / 100.0); 
@@ -100,6 +109,21 @@ class OverviewWindow : MainWindow{
                                  cast(int)(y1 * getHeight()),
                                  cast(int)(x2 * getWidth() - x1 * getWidth()) ,
                                  cast(int)(y2 * getHeight() - y1 * getHeight()));
+                return true;
+            }
+            bool onButtonPress(GdkEventButton* event, Widget widget){
+                mode = EMode.DRAGGING;
+                printf("mouse(%f,%f) area(%d,%d)\n",event.x,event.y,getWidth(),getHeight());
+                if(this.outer.outer.onChangeScrollCenterFunction !is null){
+                    this.outer.outer.onChangeScrollCenterFunction(event.x / getWidth(), event.y / getHeight());
+                }
+                return true;
+            }
+            bool onButtonRelease(GdkEventButton* event, Widget widget){
+                mode = EMode.NORMAL;
+                return true;
+            }
+            bool onMotionNotify(GdkEventMotion* event, Widget widget){
                 return true;
             }
         }
