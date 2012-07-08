@@ -39,8 +39,8 @@ struct EditInfo{
 }
 
 class ProjectInfo{
-    int mapSizeH = 20;
-    int mapSizeV = 20;
+    int mapSizeH = 100;
+    int mapSizeV = 100;
     int partsSizeH = 16;
     int partsSizeV = 16;
     // レイヤー関連

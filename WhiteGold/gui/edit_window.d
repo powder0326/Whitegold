@@ -429,6 +429,8 @@ class EditWindow : MainWindow{
             }
             class ChipDrawStrategyFill : ChipDrawStrategyBase{
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    long time1,time2;
+                    time1 = std.datetime.Clock.currStdTime();
                     int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
                     int cursorGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
@@ -489,6 +491,9 @@ class EditWindow : MainWindow{
                         }
                         ++ i;
                     }
+                    time2 = std.datetime.Clock.currStdTime();
+                    printf("Fill 1 %ld ms\n",(time2 - time1) / 10000);
+                    time1 = time2;
                     if(this.outer.outer.outer.onChipReplacedFunction){
                         this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
                     }
