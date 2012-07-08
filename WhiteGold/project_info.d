@@ -92,6 +92,7 @@ class ProjectInfo{
     }
     void SetOverviewWindow(OverviewWindow overviewWindow){
         this.overviewWindow = overviewWindow;
+        this.overviewWindow.onScrollCenterChangedFunction = &onScrollCenterChanged;
     }
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
@@ -245,6 +246,14 @@ class ProjectInfo{
         if(overviewWindow !is null){
             overviewWindow.queueDraw();
         }
+    }
+    void onScrollCenterChanged(double centerX, double centerY){
+        Adjustment adjustmentH = editWindow.editArea.getHadjustment();
+        double x = (adjustmentH.getUpper() - adjustmentH.getLower()) * centerX - adjustmentH.getPageSize() / 2.0;
+        adjustmentH.setValue(min(x, adjustmentH.getUpper() - adjustmentH.getPageSize()));
+        Adjustment adjustmentV = editWindow.editArea.getVadjustment();
+        double y = (adjustmentV.getUpper() - adjustmentV.getLower()) * centerY - adjustmentV.getPageSize() / 2.0;
+        adjustmentV.setValue(min(y, adjustmentV.getUpper() - adjustmentV.getPageSize()));
     }
 }
 enum ELayerType{

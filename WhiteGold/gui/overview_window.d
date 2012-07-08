@@ -14,7 +14,7 @@ class OverviewWindow : MainWindow{
     int zoomRate = 50;
     OverviewWindowViewArea viewArea = null;
     Statusbar statusbar = null;
-    void delegate(double centerX, double cneterY) onChangeScrollCenterFunction;
+    void delegate(double centerX, double cneterY) onScrollCenterChangedFunction;
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
@@ -113,9 +113,8 @@ class OverviewWindow : MainWindow{
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){
                 mode = EMode.DRAGGING;
-                printf("mouse(%f,%f) area(%d,%d)\n",event.x,event.y,getWidth(),getHeight());
-                if(this.outer.outer.onChangeScrollCenterFunction !is null){
-                    this.outer.outer.onChangeScrollCenterFunction(event.x / getWidth(), event.y / getHeight());
+                if(this.outer.outer.onScrollCenterChangedFunction !is null){
+                    this.outer.outer.onScrollCenterChangedFunction(event.x / getWidth(), event.y / getHeight());
                 }
                 return true;
             }
@@ -124,6 +123,11 @@ class OverviewWindow : MainWindow{
                 return true;
             }
             bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                if(mode == EMode.DRAGGING){
+                    if(this.outer.outer.onScrollCenterChangedFunction !is null){
+                        this.outer.outer.onScrollCenterChangedFunction(event.x / getWidth(), event.y / getHeight());
+                    }
+                }
                 return true;
             }
         }

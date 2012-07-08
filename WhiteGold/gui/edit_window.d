@@ -80,7 +80,6 @@ class EditWindow : MainWindow{
         Adjustment adjustmentV = editArea.getVadjustment();
         y1 = adjustmentV.getValue() / (adjustmentV.getUpper() - adjustmentV.getLower());
         y2 = (adjustmentV.getValue() + adjustmentV.getPageSize()) / (adjustmentV.getUpper() - adjustmentV.getLower());
-        printf("(%f,%f)(%f,%f)\n",x1,x2,y1,y2);
     }
 /**
    エディット用ウインドウ上部のメニュー
