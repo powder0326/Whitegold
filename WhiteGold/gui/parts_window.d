@@ -37,6 +37,7 @@ class PartsWindow : MainWindow{
         this(){
             super(false,0);
             setBorderWidth(2);
+            move(240, 240);
             // ファイル関連
             Button fileOpenButton = new Button();
             fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));

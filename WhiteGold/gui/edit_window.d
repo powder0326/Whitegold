@@ -34,6 +34,7 @@ class EditWindow : MainWindow{
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
         setDefaultSize(240, 240);
+        move(10, 10);
         setIcon(new Pixbuf("dat/icon/application--pencil.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);

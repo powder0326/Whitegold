@@ -98,7 +98,8 @@ class ProjectInfo{
     }
     void onLayerVisibilityChanged(int index, bool visible){
         layerInfos[index].visible = visible;
-        editWindow.Reload();
+        editWindow.queueDraw();
+        overviewWindow.queueDraw();
     }
     void onHideEditWindow(){
         Main.quit();
