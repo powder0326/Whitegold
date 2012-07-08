@@ -130,6 +130,34 @@ class PartsWindow : MainWindow{
                 int width = projectInfo.partsSizeH * (layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1) - 1;
                 int height = projectInfo.partsSizeV * (layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1) - 1;
                 GC gc = new GC(dr);
+                gc.setRgbFgColor(new Color(0,0,0));
+                // 内部の斜線(上辺から)
+                for(int tmpX = x ; tmpX < x + width ; tmpX += 8){
+                    if(y + (x + width - tmpX) > y + height){
+                        int value  = (y + (x + width - tmpX)) - (y + height);
+                        dr.drawLine(gc, tmpX, y, x + width - value, y + (x + width - tmpX) - value);
+                        dr.drawLine(gc, x + (x + width) - tmpX, y, x + value, y + (x + width - tmpX) - value);
+                    }else{
+                        dr.drawLine(gc, tmpX, y, x + width, y + (x + width - tmpX));
+                        dr.drawLine(gc, x + (x + width) - tmpX, y, x, y + (x + width - tmpX));
+                    }
+                }
+                // 内部の斜線(左辺右辺から)
+                for(int tmpY = y ; tmpY < y + height ; tmpY += 8){
+                    if(x + (y + height - tmpY) > x + width){
+                        int value = (x + (y + height - tmpY)) - (x + width);
+                        dr.drawLine(gc, x, tmpY, x + (y + height - tmpY) - value, y + height - value);
+                    }else{
+                        dr.drawLine(gc, x, tmpY, x + (y + height - tmpY), y + height);
+                    }
+                    if(x + width - (y + height - tmpY) < x){
+                        int value = x - (x + width - (y + height - tmpY));
+                        dr.drawLine(gc, x + width, tmpY, x + width - (y + height - tmpY) + value, y + height - value);
+                    }else{
+                        dr.drawLine(gc, x + width, tmpY, x + width - (y + height - tmpY), y + height);
+                    }
+                }
+                // 外枠
                 gc.setRgbFgColor(new Color(255,255,255));
                 dr.drawRectangle(gc, false, x, y, width, height);
                 return true;
