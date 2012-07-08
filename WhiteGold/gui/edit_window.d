@@ -521,6 +521,7 @@ class EditWindow : MainWindow{
                     break;
                 }
             }
+            Pixbuf gridPixbuf = null;
             this(){
                 super();
                 setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
@@ -531,6 +532,7 @@ class EditWindow : MainWindow{
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
+                        // 透過色パターン
                         Pixmap bgPixmap = new Pixmap(widget.getWindow(), 4 * 2, 4 * 2, -1);
                         GC gc = new GC(widget.getWindow());
                         Color color1 = new Color(200,200,200);
@@ -554,6 +556,29 @@ class EditWindow : MainWindow{
                             }
                         }
                         widget.getWindow().setBackPixmap(bgPixmap,0);
+                        // グリッドパターン
+                        Pixmap gridPixmap = new Pixmap(widget.getWindow(), widget.getWidth(), widget.getHeight(), -1);
+                        gc.setLineAttributes (1, GdkLineStyle.ON_OFF_DASH, GdkCapStyle.NOT_LAST, GdkJoinStyle.MITER);
+                        gc.setRgbBgColor(new Color(255,80,80));
+                        gc.setRgbFgColor(new Color(80,80,80));
+                        int width = projectInfo.partsSizeH * projectInfo.mapSizeH;
+                        int height = projectInfo.partsSizeV * projectInfo.mapSizeV;
+                        for(int y = 0 ; y < height ; y += projectInfo.partsSizeV){
+                            for(int x = 0 ; x < width ; x += projectInfo.partsSizeH){
+                                gridPixmap.drawLine(gc, -4, y, width, y);
+                                gridPixmap.drawLine(gc, x, -4, x, height);
+                            }
+                        }
+                        gridPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, widget.getWidth(),widget.getHeight());
+                        gridPixbuf.setFromDrawable(gridPixmap, 0, 0, widget.getWidth(),widget.getHeight());
+                        // うまいこと透過できないので黒を透過色に無理矢理書き換え
+                        char* pixels = gridPixbuf.getPixels();
+                        for(int i = 0 ; i < gridPixbuf.getWidth() * gridPixbuf.getHeight() * gridPixbuf.getNChannels() ; i += 4){
+                            if(pixels[i] == 0 && pixels[i + 1] == 0 && pixels[i + 2] == 0){
+                                pixels[i + 3] = 0;
+                            }
+                        }
+
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
@@ -569,19 +594,7 @@ class EditWindow : MainWindow{
                 }
                 // グリッド描画
                 if(showGrid){
-//                     GdkPoint points[];
-                    gc.setLineAttributes (1, GdkLineStyle.ON_OFF_DASH, GdkCapStyle.NOT_LAST, GdkJoinStyle.MITER);
-                    gc.setRgbFgColor(new Color(80,80,80));
-                    int width = projectInfo.partsSizeH * projectInfo.mapSizeH;
-                    int height = projectInfo.partsSizeV * projectInfo.mapSizeV;
-                    for(int y = 0 ; y < height ; y += projectInfo.partsSizeV){
-                        for(int x = 0 ; x < width ; x += projectInfo.partsSizeH){
-//                             points ~= GdkPoint(x, y);
-                            dr.drawLine(gc, -4, y, width, y);
-                            dr.drawLine(gc, x, -4, x, height);
-                        }
-                    }
-//                     dr.drawLines(gc, points);
+                    dr.drawPixbuf(gridPixbuf, 0, 0);
                 }
                 return true;
             }
