@@ -78,6 +78,7 @@ class ProjectInfo{
         this.editWindow.onChipReplaceCompletedFunction = &onChipReplaceCompleted;
         this.editWindow.onUndoFunction = &onUndo;
         this.editWindow.onRedoFunction = &onRedo;
+        this.editWindow.onScrollChangedFunction = &onScrollChanged;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -238,6 +239,11 @@ class ProjectInfo{
             redoQueue = redoQueue[0..$ - 1];
             updateUndoRedo();
             editWindow.queueDraw();
+        }
+    }
+    void onScrollChanged(){
+        if(overviewWindow !is null){
+            overviewWindow.queueDraw();
         }
     }
 }

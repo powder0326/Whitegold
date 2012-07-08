@@ -27,6 +27,7 @@ class EditWindow : MainWindow{
     void delegate() onChipReplaceCompletedFunction;
     void delegate() onUndoFunction;
     void delegate() onRedoFunction;
+    void delegate() onScrollChangedFunction;
     EditWindowEditArea editArea = null;
     EditWindowToolArea toolArea = null;
     bool showGrid = false;
@@ -63,6 +64,23 @@ class EditWindow : MainWindow{
         if(onMapSizeAndPartsSizeChangedFunction !is null){
             dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
         }
+    }
+    /**
+       視界情報取得
+
+       x1:視界左端がViewPortの横幅を1.0とした場合にどの位置にあるか
+       y1:視界上端がViewPortの縦幅を1.0とした場合にどの位置にあるか
+       x2:視界右端がViewPortの横幅を1.0とした場合にどの位置にあるか
+       y2:視界下端がViewPortの縦幅を1.0とした場合にどの位置にあるか
+     */
+    void GetViewPortInfo(ref double x1, ref double y1, ref double x2, ref double y2){
+        Adjustment adjustmentH = editArea.getHadjustment();
+        x1 = adjustmentH.getValue() / (adjustmentH.getUpper() - adjustmentH.getLower());
+        x2 = (adjustmentH.getValue() + adjustmentH.getPageSize()) / (adjustmentH.getUpper() - adjustmentH.getLower());
+        Adjustment adjustmentV = editArea.getVadjustment();
+        y1 = adjustmentV.getValue() / (adjustmentV.getUpper() - adjustmentV.getLower());
+        y2 = (adjustmentV.getValue() + adjustmentV.getPageSize()) / (adjustmentV.getUpper() - adjustmentV.getLower());
+        printf("(%f,%f)(%f,%f)\n",x1,x2,y1,y2);
     }
 /**
    エディット用ウインドウ上部のメニュー
@@ -698,6 +716,17 @@ class EditWindow : MainWindow{
             super();
             drawingArea = new EditDrawingArea();
             addWithViewport(drawingArea);
+            Adjustment adjustmentH = getHadjustment();
+            adjustmentH.addOnValueChanged(&ScrollChanged);
+            adjustmentH.addOnChanged(&ScrollChanged);
+            Adjustment adjustmentV = getVadjustment();
+            adjustmentV.addOnValueChanged(&ScrollChanged);
+            adjustmentV.addOnChanged(&ScrollChanged);
+        }
+        void ScrollChanged(Adjustment){
+            if(this.outer.onScrollChangedFunction !is null){
+                onScrollChangedFunction();
+            }
         }
         void Reload(){
             drawingArea.setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);

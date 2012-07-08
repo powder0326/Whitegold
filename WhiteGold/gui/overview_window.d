@@ -90,6 +90,16 @@ class OverviewWindow : MainWindow{
                         dr.drawPixbuf(scaledPixbuf, 0, 0);
                     }
                 }
+                // 視界表示
+                double x1,y1,x2,y2;
+                projectInfo.editWindow.GetViewPortInfo(x1,y1,x2,y2);
+                GC gc = new GC(dr);
+                gc.setForeground(new Color(255,0,0));
+                dr.drawRectangle(gc, false,
+                                 cast(int)(x1 * getWidth()),
+                                 cast(int)(y1 * getHeight()),
+                                 cast(int)(x2 * getWidth() - x1 * getWidth()) ,
+                                 cast(int)(y2 * getHeight() - y1 * getHeight()));
                 return true;
             }
         }
