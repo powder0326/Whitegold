@@ -67,12 +67,16 @@ class EditWindow : MainWindow{
         }
     }
     void UpdateGuide(){
-        printf("UpdateGuide 1\n");
-        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-        int width = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-        int height = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-        UpdateGuidePixbuf(editArea.drawingArea.guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, editArea.mouseGridX, editArea.mouseGridY, width, height, false);
-        printf("UpdateGuide 2\n");
+        version(DRAW_GUIDE_DIRECT){
+            editArea.drawingArea.queueDraw();
+        }else{
+            printf("UpdateGuide 1\n");
+            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+            int width = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+            int height = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+            UpdateGuidePixbuf(editArea.drawingArea.guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, editArea.mouseGridX, editArea.mouseGridY, width, height, false);
+            printf("UpdateGuide 2\n");
+        }
     }
     /**
        視界情報取得
@@ -642,7 +646,9 @@ class EditWindow : MainWindow{
                 }
             }
             Pixbuf gridPixbuf = null;
-            Pixbuf guidePixbuf = null;
+            version(DRAW_GUIDE_DIRECT){}else{
+                Pixbuf guidePixbuf = null;
+            }
             this(){
                 super();
                 setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
@@ -652,8 +658,10 @@ class EditWindow : MainWindow{
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                guidePixbuf = CreateGuidePixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                UpdateGuidePixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
+                version(DRAW_GUIDE_DIRECT){}else{
+                    guidePixbuf = CreateGuidePixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                    UpdateGuidePixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
+                }
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         // 透過色パターン
@@ -699,7 +707,20 @@ class EditWindow : MainWindow{
                     dr.drawPixbuf(gridPixbuf, 0, 0);
                 }
                 // カーソル位置の四角描画
-                dr.drawPixbuf(guidePixbuf, 0, 0);
+                version(DRAW_GUIDE_DIRECT){
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+                    int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+                    int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                    int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
+                    int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
+                    int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
+                    int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
+                    gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                    dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                }else{
+                    dr.drawPixbuf(guidePixbuf, 0, 0);
+                }
                 printf("EditWindow.exposeCallback 2\n");
                 return true;
             }

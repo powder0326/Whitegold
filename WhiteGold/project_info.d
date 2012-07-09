@@ -97,6 +97,7 @@ class ProjectInfo{
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
         partsWindow.Reload();
+        editWindow.queueDraw();
     }
     void onLayerVisibilityChanged(int index, bool visible){
         layerInfos[index].visible = visible;

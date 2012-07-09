@@ -79,7 +79,7 @@
   <deffile />
   <resfile />
   <exefile>$(OutDir)\$(ProjectName).exe</exefile>
-  <additionalOptions>-version=DRAW_SAMPLE</additionalOptions>
+  <additionalOptions>-version=DRAW_SAMPLE -version=DRAW_GUIDE_DIRECT</additionalOptions>
   <preBuildCommand />
   <postBuildCommand />
   <debugtarget>$(TARGETPATH)</debugtarget>
