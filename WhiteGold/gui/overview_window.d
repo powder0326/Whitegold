@@ -87,6 +87,7 @@ class OverviewWindow : MainWindow{
                 setSizeRequest(cast(int)width, cast(int)height);
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
+                printf("OverviewWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
@@ -109,6 +110,7 @@ class OverviewWindow : MainWindow{
                                  cast(int)(y1 * getHeight()),
                                  cast(int)(x2 * getWidth() - x1 * getWidth()) ,
                                  cast(int)(y2 * getHeight() - y1 * getHeight()));
+                printf("OverviewWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){

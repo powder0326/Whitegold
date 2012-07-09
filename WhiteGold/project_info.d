@@ -155,6 +155,7 @@ class ProjectInfo{
         overviewWindow.Reload();
     }
     void onSelectionChanged(double startX, double startY, double endX, double endY){
+        printf("onSelectionChanged 1\n");
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
         int oldStartGridX = normalLayerInfo.gridSelection.startGridX;
         int oldStartGridY = normalLayerInfo.gridSelection.startGridY;
@@ -170,6 +171,7 @@ class ProjectInfo{
             editWindow.queueDraw();
             partsWindow.queueDraw();
         }
+        printf("onSelectionChanged 2\n");
     }
     /**
        ある場所のチップのIndexを入れ替えてPixbufも更新。
@@ -178,6 +180,7 @@ class ProjectInfo{
      */
     EditInfo tmpEditInfosTree[][];
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
+        printf("onChipReplaced 1\n");
         EditInfo editInfos[];
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
         foreach(chipReplaceInfo;chipReplaceInfos){
@@ -194,6 +197,7 @@ class ProjectInfo{
         tmpEditInfosTree ~= editInfos;
         editWindow.queueDraw();
         overviewWindow.queueDraw();
+        printf("onChipReplaced 2\n");
     }
     /**
        チップの入れ替え確定
@@ -201,10 +205,12 @@ class ProjectInfo{
        tmpEditInfosの内容をundoQueueに反映する。
        */
     void onChipReplaceCompleted(){
+        printf("onChipReplaceCompleted 1\n");
         undoQueue ~= tmpEditInfosTree;
         redoQueue.clear;
         tmpEditInfosTree.clear;
         updateUndoRedo();
+        printf("onChipReplaceCompleted 2\n");
     }
     void updateUndoRedo(){
         editWindow.toolArea.editUndoButton.setSensitive(undoQueue.length >= 1);

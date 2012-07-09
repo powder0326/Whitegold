@@ -67,11 +67,12 @@ class EditWindow : MainWindow{
         }
     }
     void UpdateGuide(){
+        printf("UpdateGuide 1\n");
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
         int width = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
         int height = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-        printf("UpdateGuide w=%d h=%d",width,height);
         UpdateGuidePixbuf(editArea.drawingArea.guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, editArea.mouseGridX, editArea.mouseGridY, width, height, false);
+        printf("UpdateGuide 2\n");
     }
     /**
        視界情報取得
@@ -82,12 +83,14 @@ class EditWindow : MainWindow{
        y2:視界下端がViewPortの縦幅を1.0とした場合にどの位置にあるか
      */
     void GetViewPortInfo(ref double x1, ref double y1, ref double x2, ref double y2){
+        printf("GetViewPortInfo 1\n");
         Adjustment adjustmentH = editArea.getHadjustment();
         x1 = adjustmentH.getValue() / (adjustmentH.getUpper() - adjustmentH.getLower());
         x2 = (adjustmentH.getValue() + adjustmentH.getPageSize()) / (adjustmentH.getUpper() - adjustmentH.getLower());
         Adjustment adjustmentV = editArea.getVadjustment();
         y1 = adjustmentV.getValue() / (adjustmentV.getUpper() - adjustmentV.getLower());
         y2 = (adjustmentV.getValue() + adjustmentV.getPageSize()) / (adjustmentV.getUpper() - adjustmentV.getLower());
+        printf("GetViewPortInfo 2\n");
     }
 /**
    エディット用ウインドウ上部のメニュー
@@ -419,11 +422,15 @@ class EditWindow : MainWindow{
                     return true;
                 }
                 void drawChip(int gridX, int gridY){
+                    printf("drawChip 1\n");
                     ChipReplaceInfo[] chipReplaceInfos;
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                     with(normalLayerInfo.gridSelection){
                         for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
                             for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
+                                if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
+                                    continue;
+                                }
                                 chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y);
                             }
                         }
@@ -431,6 +438,7 @@ class EditWindow : MainWindow{
                     if(this.outer.outer.outer.onChipReplacedFunction !is null){
                         this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
                     }
+                    printf("drawChip 2\n");
                 }
             }
             class ChipDrawStrategyTilingPen : ChipDrawStrategyBase{
@@ -675,6 +683,7 @@ class EditWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
+                printf("EditWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
@@ -691,6 +700,7 @@ class EditWindow : MainWindow{
                 }
                 // カーソル位置の四角描画
                 dr.drawPixbuf(guidePixbuf, 0, 0);
+                printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){

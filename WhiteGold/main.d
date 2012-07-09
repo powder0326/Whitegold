@@ -171,7 +171,7 @@ Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSiz
             pixels[i+3]=255;
         }
     }
-    printf("CreateGridPixbuf %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
+//     printf("CreateGridPixbuf %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
 	return gridPixbuf;
 }
 Pixbuf CreateGuidePixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
@@ -182,6 +182,7 @@ Pixbuf CreateGuidePixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSi
     return guidePixbuf;
 }
 void UpdateGuidePixbuf(Pixbuf pixbuf, int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV, int cursorGridX, int cursorGridY, int selectWidth, int selectHeight, bool tiling){
+    long time = std.datetime.Clock.currStdTime();
     char* pixels = pixbuf.getPixels();
     int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
     pixels[0..length] = 0;
@@ -189,10 +190,8 @@ void UpdateGuidePixbuf(Pixbuf pixbuf, int mapSizeH, int mapSizeV, int partsSizeH
     int rightPixelX = cursorGridX * partsSizeH + partsSizeH * selectWidth - 1 - 1;
     int topPixelY = cursorGridY * partsSizeV + 1;
     int bottomPixelY = cursorGridY * partsSizeV + partsSizeV * selectHeight - 1 - 1;
-    printf("XY(%d,%d)(%d,%d)\n",cursorGridX,cursorGridY,leftPixelX,rightPixelX);
     for(int pixelX = leftPixelX ; pixelX < rightPixelX ; ++ pixelX){
         int pixelIndexUp = (pixelX * 4) + (topPixelY * mapSizeH * partsSizeH * 4);
-        printf("pixelIndexUp = %d\n",pixelIndexUp);
         pixels[pixelIndexUp + 0] = 255;
         pixels[pixelIndexUp + 1] = 0;
         pixels[pixelIndexUp + 2] = 0;
@@ -215,4 +214,5 @@ void UpdateGuidePixbuf(Pixbuf pixbuf, int mapSizeH, int mapSizeV, int partsSizeH
         pixels[pixelIndexRight + 2] = 0;
         pixels[pixelIndexRight+ 3] = 255;
     }
+//     printf("UpdateGuidePixbuf %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
 }
