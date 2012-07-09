@@ -157,3 +157,20 @@ CsvProjectInfo ParseCsv(string csvFilePath){
     ret.chipLayouts = chipLayouts;
     return ret;
 }
+Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
+    long time = std.datetime.Clock.currStdTime();
+    Pixbuf gridPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, partsSizeH * mapSizeH, partsSizeV * mapSizeV);
+    char* pixels = gridPixbuf.getPixels();
+    int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
+    int intervalH = partsSizeH * 4;
+    int pixelNumH = mapSizeH * partsSizeH;
+    pixels[0..length] = 0;
+    for(int i=0;i<length;i+=4){
+        if(((i / 4) / pixelNumH) % partsSizeV == 0 || i % intervalH == 0){
+            pixels[i..i+3]=220;
+            pixels[i+3]=255;
+        }
+    }
+    printf("CreateGridPixbuf %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
+	return gridPixbuf;
+}

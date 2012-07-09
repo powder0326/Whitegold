@@ -4,6 +4,7 @@ import imports.all;
 import main;
 import project_info;
 import dialog.new_project_dialog;
+import dialog.resize_dialog;
 
 /**
    エディット用ウインドウ
@@ -113,6 +114,7 @@ class EditWindow : MainWindow{
             editMenu.append(new MenuItem(&onMenuActivate, "取り消し","edit.undo", true, accelGroup, 'z'));
             editMenu.append(new MenuItem(&onMenuActivate, "やり直し","edit.redo", true, accelGroup, 'y'));
             editMenu.append(new SeparatorMenuItem());
+            editMenu.append(new MenuItem(&onMenuActivate, "リサイズ","edit.resize", true));
             editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
             Menu windowMenu = append("ウインドウ");
             CustomCheckMenuItem checkMenuItemPartsWindow = new CustomCheckMenuItem("パーツウインドウ", true, EWindowType.PARTS);
@@ -147,6 +149,14 @@ class EditWindow : MainWindow{
                     }
                 }
                 fs.hide();
+                break;
+            case "edit.resize":
+                ResizeDialog dialog = new ResizeDialog();
+                dialog.setModal(true);
+                dialog.showAll();
+//                     if(onMapSizeAndPartsSizeChangedFunction !is null){
+//                         dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
+//                     }
                 break;
             default:
                 break;
@@ -448,8 +458,7 @@ class EditWindow : MainWindow{
             }
             class ChipDrawStrategyFill : ChipDrawStrategyBase{
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
-                    long time1,time2;
-                    time1 = std.datetime.Clock.currStdTime();
+                    long time = std.datetime.Clock.currStdTime();
                     int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
                     int cursorGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
@@ -586,9 +595,7 @@ class EditWindow : MainWindow{
                             ++ i;
                         }
                     }
-                    time2 = std.datetime.Clock.currStdTime();
-                    printf("Fill 1 %ld ms\n",(time2 - time1) / 10000);
-                    time1 = time2;
+                    printf("Fill %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
                     if(this.outer.outer.outer.onChipReplacedFunction){
                         this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
                     }
@@ -630,6 +637,7 @@ class EditWindow : MainWindow{
                 addOnMotionNotify(&onMotionNotify);
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
+                gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         // 透過色パターン
@@ -656,29 +664,6 @@ class EditWindow : MainWindow{
                             }
                         }
                         widget.getWindow().setBackPixmap(bgPixmap,0);
-                        // グリッドパターン
-//                         Pixmap gridPixmap = new Pixmap(widget.getWindow(), widget.getWidth(), widget.getHeight(), -1);
-//                         gc.setLineAttributes (1, GdkLineStyle.ON_OFF_DASH, GdkCapStyle.NOT_LAST, GdkJoinStyle.MITER);
-//                         gc.setRgbBgColor(new Color(255,80,80));
-//                         gc.setRgbFgColor(new Color(80,80,80));
-//                         int width = projectInfo.partsSizeH * projectInfo.mapSizeH;
-//                         int height = projectInfo.partsSizeV * projectInfo.mapSizeV;
-//                         for(int y = 0 ; y < height ; y += projectInfo.partsSizeV){
-//                             for(int x = 0 ; x < width ; x += projectInfo.partsSizeH){
-//                                 gridPixmap.drawLine(gc, -4, y, width, y);
-//                                 gridPixmap.drawLine(gc, x, -4, x, height);
-//                             }
-//                         }
-//                         gridPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, widget.getWidth(),widget.getHeight());
-//                         gridPixbuf.setFromDrawable(gridPixmap, 0, 0, widget.getWidth(),widget.getHeight());
-//                         // うまいこと透過できないので黒を透過色に無理矢理書き換え
-//                         char* pixels = gridPixbuf.getPixels();
-//                         for(int i = 0 ; i < gridPixbuf.getWidth() * gridPixbuf.getHeight() * gridPixbuf.getNChannels() ; i += 4){
-//                             if(pixels[i] == 0 && pixels[i + 1] == 0 && pixels[i + 2] == 0){
-//                                 pixels[i + 3] = 0;
-//                             }
-//                         }
-
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){

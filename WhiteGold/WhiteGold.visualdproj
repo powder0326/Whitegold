@@ -183,6 +183,7 @@
  <Folder name="WhiteGold">
   <Folder name="dialog">
    <File path="dialog\new_project_dialog.d" />
+   <File path="dialog\resize_dialog.d" />
   </Folder>
   <Folder name="gui">
    <File path="gui\edit_window.d" />
