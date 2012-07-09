@@ -398,6 +398,53 @@ class EditWindow : MainWindow{
                 abstract bool onButtonRelease(GdkEventButton* event, Widget widget);
                 abstract bool onMotionNotify(GdkEventMotion* event, Widget widget);
             }
+            void drawChip(int gridX, int gridY){
+                printf("drawChip 1\n");
+                ChipReplaceInfo[] chipReplaceInfos;
+                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                with(normalLayerInfo.gridSelection){
+                    for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
+                        for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
+                            if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
+                                continue;
+                            }
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y);
+                        }
+                    }
+                }
+                if(this.outer.outer.onChipReplacedFunction !is null){
+                    this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                }
+                printf("drawChip 2\n");
+            }
+            /**
+               タイリングしてチップを配置
+
+               startGridX:左上グリッドX座標
+               startGridY:左上グリッドY座標
+               endGridX:右下グリッド座標
+               endGridY:右下グリッド座標
+            */
+            void tilingChip(int gridX1, int gridY1, int gridX2, int gridY2){
+                    printf("tilingChip 1\n");
+                    ChipReplaceInfo[] chipReplaceInfos;
+                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    with(normalLayerInfo.gridSelection){
+                        int width = endGridX - startGridX + 1;
+                        int height = endGridY - startGridY + 1;
+                        for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
+                            for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
+                                int x = startGridX + (gridX - gridX1) % width;
+                                int y = startGridY + (gridY - gridY1) % height;
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y);
+                            }
+                        }
+                    }
+                    if(this.outer.outer.onChipReplacedFunction !is null){
+                        this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                    }
+                    printf("tilingChip 2\n");
+            }
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
                 int lastGridX,lastGridY;
                 bool pressed = false;
@@ -425,33 +472,29 @@ class EditWindow : MainWindow{
                     }
                     return true;
                 }
-                void drawChip(int gridX, int gridY){
-                    printf("drawChip 1\n");
-                    ChipReplaceInfo[] chipReplaceInfos;
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                    with(normalLayerInfo.gridSelection){
-                        for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
-                            for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
-                                if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
-                                    continue;
-                                }
-                                chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y);
-                            }
-                        }
-                    }
-                    if(this.outer.outer.outer.onChipReplacedFunction !is null){
-                        this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
-                    }
-                    printf("drawChip 2\n");
-                }
             }
             class ChipDrawStrategyTilingPen : ChipDrawStrategyBase{
+                enum EMode{
+                    NORMAL,
+                    DRAGGING,
+                }
+                EMode mode = EMode.NORMAL;
+                int startGridX = 0;
+                int startGridY = 0;
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onButtonPress\n");
+                    mode = EMode.DRAGGING;
+                    startGridX = mouseGridX;
+                    startGridY = mouseGridY;
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onButtonRelease\n");
+                    mode = EMode.NORMAL;
+                    tilingChip(startGridX, startGridY, mouseGridX, mouseGridY);
+                    if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
+                        this.outer.outer.outer.onChipReplaceCompletedFunction();
+                    }
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
