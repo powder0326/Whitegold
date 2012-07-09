@@ -66,6 +66,13 @@ class EditWindow : MainWindow{
             dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
         }
     }
+    void UpdateGuide(){
+        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+        int width = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+        int height = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+        printf("UpdateGuide w=%d h=%d",width,height);
+        UpdateGuidePixbuf(editArea.drawingArea.guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, editArea.mouseGridX, editArea.mouseGridY, width, height, false);
+    }
     /**
        視界情報取得
 
@@ -388,16 +395,12 @@ class EditWindow : MainWindow{
                 int lastGridX,lastGridY;
                 bool pressed = false;
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
-                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     pressed = true;
                     // チップ配置
                     drawChip(mouseGridX, mouseGridY);
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
-                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     pressed = false;
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
@@ -405,8 +408,6 @@ class EditWindow : MainWindow{
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     if(pressed){
                         // グリッドが変わったら描画
                         if(mouseGridX != lastGridX || mouseGridY != lastGridY){
@@ -643,8 +644,8 @@ class EditWindow : MainWindow{
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                guidePixbuf = CreateGuidPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                UpdateGridPixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
+                guidePixbuf = CreateGuidePixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                UpdateGuidePixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         // 透過色パターン
@@ -682,7 +683,7 @@ class EditWindow : MainWindow{
                         continue;
                     }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-//                     dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
                 }
                 // グリッド描画
                 if(showGrid){
@@ -692,15 +693,37 @@ class EditWindow : MainWindow{
                 dr.drawPixbuf(guidePixbuf, 0, 0);
                 return true;
             }
-            bool onButtonPress(GdkEventButton* event, Widget widget)
-            {
+            bool onButtonPress(GdkEventButton* event, Widget widget){
+                int lastMouseGridX = mouseGridX;
+                int lastMouseGridY = mouseGridY;
+                mouseGridX = min(cast(int)(event.x / projectInfo.partsSizeH), projectInfo.mapSizeH - 1);
+                mouseGridY = min(cast(int)(event.y / projectInfo.partsSizeV), projectInfo.mapSizeV - 1);
+                if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
+                    UpdateGuide();
+                    queueDraw();
+                }
                 return chipDrawStrategy.onButtonPress(event, widget);
             }
-            bool onButtonRelease(GdkEventButton* event, Widget widget)
-            {
+            bool onButtonRelease(GdkEventButton* event, Widget widget){
+                int lastMouseGridX = mouseGridX;
+                int lastMouseGridY = mouseGridY;
+                mouseGridX = min(cast(int)(event.x / projectInfo.partsSizeH), projectInfo.mapSizeH - 1);
+                mouseGridY = min(cast(int)(event.y / projectInfo.partsSizeV), projectInfo.mapSizeV - 1);
+                if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
+                    UpdateGuide();
+                    queueDraw();
+                }
                 return chipDrawStrategy.onButtonRelease(event, widget);
             }
             bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                int lastMouseGridX = mouseGridX;
+                int lastMouseGridY = mouseGridY;
+                mouseGridX = min(cast(int)(event.x / projectInfo.partsSizeH), projectInfo.mapSizeH - 1);
+                mouseGridY = min(cast(int)(event.y / projectInfo.partsSizeV), projectInfo.mapSizeV - 1);
+                if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
+                    UpdateGuide();
+                    queueDraw();
+                }
                 return chipDrawStrategy.onMotionNotify(event, widget);
             }
         }

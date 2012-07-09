@@ -166,6 +166,8 @@ class ProjectInfo{
         normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
         // グリッド座標が変わっていない場合は再描画必要ない
         if(oldStartGridX != normalLayerInfo.gridSelection.startGridX || oldStartGridY != normalLayerInfo.gridSelection.startGridY || oldEndGridX != normalLayerInfo.gridSelection.endGridX || oldEndGridY != normalLayerInfo.gridSelection.endGridY){
+            editWindow.UpdateGuide();
+            editWindow.queueDraw();
             partsWindow.queueDraw();
         }
     }
