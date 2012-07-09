@@ -393,6 +393,13 @@ class EditWindow : MainWindow{
         int mouseGridX = 0;
         int mouseGridY = 0;
         class EditDrawingArea : DrawingArea{
+            enum EGuideMode{
+                CURSOR,
+                TILING,
+            }
+            EGuideMode guideMode = EGuideMode.CURSOR;
+            int tilingStartGridX = 0;
+            int tilingStartGridY = 0;
             abstract class ChipDrawStrategyBase{
                 abstract bool onButtonPress(GdkEventButton* event, Widget widget);
                 abstract bool onButtonRelease(GdkEventButton* event, Widget widget);
@@ -484,13 +491,15 @@ class EditWindow : MainWindow{
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onButtonPress\n");
                     mode = EMode.DRAGGING;
-                    startGridX = mouseGridX;
-                    startGridY = mouseGridY;
+                    guideMode = EGuideMode.TILING;
+                    tilingStartGridX = startGridX = mouseGridX;
+                    tilingStartGridY = startGridY = mouseGridY;
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onButtonRelease\n");
                     mode = EMode.NORMAL;
+                    guideMode = EGuideMode.CURSOR;
                     tilingChip(startGridX, startGridY, mouseGridX, mouseGridY);
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
@@ -751,16 +760,46 @@ class EditWindow : MainWindow{
                 }
                 // カーソル位置の四角描画
                 version(DRAW_GUIDE_DIRECT){
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
-                    int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-                    int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-                    int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
-                    int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
-                    int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
-                    int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
-                    gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                    dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                    if(guideMode == EGuideMode.CURSOR){
+                        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                        dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+                        int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+                        int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                        int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
+                        int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
+                        int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
+                        int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                    }
+                    else if(guideMode == EGuideMode.TILING){
+                        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+                        int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                        int startGridX = 0;
+                        int i = 0;
+                        for(;;++i){
+                            startGridX = tilingStartGridX - selectWidth * i;
+                            if(startGridX <= 0){
+                                break;
+                            }
+                        }
+                        int startGridY = 0;
+                        int j = 0;
+                        for(;;++j){
+                            startGridY = tilingStartGridY - selectHeight * j;
+                            if(startGridY <= 0){
+                                break;
+                            }
+                        }
+                        for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
+                            for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
+                                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                                dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
+                            }
+                        }
+                    }
                 }else{
                     dr.drawPixbuf(guidePixbuf, 0, 0);
                 }
