@@ -104,7 +104,8 @@ class OverviewWindow : MainWindow{
                 double x1,y1,x2,y2;
                 projectInfo.editWindow.GetViewPortInfo(x1,y1,x2,y2);
                 GC gc = new GC(dr);
-                gc.setForeground(new Color(255,0,0));
+                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+//                 gc.setForeground(new Color(255,0,0));
                 dr.drawRectangle(gc, false,
                                  cast(int)(x1 * getWidth()),
                                  cast(int)(y1 * getHeight()),

@@ -47,4 +47,5 @@ public import gdk.Pixmap;
 public import gdk.Color;
 public import gdk.Drawable;
 public import gdk.GC;
+public import gdk.RGB;
 public import glib.Idle;
