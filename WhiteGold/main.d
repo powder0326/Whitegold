@@ -174,3 +174,41 @@ Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSiz
     printf("CreateGridPixbuf %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
 	return gridPixbuf;
 }
+Pixbuf CreateGuidPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
+    Pixbuf guidePixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, partsSizeH * mapSizeH, partsSizeV * mapSizeV);
+    char* pixels = guidePixbuf.getPixels();
+    int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
+    pixels[0..length] = 0;
+    return guidePixbuf;
+}
+void UpdateGridPixbuf(Pixbuf pixbuf, int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV, int cursorGridX, int cursorGridY, int selectWidth, int selectHeight, bool tiling){
+    char* pixels = pixbuf.getPixels();
+    int leftPixelX = cursorGridX * partsSizeH;
+    int rightPixelX = cursorGridX * partsSizeH + partsSizeH * selectWidth;
+    int topPixelY = cursorGridY * partsSizeV;
+    int bottomPixelY = cursorGridY * partsSizeV + partsSizeV * selectHeight;
+    for(int pixelX = leftPixelX ; pixelX < rightPixelX ; ++ pixelX){
+        int pixelIndexUp = (pixelX * 4) + (topPixelY * mapSizeH * partsSizeH * 4);
+        pixels[pixelIndexUp + 0] = 255;
+        pixels[pixelIndexUp + 1] = 0;
+        pixels[pixelIndexUp + 2] = 0;
+        pixels[pixelIndexUp+ 3] = 255;
+        int pixelIndexDown = (pixelX * 4) + (bottomPixelY * mapSizeH * partsSizeH * 4);
+        pixels[pixelIndexDown + 0] = 255;
+        pixels[pixelIndexDown + 1] = 0;
+        pixels[pixelIndexDown + 2] = 0;
+        pixels[pixelIndexDown+ 3] = 255;
+    }
+    for(int pixelY = topPixelY ; pixelY < bottomPixelY ; ++ pixelY){
+//         int pixelIndexLeft = (pixelY * 4) + (topPixelY * mapSizeV * partsSizeV * 4);
+//         pixels[pixelIndexLeft + 0] = 255;
+//         pixels[pixelIndexLeft + 1] = 0;
+//         pixels[pixelIndexLeft + 2] = 0;
+//         pixels[pixelIndexLeft+ 3] = 255;
+//         int pixelIndexRight = (pixelY * 4) + (bottomPixelY * mapSizeV * partsSizeV * 4);
+//         pixels[pixelIndexRight + 0] = 255;
+//         pixels[pixelIndexRight + 1] = 0;
+//         pixels[pixelIndexRight + 2] = 0;
+//         pixels[pixelIndexRight+ 3] = 255;
+    }
+}

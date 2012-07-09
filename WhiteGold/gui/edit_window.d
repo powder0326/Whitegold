@@ -376,6 +376,8 @@ class EditWindow : MainWindow{
    ここにマップチップを配置していく。
 */
     class EditWindowEditArea : ScrolledWindow{
+        int mouseGridX = 0;
+        int mouseGridY = 0;
         class EditDrawingArea : DrawingArea{
             abstract class ChipDrawStrategyBase{
                 abstract bool onButtonPress(GdkEventButton* event, Widget widget);
@@ -386,14 +388,16 @@ class EditWindow : MainWindow{
                 int lastGridX,lastGridY;
                 bool pressed = false;
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     pressed = true;
                     // チップ配置
-                    int gridX = lastGridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    int gridY = lastGridY = cast(int)(event.y / projectInfo.partsSizeV);
-                    drawChip(gridX, gridY);
+                    drawChip(mouseGridX, mouseGridY);
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     pressed = false;
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
@@ -401,14 +405,14 @@ class EditWindow : MainWindow{
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    mouseGridX = cast(int)(event.x / projectInfo.partsSizeH);
+                    mouseGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     if(pressed){
                         // グリッドが変わったら描画
-                        int gridX = cast(int)(event.x / projectInfo.partsSizeH);
-                        int gridY = cast(int)(event.y / projectInfo.partsSizeV);
-                        if(gridX != lastGridX || gridY != lastGridY){
-                            lastGridX = gridX;
-                            lastGridY = gridY;
-                            drawChip(gridX, gridY);
+                        if(mouseGridX != lastGridX || mouseGridY != lastGridY){
+                            lastGridX = mouseGridX;
+                            lastGridY = mouseGridY;
+                            drawChip(mouseGridX, mouseGridY);
                         }
                     }
                     return true;
@@ -629,6 +633,7 @@ class EditWindow : MainWindow{
                 }
             }
             Pixbuf gridPixbuf = null;
+            Pixbuf guidePixbuf = null;
             this(){
                 super();
                 setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
@@ -638,6 +643,8 @@ class EditWindow : MainWindow{
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                guidePixbuf = CreateGuidPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                UpdateGridPixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         // 透過色パターン
@@ -675,12 +682,14 @@ class EditWindow : MainWindow{
                         continue;
                     }
                     NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+//                     dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
                 }
                 // グリッド描画
                 if(showGrid){
                     dr.drawPixbuf(gridPixbuf, 0, 0);
                 }
+                // カーソル位置の四角描画
+                dr.drawPixbuf(guidePixbuf, 0, 0);
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget)
