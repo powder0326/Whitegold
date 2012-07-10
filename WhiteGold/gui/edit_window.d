@@ -67,16 +67,7 @@ class EditWindow : MainWindow{
         }
     }
     void UpdateGuide(){
-        version(DRAW_GUIDE_DIRECT){
-            editArea.drawingArea.queueDraw();
-        }else{
-            printf("UpdateGuide 1\n");
-            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-            int width = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-            int height = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-            UpdateGuidePixbuf(editArea.drawingArea.guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, editArea.mouseGridX, editArea.mouseGridY, width, height, false);
-            printf("UpdateGuide 2\n");
-        }
+        editArea.drawingArea.queueDraw();
     }
     /**
        視界情報取得
@@ -401,6 +392,7 @@ class EditWindow : MainWindow{
             int tilingStartGridX = 0;
             int tilingStartGridY = 0;
             abstract class ChipDrawStrategyBase{
+                abstract EDrawingType type();
                 abstract bool onButtonPress(GdkEventButton* event, Widget widget);
                 abstract bool onButtonRelease(GdkEventButton* event, Widget widget);
                 abstract bool onMotionNotify(GdkEventMotion* event, Widget widget);
@@ -455,6 +447,9 @@ class EditWindow : MainWindow{
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
                 int lastGridX,lastGridY;
                 bool pressed = false;
+                override EDrawingType type(){
+                    return EDrawingType.PEN;
+                }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
                     pressed = true;
                     // チップ配置
@@ -488,6 +483,9 @@ class EditWindow : MainWindow{
                 EMode mode = EMode.NORMAL;
                 int startGridX = 0;
                 int startGridY = 0;
+                override EDrawingType type(){
+                    return EDrawingType.TILING_PEN;
+                }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onButtonPress\n");
                     mode = EMode.DRAGGING;
@@ -512,20 +510,60 @@ class EditWindow : MainWindow{
                 }
             }
             class ChipDrawStrategySelect : ChipDrawStrategyBase{
+                enum EMode{
+                    NORMAL,
+                    DRAGGING,
+                    MOVING,
+                }
+                EMode mode = EMode.NORMAL;
+                int startGridX = 0;
+                int startGridY = 0;
+                class Selection{
+                    int startGridX;
+                    int startGridY;
+                    int endGridX;
+                    int endGridY;
+                    this(int startGridX, int startGridY, int endGridX, int endGridY){
+                        this.startGridX = startGridX;
+                        this.startGridY = startGridY;
+                        this.endGridX = endGridX;
+                        this.endGridY = endGridY;
+                    }
+                }
+                Selection selection = null;
+                override EDrawingType type(){
+                    return EDrawingType.SELECT;
+                }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategySelect.onButtonPress\n");
+//                     printf("ChipDrawStrategySelect.onButtonPress\n");
+                    if(mode == EMode.NORMAL){
+                        mode = EMode.DRAGGING;
+                        selection = new Selection(mouseGridX, mouseGridY, mouseGridX, mouseGridY);
+                    }
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategySelect.onButtonRelease\n");
+//                     printf("ChipDrawStrategySelect.onButtonRelease\n");
+                    if(mode == EMode.DRAGGING){
+                        mode = EMode.NORMAL;
+                        selection.endGridX = mouseGridX;
+                        selection.endGridY = mouseGridY;
+                    }
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    printf("ChipDrawStrategySelect.onMotionNotify\n");
+//                     printf("ChipDrawStrategySelect.onMotionNotify\n");
+                    if(mode == EMode.DRAGGING){
+                        selection.endGridX = mouseGridX;
+                        selection.endGridY = mouseGridY;
+                    }
                     return true;
                 }
             }
             class ChipDrawStrategyFill : ChipDrawStrategyBase{
+                override EDrawingType type(){
+                    return EDrawingType.FILL;
+                }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
                     long time = std.datetime.Clock.currStdTime();
                     int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
@@ -698,9 +736,6 @@ class EditWindow : MainWindow{
                 }
             }
             Pixbuf gridPixbuf = null;
-            version(DRAW_GUIDE_DIRECT){}else{
-                Pixbuf guidePixbuf = null;
-            }
             this(){
                 super();
                 setPolicy(GtkPolicyType.AUTOMATIC, GtkPolicyType.AUTOMATIC);
@@ -710,10 +745,6 @@ class EditWindow : MainWindow{
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                version(DRAW_GUIDE_DIRECT){}else{
-                    guidePixbuf = CreateGuidePixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                    UpdateGuidePixbuf(guidePixbuf, projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV, mouseGridX, mouseGridY, 1, 1, false);
-                }
                 chipDrawStrategy = new ChipDrawStrategyPen();
                 addOnRealize((Widget widget){
                         // 透過色パターン
@@ -760,48 +791,91 @@ class EditWindow : MainWindow{
                 }
                 // カーソル位置の四角描画
                 version(DRAW_GUIDE_DIRECT){
-                    if(guideMode == EGuideMode.CURSOR){
-                        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                        dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
-                        int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-                        int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-                        int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
-                        int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
-                        int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
-                        int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
-                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                        dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
-                    }
-                    else if(guideMode == EGuideMode.TILING){
-                        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                        int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-                        int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
-                        int startGridX = 0;
-                        int i = 0;
-                        for(;;++i){
-                            startGridX = tilingStartGridX - selectWidth * i;
-                            if(startGridX <= 0){
-                                break;
-                            }
+                    if(chipDrawStrategy.type != EDrawingType.SELECT){
+                        if(guideMode == EGuideMode.CURSOR){
+                            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                            int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+                            int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                            int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
+                            int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
+                            int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
+                            int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
+                            gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                            dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
                         }
-                        int startGridY = 0;
-                        int j = 0;
-                        for(;;++j){
-                            startGridY = tilingStartGridY - selectHeight * j;
-                            if(startGridY <= 0){
-                                break;
+                        else if(guideMode == EGuideMode.TILING){
+                            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                            gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                            int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
+                            int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                            int startGridX = 0;
+                            int i = 0;
+                            for(;;++i){
+                                startGridX = tilingStartGridX - selectWidth * i;
+                                if(startGridX <= 0){
+                                    break;
+                                }
                             }
-                        }
-                        for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
-                            for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
-                                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                                dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
+                            int startGridY = 0;
+                            int j = 0;
+                            for(;;++j){
+                                startGridY = tilingStartGridY - selectHeight * j;
+                                if(startGridY <= 0){
+                                    break;
+                                }
+                            }
+                            for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
+                                for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
+                                    gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                                    dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
+                                }
                             }
                         }
                     }
                 }else{
                     dr.drawPixbuf(guidePixbuf, 0, 0);
+                }
+                // 選択領域描画
+                if(chipDrawStrategy.type == EDrawingType.SELECT){
+                    auto strategySelect = cast(ChipDrawStrategySelect)chipDrawStrategy;
+                    if(strategySelect.selection !is null){
+                        // 選択領域描画
+                        int x = strategySelect.selection.startGridX * projectInfo.partsSizeH;
+                        int y = strategySelect.selection.startGridY * projectInfo.partsSizeV;
+                        int width = projectInfo.partsSizeH * (strategySelect.selection.endGridX - strategySelect.selection.startGridX + 1) - 1;
+                        int height = projectInfo.partsSizeV * (strategySelect.selection.endGridY - strategySelect.selection.startGridY + 1) - 1;
+                        GC gc = new GC(dr);
+                        gc.setRgbFgColor(new Color(0,0,0));
+                        // 内部の斜線(上辺から)
+                        for(int tmpX = x ; tmpX < x + width ; tmpX += 8){
+                            if(y + (x + width - tmpX) > y + height){
+                                int value  = (y + (x + width - tmpX)) - (y + height);
+                                dr.drawLine(gc, tmpX, y, x + width - value, y + (x + width - tmpX) - value);
+                                dr.drawLine(gc, x + (x + width) - tmpX, y, x + value, y + (x + width - tmpX) - value);
+                            }else{
+                                dr.drawLine(gc, tmpX, y, x + width, y + (x + width - tmpX));
+                                dr.drawLine(gc, x + (x + width) - tmpX, y, x, y + (x + width - tmpX));
+                            }
+                        }
+                        // 内部の斜線(左辺右辺から)
+                        for(int tmpY = y ; tmpY < y + height ; tmpY += 8){
+                            if(x + (y + height - tmpY) > x + width){
+                                int value = (x + (y + height - tmpY)) - (x + width);
+                                dr.drawLine(gc, x, tmpY, x + (y + height - tmpY) - value, y + height - value);
+                            }else{
+                                dr.drawLine(gc, x, tmpY, x + (y + height - tmpY), y + height);
+                            }
+                            if(x + width - (y + height - tmpY) < x){
+                                int value = x - (x + width - (y + height - tmpY));
+                                dr.drawLine(gc, x + width, tmpY, x + width - (y + height - tmpY) + value, y + height - value);
+                            }else{
+                                dr.drawLine(gc, x + width, tmpY, x + width - (y + height - tmpY), y + height);
+                            }
+                        }
+                        // 外枠
+                        gc.setRgbFgColor(new Color(255,255,255));
+                        dr.drawRectangle(gc, false, x, y, width, height);
+                    }
                 }
                 printf("EditWindow.exposeCallback 2\n");
                 return true;
