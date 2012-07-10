@@ -555,7 +555,7 @@ class EditWindow : MainWindow{
 //                                 int length = projectInfo.mapSizeH * projectInfo.partsSizeH * projectInfo.mapSizeV * projectInfo.partsSizeV * 4;
 //                                 pixels[0..length] = 0;
                                 Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                                char* pixels = layerInfo.layoutPixbuf.getPixels();
+                                char* pixels = pixbuf.getPixels();
                                 pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
                                 for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
                                     for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
