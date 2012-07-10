@@ -548,6 +548,21 @@ class EditWindow : MainWindow{
                            selection.endGridY >= mouseGridY){
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
+                            // 元の場所を削除する処理
+                            static if(true){
+                                NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+//                                 char* pixels = layerInfo.layoutPixbuf.getPixels();
+//                                 int length = projectInfo.mapSizeH * projectInfo.partsSizeH * projectInfo.mapSizeV * projectInfo.partsSizeV * 4;
+//                                 pixels[0..length] = 0;
+                                Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                                char* pixels = layerInfo.layoutPixbuf.getPixels();
+                                pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+                                for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
+                                    for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
+                                        pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+                                    }
+                                }
+                            }
                             mode = EMode.MOVING;
                         }else{
                             mode = EMode.DRAGGING;
@@ -860,11 +875,13 @@ class EditWindow : MainWindow{
                 if(chipDrawStrategy.type == EDrawingType.SELECT){
                     auto strategySelect = cast(ChipDrawStrategySelect)chipDrawStrategy;
                     if(strategySelect.selection !is null){
+                        int leftGridX = min(strategySelect.selection.startGridX, strategySelect.selection.endGridX);
+                        int topGridY = min(strategySelect.selection.startGridY, strategySelect.selection.endGridY);
                         // 選択領域描画
-                        int x = (strategySelect.selection.startGridX + strategySelect.selection.moveGridX) * projectInfo.partsSizeH;
-                        int y = (strategySelect.selection.startGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
-                        int width = projectInfo.partsSizeH * (strategySelect.selection.endGridX - strategySelect.selection.startGridX + 1) - 1;
-                        int height = projectInfo.partsSizeV * (strategySelect.selection.endGridY - strategySelect.selection.startGridY + 1) - 1;
+                        int x = (leftGridX + strategySelect.selection.moveGridX) * projectInfo.partsSizeH;
+                        int y = (topGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
+                        int width = projectInfo.partsSizeH * (std.math.abs(strategySelect.selection.endGridX - strategySelect.selection.startGridX) + 1) - 1;
+                        int height = projectInfo.partsSizeV * (std.math.abs(strategySelect.selection.endGridY - strategySelect.selection.startGridY) + 1) - 1;
                         GC gc = new GC(dr);
                         gc.setRgbFgColor(new Color(0,0,0));
                         // 内部の斜線(上辺から)
