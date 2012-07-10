@@ -15,6 +15,8 @@ class OverviewWindow : MainWindow{
     OverviewWindowViewArea viewArea = null;
     Statusbar statusbar = null;
     void delegate(double centerX, double cneterY) onScrollCenterChangedFunction;
+    Cursor cursorNormal = null;
+    Cursor cursorDragging = null;
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
@@ -31,9 +33,10 @@ class OverviewWindow : MainWindow{
 		mainBox.packStart(statusbar,false,false,0);
         setDeletable(false);
         addOnRealize((Widget widget){
-                Cursor cursor = new Cursor(widget.getDisplay() , new Pixbuf("dat/icon/eye.png"), 0, 0);
-//                 Cursor cursor = new Cursor(GdkCursorType.HAND2);
-                setCursor(cursor);
+                cursorNormal = new Cursor(widget.getDisplay() , new Pixbuf("dat/cursor/hand.png"), 0, 0);
+                //cursorNormal = new Cursor(widget.getDisplay(), GdkCursorType.HAND2);
+                cursorDragging = new Cursor(widget.getDisplay() , new Pixbuf("dat/cursor/hand2.png"), 0, 0);
+                setCursor(cursorNormal);
             });
     }
     void Reload(){
@@ -120,6 +123,7 @@ class OverviewWindow : MainWindow{
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){
+                getWindow().setCursor(cursorDragging);
                 mode = EMode.DRAGGING;
                 if(this.outer.outer.onScrollCenterChangedFunction !is null){
                     this.outer.outer.onScrollCenterChangedFunction(event.x / getWidth(), event.y / getHeight());
@@ -127,6 +131,7 @@ class OverviewWindow : MainWindow{
                 return true;
             }
             bool onButtonRelease(GdkEventButton* event, Widget widget){
+                getWindow().setCursor(cursorNormal);
                 mode = EMode.NORMAL;
                 return true;
             }
