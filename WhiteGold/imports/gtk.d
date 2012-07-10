@@ -40,6 +40,8 @@ public import gtk.HSeparator;
 public import gtk.VSeparator;
 public import gtk.FileChooserDialog;
 public import gtk.Frame;
+public import gdk.Display;
+public import gdk.Cursor;
 public import gdk.Event;
 public import gdk.Threads;
 public import gdk.Pixbuf;

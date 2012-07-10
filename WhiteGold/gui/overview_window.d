@@ -30,6 +30,11 @@ class OverviewWindow : MainWindow{
         statusbar.push(1, format("表示倍率:%d%%",zoomRate));
 		mainBox.packStart(statusbar,false,false,0);
         setDeletable(false);
+        addOnRealize((Widget widget){
+                Cursor cursor = new Cursor(widget.getDisplay() , new Pixbuf("dat/icon/eye.png"), 0, 0);
+//                 Cursor cursor = new Cursor(GdkCursorType.HAND2);
+                setCursor(cursor);
+            });
     }
     void Reload(){
         viewArea.Reload();
