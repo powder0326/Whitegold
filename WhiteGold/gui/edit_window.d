@@ -523,6 +523,8 @@ class EditWindow : MainWindow{
                     int startGridY;
                     int endGridX;
                     int endGridY;
+                    int moveGridX = 0;
+                    int moveGridY = 0;
                     this(int startGridX, int startGridY, int endGridX, int endGridY){
                         this.startGridX = startGridX;
                         this.startGridY = startGridY;
@@ -531,14 +533,26 @@ class EditWindow : MainWindow{
                     }
                 }
                 Selection selection = null;
+                int moveStartGridX = 0;
+                int moveStartGridY = 0;
                 override EDrawingType type(){
                     return EDrawingType.SELECT;
                 }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
 //                     printf("ChipDrawStrategySelect.onButtonPress\n");
                     if(mode == EMode.NORMAL){
-                        mode = EMode.DRAGGING;
-                        selection = new Selection(mouseGridX, mouseGridY, mouseGridX, mouseGridY);
+                        if(selection !is null &&
+                           selection.startGridX <= mouseGridX &&
+                           selection.endGridX >= mouseGridX &&
+                           selection.startGridY <= mouseGridY &&
+                           selection.endGridY >= mouseGridY){
+                            moveStartGridX = mouseGridX;
+                            moveStartGridY = mouseGridY;
+                            mode = EMode.MOVING;
+                        }else{
+                            mode = EMode.DRAGGING;
+                            selection = new Selection(mouseGridX, mouseGridY, mouseGridX, mouseGridY);
+                        }
                     }
                     return true;
                 }
@@ -549,6 +563,9 @@ class EditWindow : MainWindow{
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
                     }
+                    else if(mode == EMode.MOVING){
+                        mode = EMode.NORMAL;
+                    }
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
@@ -556,6 +573,10 @@ class EditWindow : MainWindow{
                     if(mode == EMode.DRAGGING){
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
+                    }
+                    else if(mode == EMode.MOVING){
+                        selection.moveGridX = mouseGridX - moveStartGridX;
+                        selection.moveGridY = mouseGridY - moveStartGridY;
                     }
                     return true;
                 }
@@ -774,7 +795,7 @@ class EditWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
-                printf("EditWindow.exposeCallback 1\n");
+//                 printf("EditWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
@@ -840,8 +861,8 @@ class EditWindow : MainWindow{
                     auto strategySelect = cast(ChipDrawStrategySelect)chipDrawStrategy;
                     if(strategySelect.selection !is null){
                         // 選択領域描画
-                        int x = strategySelect.selection.startGridX * projectInfo.partsSizeH;
-                        int y = strategySelect.selection.startGridY * projectInfo.partsSizeV;
+                        int x = (strategySelect.selection.startGridX + strategySelect.selection.moveGridX) * projectInfo.partsSizeH;
+                        int y = (strategySelect.selection.startGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
                         int width = projectInfo.partsSizeH * (strategySelect.selection.endGridX - strategySelect.selection.startGridX + 1) - 1;
                         int height = projectInfo.partsSizeV * (strategySelect.selection.endGridY - strategySelect.selection.startGridY + 1) - 1;
                         GC gc = new GC(dr);
@@ -877,7 +898,7 @@ class EditWindow : MainWindow{
                         dr.drawRectangle(gc, false, x, y, width, height);
                     }
                 }
-                printf("EditWindow.exposeCallback 2\n");
+//                 printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){
