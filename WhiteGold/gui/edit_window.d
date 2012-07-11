@@ -78,14 +78,14 @@ class EditWindow : MainWindow{
        y2:視界下端がViewPortの縦幅を1.0とした場合にどの位置にあるか
      */
     void GetViewPortInfo(ref double x1, ref double y1, ref double x2, ref double y2){
-        printf("GetViewPortInfo 1\n");
+//         printf("GetViewPortInfo 1\n");
         Adjustment adjustmentH = editArea.getHadjustment();
         x1 = adjustmentH.getValue() / (adjustmentH.getUpper() - adjustmentH.getLower());
         x2 = (adjustmentH.getValue() + adjustmentH.getPageSize()) / (adjustmentH.getUpper() - adjustmentH.getLower());
         Adjustment adjustmentV = editArea.getVadjustment();
         y1 = adjustmentV.getValue() / (adjustmentV.getUpper() - adjustmentV.getLower());
         y2 = (adjustmentV.getValue() + adjustmentV.getPageSize()) / (adjustmentV.getUpper() - adjustmentV.getLower());
-        printf("GetViewPortInfo 2\n");
+//         printf("GetViewPortInfo 2\n");
     }
 /**
    エディット用ウインドウ上部のメニュー
@@ -525,6 +525,7 @@ class EditWindow : MainWindow{
                     int endGridY;
                     int moveGridX = 0;
                     int moveGridY = 0;
+                    Pixbuf pixbuf = null;
                     this(int startGridX, int startGridY, int endGridX, int endGridY){
                         this.startGridX = startGridX;
                         this.startGridY = startGridY;
@@ -549,18 +550,13 @@ class EditWindow : MainWindow{
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
                             // 元の場所を削除する処理
-                            static if(true){
-                                NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-//                                 char* pixels = layerInfo.layoutPixbuf.getPixels();
-//                                 int length = projectInfo.mapSizeH * projectInfo.partsSizeH * projectInfo.mapSizeV * projectInfo.partsSizeV * 4;
-//                                 pixels[0..length] = 0;
-                                Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                                char* pixels = pixbuf.getPixels();
-                                pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
-                                for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
-                                    for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
-                                        pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
-                                    }
+                            NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                            Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                            char* pixels = pixbuf.getPixels();
+                            pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+                            for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
+                                for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
+                                    pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
                                 }
                             }
                             mode = EMode.MOVING;
@@ -577,9 +573,15 @@ class EditWindow : MainWindow{
                         mode = EMode.NORMAL;
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
+                        // 元の場所をSelection側にコピー
+                        NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                        selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
+                        layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
                     }
                     else if(mode == EMode.MOVING){
                         mode = EMode.NORMAL;
+                        // 移動を確定
+                        drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
                     }
                     return true;
                 }
@@ -882,6 +884,8 @@ class EditWindow : MainWindow{
                         int y = (topGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
                         int width = projectInfo.partsSizeH * (std.math.abs(strategySelect.selection.endGridX - strategySelect.selection.startGridX) + 1) - 1;
                         int height = projectInfo.partsSizeV * (std.math.abs(strategySelect.selection.endGridY - strategySelect.selection.startGridY) + 1) - 1;
+                        // 画像描画
+                        dr.drawPixbuf(strategySelect.selection.pixbuf, x, y);
                         GC gc = new GC(dr);
                         gc.setRgbFgColor(new Color(0,0,0));
                         // 内部の斜線(上辺から)
