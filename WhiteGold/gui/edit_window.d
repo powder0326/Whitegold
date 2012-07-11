@@ -565,7 +565,7 @@ class EditWindow : MainWindow{
                            selection.endGridY >= mouseGridY){
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
-                            // 元の場所を削除する処理
+                            // 元の場所を削除(Pixbufの表示だけ)
                             NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                             Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
                             char* pixels = pixbuf.getPixels();
@@ -598,7 +598,7 @@ class EditWindow : MainWindow{
                     else if(mode == EMode.MOVING){
                         mode = EMode.NORMAL;
                         // 移動を確定
-                        selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX, selection.endGridY - selection.startGridY);
+                        selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX + 1, selection.endGridY - selection.startGridY + 1);
 //                         drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
                     }
                     return true;

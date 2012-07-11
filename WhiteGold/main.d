@@ -26,6 +26,7 @@ int main(string[] argv){
         NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
         projectInfo.layerInfos ~= layerInfo1;
         layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+        layerInfo1.chipLayout[0..length] = -1;
 //         layerInfo1.chipLayout = [128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
 //                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
 //                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
@@ -68,11 +69,13 @@ int main(string[] argv){
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130];
-        projectInfo.layerInfos ~= layerInfo2;
+//         projectInfo.layerInfos ~= layerInfo2;
         projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
+        layerInfo1.CreateTransparentPixbuf();
         layerInfo1.layoutPixbuf = CreatePixbufFromLayout(0);
-        layerInfo2.layoutPixbuf = CreatePixbufFromLayout(1);
+//         layerInfo2.CreateTransparentPixbuf();
+//         layerInfo2.layoutPixbuf = CreatePixbufFromLayout(1);
     }
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
@@ -97,12 +100,18 @@ Pixbuf CreatePixbufFromLayout(int layerIndex){
     int chipLayout[] = normalLayerInfo.chipLayout;
     // マップチップの横分割数
     int chipDivNumH = mapChip.getWidth() / projectInfo.partsSizeH;
+    // 透明Pixbuf
+
     for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
         for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
             int chipIndex = normalLayerInfo.chipLayout[x + y * projectInfo.mapSizeH];
-            int chipSrcOffsetX = chipIndex % chipDivNumH;
-            int chipSrcOffsetY = chipIndex / chipDivNumH;
-            mapChip.copyArea(projectInfo.partsSizeH * chipSrcOffsetX, projectInfo.partsSizeV * chipSrcOffsetY, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+            if(chipIndex < 0){
+                normalLayerInfo.transparentPixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+            }else{
+                int chipSrcOffsetX = chipIndex % chipDivNumH;
+                int chipSrcOffsetY = chipIndex / chipDivNumH;
+                mapChip.copyArea(projectInfo.partsSizeH * chipSrcOffsetX, projectInfo.partsSizeV * chipSrcOffsetY, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+            }
         }
     }
     return ret;

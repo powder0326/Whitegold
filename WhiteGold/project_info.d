@@ -202,28 +202,46 @@ class ProjectInfo{
         printf("onChipReplaced 2\n");
     }
     void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
-        EditInfo editInfosTree[][];
-        EditInfo editInfos[];
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        struct ReplaceInfo{
+            int gridX;
+            int gridY;
+            int newChipId;
+            this(int gridX, int gridY, int newChipId){
+                this.gridX = gridX;
+                this.gridY = gridY;
+                this.newChipId = newChipId;
+            }
+        }
+        ReplaceInfo replaceInfos[];
+        EditInfo editInfos[];
+        // 元の場所の削除
+        for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
+            for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
+                int newChipId = -1;
+                int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
+                int layoutIndex = gridX + gridY * mapSizeH;
+                replaceInfos ~= ReplaceInfo(gridX, gridY, newChipId);
+                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                printf("(%d,%d) %d->%d\n",gridX,gridY,oldChipId,newChipId);
+            }
+        }
+        // 移動後の反映
         for(int offsetY = 0 ; offsetY < gridHeight ; ++ offsetY){
             for(int offsetX = 0 ; offsetX < gridWidth ; ++ offsetX){
                 int newChipId = normalLayerInfo.GetChipId(srcGridX + offsetX, srcGridY + offsetY);
                 int oldChipId = normalLayerInfo.GetChipId(dstGridX + offsetX, dstGridY + offsetY);
                 int layoutIndex = (dstGridX + offsetX) + (dstGridY + offsetY) * mapSizeH;
+                replaceInfos ~= ReplaceInfo(dstGridX + offsetX,dstGridY + offsetY,newChipId);
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
-                normalLayerInfo.ReplaceChip(dstGridX + offsetX,dstGridY + offsetY,newChipId);
             }
         }
-//         for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
-//             for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
-//                 int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
-//                 int newChipId = normalLayerInfo.GetChipId(gridX, gridY);
-//             }
-//         }
-        editInfosTree ~= editInfos;
+        foreach(replaceInfo;replaceInfos){
+            normalLayerInfo.ReplaceChip(replaceInfo.gridX, replaceInfo.gridY ,replaceInfo.newChipId);
+        }
+        EditInfo editInfosTree[][] = [editInfos];
         undoQueue ~= editInfosTree;
         redoQueue.clear;
-        tmpEditInfosTree.clear;
         updateUndoRedo();
 
         editWindow.queueDraw();
@@ -336,13 +354,19 @@ class NormalLayerInfo : LayerInfoBase{
     string mapchipFilePath = "";
     int chipLayout[];
     Pixbuf layoutPixbuf;
+    Pixbuf transparentPixbuf;
     GridSelection gridSelection = null;
     void ReplaceChip(int gridX, int gridY, int newChipId){
         Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
-        int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
-        int newChipGridX = newChipId % mapchipDivNumH;
-        int newChipGridY = newChipId / mapchipDivNumH;
-        mapchip.copyArea(projectInfo.partsSizeH * newChipGridX, projectInfo.partsSizeV * newChipGridY, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
+        if(newChipId < 0){
+            transparentPixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
+        }
+        else{
+            int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
+            int newChipGridX = newChipId % mapchipDivNumH;
+            int newChipGridY = newChipId / mapchipDivNumH;
+            mapchip.copyArea(projectInfo.partsSizeH * newChipGridX, projectInfo.partsSizeV * newChipGridY, projectInfo.partsSizeH, projectInfo.partsSizeV, layoutPixbuf, gridX * projectInfo.partsSizeH, gridY * projectInfo.partsSizeV);
+        }
         chipLayout[gridX + gridY * projectInfo.mapSizeH] = newChipId;
     }
     int GetChipId(int gridX, int gridY){
@@ -353,6 +377,12 @@ class NormalLayerInfo : LayerInfoBase{
         int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
         return gridX + gridY * mapchipDivNumH;
     }
+    void CreateTransparentPixbuf(){
+        transparentPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
+        char* pixels = transparentPixbuf.getPixels();
+        pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+    }
+
 private:
     string name_ = "layer";
     bool visible_ = true;
