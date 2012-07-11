@@ -75,6 +75,7 @@ class ProjectInfo{
         this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
+        this.editWindow.onSelectionMovedFunction = &onSelectionMoved;
         this.editWindow.onChipReplaceCompletedFunction = &onChipReplaceCompleted;
         this.editWindow.onUndoFunction = &onUndo;
         this.editWindow.onRedoFunction = &onRedo;
@@ -199,6 +200,34 @@ class ProjectInfo{
         editWindow.queueDraw();
         overviewWindow.queueDraw();
         printf("onChipReplaced 2\n");
+    }
+    void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
+        EditInfo editInfosTree[][];
+        EditInfo editInfos[];
+        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        for(int offsetY = 0 ; offsetY < gridHeight ; ++ offsetY){
+            for(int offsetX = 0 ; offsetX < gridWidth ; ++ offsetX){
+                int newChipId = normalLayerInfo.GetChipId(srcGridX + offsetX, srcGridY + offsetY);
+                int oldChipId = normalLayerInfo.GetChipId(dstGridX + offsetX, dstGridY + offsetY);
+                int layoutIndex = (dstGridX + offsetX) + (dstGridY + offsetY) * mapSizeH;
+                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                normalLayerInfo.ReplaceChip(dstGridX + offsetX,dstGridY + offsetY,newChipId);
+            }
+        }
+//         for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
+//             for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
+//                 int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
+//                 int newChipId = normalLayerInfo.GetChipId(gridX, gridY);
+//             }
+//         }
+        editInfosTree ~= editInfos;
+        undoQueue ~= editInfosTree;
+        redoQueue.clear;
+        tmpEditInfosTree.clear;
+        updateUndoRedo();
+
+        editWindow.queueDraw();
+        overviewWindow.queueDraw();
     }
     /**
        チップの入れ替え確定

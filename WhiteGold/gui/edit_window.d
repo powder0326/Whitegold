@@ -25,6 +25,7 @@ class EditWindow : MainWindow{
     void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
+    void delegate(int,int,int,int,int,int) onSelectionMovedFunction;
     void delegate() onChipReplaceCompletedFunction;
     void delegate() onUndoFunction;
     void delegate() onRedoFunction;
@@ -444,6 +445,11 @@ class EditWindow : MainWindow{
                     }
                     printf("tilingChip 2\n");
             }
+            void selectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
+                if(this.outer.outer.onSelectionMovedFunction !is null){
+                    this.outer.outer.onSelectionMovedFunction(srcGridX, srcGridY, dstGridX, dstGridY, gridWidth, gridHeight);
+                }
+            }
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
                 int lastGridX,lastGridY;
                 bool pressed = false;
@@ -532,6 +538,16 @@ class EditWindow : MainWindow{
                         this.endGridX = endGridX;
                         this.endGridY = endGridY;
                     }
+                    void Normalize(){
+                        int tmpStartGridX = startGridX;
+                        int tmpStartGridY = startGridY;
+                        int tmpEndGridX = endGridX;
+                        int tmpEndGridY = endGridY;
+                        startGridX = min(tmpStartGridX, tmpEndGridX);
+                        startGridY = min(tmpStartGridY, tmpEndGridY);
+                        endGridX = max(tmpStartGridX, tmpEndGridX);
+                        endGridY = max(tmpStartGridY, tmpEndGridY);
+                    }
                 }
                 Selection selection = null;
                 int moveStartGridX = 0;
@@ -573,6 +589,7 @@ class EditWindow : MainWindow{
                         mode = EMode.NORMAL;
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
+                        selection.Normalize();
                         // 元の場所をSelection側にコピー
                         NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                         selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
@@ -581,7 +598,8 @@ class EditWindow : MainWindow{
                     else if(mode == EMode.MOVING){
                         mode = EMode.NORMAL;
                         // 移動を確定
-                        drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
+                        selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX, selection.endGridY - selection.startGridY);
+//                         drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
                     }
                     return true;
                 }
@@ -590,6 +608,7 @@ class EditWindow : MainWindow{
                     if(mode == EMode.DRAGGING){
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
+//                         selection.Normalize();
                     }
                     else if(mode == EMode.MOVING){
                         selection.moveGridX = mouseGridX - moveStartGridX;
