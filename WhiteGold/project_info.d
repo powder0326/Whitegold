@@ -39,8 +39,8 @@ struct EditInfo{
 }
 
 class ProjectInfo{
-    int mapSizeH = 100;
-    int mapSizeV = 100;
+    int mapSizeH = 200;
+    int mapSizeV = 200;
     int partsSizeH = 16;
     int partsSizeV = 16;
     // レイヤー関連
@@ -85,6 +85,7 @@ class ProjectInfo{
         this.layerWindow = layerWindow;
         this.layerWindow.onSelectedLayerChangedFunction = &onSelectedLayerChanged;
         this.layerWindow.onLayerVisibilityChangedFunction = &onLayerVisibilityChanged;
+        this.layerWindow.onLayerAddedFunction = &onLayerAdded;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
@@ -104,6 +105,16 @@ class ProjectInfo{
         layerInfos[index].visible = visible;
         editWindow.queueDraw();
         overviewWindow.queueDraw();
+    }
+    void onLayerAdded(){
+        NormalLayerInfo layerInfo = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
+        layerInfo.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+        layerInfo.chipLayout[0..length] = -1;
+        AddMapchipFile("dat/sample/mapchip256_b.png");
+        layerInfo.CreateTransparentPixbuf();
+        layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
+        layerInfos ~= layerInfo;
+        layerWindow.Reload();
     }
     void onHideEditWindow(){
         Main.quit();
@@ -151,7 +162,7 @@ class ProjectInfo{
         AddMapchipFile(mapchipFilePath);
         NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
         normalLayerInfo.mapchipFilePath = mapchipFilePath;
-        normalLayerInfo.layoutPixbuf = CreatePixbufFromLayout(currentLayerIndex);
+        normalLayerInfo.layoutPixbuf = CreatePixbufFromLayout(normalLayerInfo);
         partsWindow.Reload();
         editWindow.Reload();
         overviewWindow.Reload();

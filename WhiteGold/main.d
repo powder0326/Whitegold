@@ -47,8 +47,15 @@ int main(string[] argv){
 //                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
 //                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
 //                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128];
+        projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
+        layerInfo1.CreateTransparentPixbuf();
+        layerInfo1.layoutPixbuf = CreatePixbufFromLayout(layerInfo1);
+
         NormalLayerInfo layerInfo2 = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
-        layerInfo2.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+//         projectInfo.layerInfos ~= layerInfo2;
+//         layerInfo2.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+        layerInfo2.chipLayout[0..length] = -1;
+
 //         layerInfo2.chipLayout = [130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,122,123,124,125,130,130,200,201,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,138,139,140,141,130,130,216,217,130,130,130,130,130,130,130,130,130,130,130,
@@ -69,13 +76,9 @@ int main(string[] argv){
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
 //                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130];
-//         projectInfo.layerInfos ~= layerInfo2;
-        projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
-        layerInfo1.CreateTransparentPixbuf();
-        layerInfo1.layoutPixbuf = CreatePixbufFromLayout(0);
 //         layerInfo2.CreateTransparentPixbuf();
-//         layerInfo2.layoutPixbuf = CreatePixbufFromLayout(1);
+//         layerInfo2.layoutPixbuf = CreatePixbufFromLayout(layerInfo2);
     }
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
@@ -93,20 +96,19 @@ int main(string[] argv){
     return 0;
 }
 
-Pixbuf CreatePixbufFromLayout(int layerIndex){
+Pixbuf CreatePixbufFromLayout(NormalLayerInfo layerInfo){
     Pixbuf ret = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
-    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.layerInfos[layerIndex];
-    Pixbuf mapChip = projectInfo.mapchipPixbufList[normalLayerInfo.mapchipFilePath];
-    int chipLayout[] = normalLayerInfo.chipLayout;
+    Pixbuf mapChip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
+    int chipLayout[] = layerInfo.chipLayout;
     // マップチップの横分割数
     int chipDivNumH = mapChip.getWidth() / projectInfo.partsSizeH;
     // 透明Pixbuf
 
     for(int y = 0 ; y < projectInfo.mapSizeV ; ++ y){
         for(int x = 0 ; x < projectInfo.mapSizeH ; ++ x){
-            int chipIndex = normalLayerInfo.chipLayout[x + y * projectInfo.mapSizeH];
+            int chipIndex = layerInfo.chipLayout[x + y * projectInfo.mapSizeH];
             if(chipIndex < 0){
-                normalLayerInfo.transparentPixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+                layerInfo.transparentPixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, ret, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
             }else{
                 int chipSrcOffsetX = chipIndex % chipDivNumH;
                 int chipSrcOffsetY = chipIndex / chipDivNumH;

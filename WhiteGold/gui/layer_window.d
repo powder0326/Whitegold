@@ -12,6 +12,8 @@ private import project_info;
 class LayerWindow : MainWindow{
     void delegate(int index) onSelectedLayerChangedFunction;
     void delegate(int index, bool visible) onLayerVisibilityChangedFunction;
+    void delegate() onLayerAddedFunction;
+    VBox mainBox;
     LayerWindowListview layerWindowListview = null;
     this(){
         super("レイヤー");
@@ -19,7 +21,7 @@ class LayerWindow : MainWindow{
         setDefaultSize(240, 240);
         move(480, 240);
         setIcon(new Pixbuf("dat/icon/layers.png"));
-        VBox mainBox = new VBox(false,0);
+        mainBox = new VBox(false,0);
 		mainBox.packStart(new LayerWindowMenubar(),false,false,0);
 		mainBox.packStart(new LayerWindowToolArea(),false,false,0);
         layerWindowListview = new LayerWindowListview();
@@ -28,7 +30,11 @@ class LayerWindow : MainWindow{
         setDeletable(false);
     }
     void Reload(){
-        layerWindowListview.Reload();
+//         layerWindowListview.Reload();
+        layerWindowListview.destroy();
+        layerWindowListview = new LayerWindowListview();
+		mainBox.packStart(layerWindowListview,true,true,0);
+        mainBox.showAll();
     }
 /**
    レイヤー用ウインドウ上部のメニュー
@@ -69,6 +75,11 @@ class LayerWindow : MainWindow{
             setBorderWidth(2);
             Button addLayerButton = new Button();
             addLayerButton.setImage(new Image(new Pixbuf("dat/icon/layer--plus.png")));
+            addLayerButton.addOnClicked((Button button){
+                    if(this.outer.onLayerAddedFunction !is null){
+                        this.outer.onLayerAddedFunction();
+                    }
+                });
             packStart(addLayerButton , false, false, 2 );
             Button deleteLayerButton = new Button();
             deleteLayerButton.setImage(new Image(new Pixbuf("dat/icon/cross-circle.png")));
