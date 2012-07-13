@@ -96,6 +96,7 @@ int main(string[] argv){
     return 0;
 }
 
+// Todo! これはNormalLayerInfoクラス自身に持たせよう
 Pixbuf CreatePixbufFromLayout(NormalLayerInfo layerInfo){
     Pixbuf ret = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
     Pixbuf mapChip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];

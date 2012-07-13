@@ -4,7 +4,7 @@ private import project_info;
 private import main;
 
 class NewProjectDialog : Window{
-    void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
+    void delegate(int,int,int,int) onNewProjectFunction;
     this(){
         super("新規マップの作成");
         setBorderWidth(10);
@@ -28,8 +28,8 @@ class NewProjectDialog : Window{
         HBox hbox3 = new HBox(true, 5);
         Button buttonOk = new Button("OK");
         buttonOk.addOnClicked((Button button){
-                if(onMapSizeAndPartsSizeChangedFunction !is null){
-                    onMapSizeAndPartsSizeChangedFunction(
+                if(onNewProjectFunction !is null){
+                    onNewProjectFunction(
                         cast(int)spinMapH.getValue(),
                         cast(int)spinMapV.getValue(),
                         cast(int)spinPartsH.getValue(),

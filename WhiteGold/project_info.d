@@ -39,8 +39,8 @@ struct EditInfo{
 }
 
 class ProjectInfo{
-    int mapSizeH = 200;
-    int mapSizeV = 200;
+    int mapSizeH = 20;
+    int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
     // レイヤー関連
@@ -72,7 +72,8 @@ class ProjectInfo{
         this.editWindow = editWindow;
         this.editWindow.onHideFunction = &onHideEditWindow;
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
-        this.editWindow.onMapSizeAndPartsSizeChangedFunction = &onMapSizeAndPartsSizeChanged;
+        this.editWindow.onNewProjectFunction = &onNewProject;
+        this.editWindow.onMapSizeChangedFunction = &onMapSizeChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
         this.editWindow.onSelectionMovedFunction = &onSelectionMoved;
@@ -135,12 +136,24 @@ class ProjectInfo{
             break;
         }
     }
-    void onMapSizeAndPartsSizeChanged(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
+    void onNewProject(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
         this.mapSizeH = mapSizeH;
         this.mapSizeV = mapSizeV;
         this.partsSizeH = partsSizeH;
         this.partsSizeV = partsSizeV;
+        layerInfos = layerInfos[0..1];
+        foreach(layerInfo;layerInfos){
+            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
+            normalLayerInfo.Reset();
+        }
         editWindow.Reload();
+        partsWindow.Reload();
+        overviewWindow.Reload();
+        layerWindow.Reload();
+    }
+    void onMapSizeChanged(int mapSizeH, int mapSizeV){
+        this.mapSizeH = mapSizeH;
+        this.mapSizeV = mapSizeV;
     }
     void onCsvLoaded(CsvProjectInfo info){
         mapSizeH = info.mapSizeH;
@@ -347,6 +360,16 @@ class NormalLayerInfo : LayerInfoBase{
         this.mapchipFilePath = mapchipFilePath;
         gridSelection = new GridSelection();
     }
+    ~this(){
+		if(layoutPixbuf !is null){
+            layoutPixbuf.unref();
+            delete layoutPixbuf;
+        }
+		if(transparentPixbuf !is null){
+            transparentPixbuf.unref();
+            delete transparentPixbuf;
+        }
+    }
     override ELayerType type(){
         return ELayerType.NORMAL;
     }
@@ -393,7 +416,14 @@ class NormalLayerInfo : LayerInfoBase{
         char* pixels = transparentPixbuf.getPixels();
         pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
     }
-
+    void Reset(){
+        gridSelection = new GridSelection();
+        chipLayout.clear;
+        chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+        chipLayout[0..length] = -1;
+        CreateTransparentPixbuf();
+        layoutPixbuf = CreatePixbufFromLayout(this);
+    }
 private:
     string name_ = "layer";
     bool visible_ = true;

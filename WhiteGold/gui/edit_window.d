@@ -22,7 +22,8 @@ enum EDrawingType{
 class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
-    void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
+    void delegate(int,int) onMapSizeChangedFunction;
+    void delegate(int,int,int,int) onNewProjectFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
     void delegate(int,int,int,int,int,int) onSelectionMovedFunction;
@@ -63,8 +64,16 @@ class EditWindow : MainWindow{
         NewProjectDialog dialog = new NewProjectDialog();
         dialog.setModal(true);
         dialog.showAll();
-        if(onMapSizeAndPartsSizeChangedFunction !is null){
-            dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
+        if(onNewProjectFunction !is null){
+            dialog.onNewProjectFunction = onNewProjectFunction;
+        }
+    }
+    void OpenResizeDialog(){
+        ResizeDialog dialog = new ResizeDialog();
+        dialog.setModal(true);
+        dialog.showAll();
+        if(onMapSizeChangedFunction !is null){
+            dialog.onMapSizeChangedFunction = onMapSizeChangedFunction;
         }
     }
     void UpdateGuide(){
@@ -157,12 +166,7 @@ class EditWindow : MainWindow{
                 fs.hide();
                 break;
             case "edit.resize":
-                ResizeDialog dialog = new ResizeDialog();
-                dialog.setModal(true);
-                dialog.showAll();
-//                     if(onMapSizeAndPartsSizeChangedFunction !is null){
-//                         dialog.onMapSizeAndPartsSizeChangedFunction = onMapSizeAndPartsSizeChangedFunction;
-//                     }
+                OpenResizeDialog();
                 break;
             default:
                 break;

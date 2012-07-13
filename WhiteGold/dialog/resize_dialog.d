@@ -4,7 +4,7 @@ private import project_info;
 private import main;
 
 class ResizeDialog : Window{
-    void delegate(int,int,int,int) onMapSizeAndPartsSizeChangedFunction;
+    void delegate(int,int) onMapSizeChangedFunction;
     this(){
         super("マップのリサイズ");
         setBorderWidth(10);
@@ -38,10 +38,17 @@ class ResizeDialog : Window{
         VBox rightBox = new VBox(false, 5);
         Button buttonOk = new Button("OK");
         buttonOk.addOnClicked((Button button){
+                if(onMapSizeChangedFunction !is null){
+                    onMapSizeChangedFunction(
+                        cast(int)spinMapH.getValue(),
+                        cast(int)spinMapV.getValue());
+                }
+                destroy();
             });
         rightBox.packStart(buttonOk, false, false, 0);
         Button buttonCancel = new Button("Cancel");
         buttonCancel.addOnClicked((Button button){
+                destroy();
             });
         rightBox.packStart(buttonCancel, false, false, 0);
         mainBox.packStart(rightBox, false, false, 0);
