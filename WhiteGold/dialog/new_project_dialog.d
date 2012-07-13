@@ -10,7 +10,6 @@ class NewProjectDialog : Window{
         setBorderWidth(10);
         VBox mainBox = new VBox(false, 5);
         add(mainBox);
-        // テスト
         Table table = new Table(4,2,false);
         SpinButton spinMapH = new SpinButton(new Adjustment(projectInfo.mapSizeH, 1.0, 256.0, 1.0, 10.0, 0),1,0);
         table.attach(new Label("マップの横幅:"),0,1,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
