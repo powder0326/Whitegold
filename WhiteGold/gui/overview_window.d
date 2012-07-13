@@ -107,6 +107,7 @@ class OverviewWindow : MainWindow{
                         Pixbuf scaledPixbuf = normalLayerInfo.layoutPixbuf.scaleSimple(cast(int)getWidth(), cast(int)getHeight(), GdkInterpType.NEAREST/*,TILES,BILINEAR,HYPER*/);
                         dr.drawPixbuf(scaledPixbuf, 0, 0);
                         scaledPixbuf.unref();
+                        delete scaledPixbuf;
                     }
                 }
                 // 視界表示
