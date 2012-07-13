@@ -209,8 +209,10 @@ class ProjectInfo{
         partsSizeV = info.partsSizeV;
         layerInfos.clear;
         foreach(i,chipLayout;info.chipLayouts){
-            LayerInfo layerInfo = new LayerInfo(format("レイヤー%d",i), true, "");
+            LayerInfo layerInfo = new LayerInfo(format("レイヤー%d",i), true, null);
             layerInfo.chipLayout = chipLayout;
+            layerInfo.CreateTransparentPixbuf();
+            layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
             layerInfos ~= layerInfo;
         }
         editWindow.Reload();
