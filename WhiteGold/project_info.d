@@ -161,7 +161,7 @@ class ProjectInfo{
             normalLayerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
         }
         editWindow.queueDraw();
-        overviewWindow.queueDraw();
+        overviewWindow.Reload();
     }
     void onCsvLoaded(CsvProjectInfo info){
         mapSizeH = info.mapSizeH;
