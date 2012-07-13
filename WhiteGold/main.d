@@ -21,8 +21,7 @@ ProjectInfo projectInfo = null;
 
 int main(string[] argv){
     Serializer.registerClassConstructor!(SerializableProjectInfo)({ return new SerializableProjectInfo(); });
-
-
+    Serializer.registerClassConstructor!(SerializableLayerInfo)({ return new SerializableLayerInfo(); });
     Main.init(argv);
     projectInfo = new ProjectInfo();
     // シリアライズテスト

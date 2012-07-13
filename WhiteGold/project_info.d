@@ -52,6 +52,7 @@ class ProjectInfo{
     // マップチップ関連
     Pixbuf[string] mapchipPixbufList;
     void AddMapchipFile(string mapchipFilePath){
+        printf("AddMapchipFile %s\n",toMBSz(mapchipFilePath));
         if(mapchipFilePath !in mapchipPixbufList){
             mapchipPixbufList[mapchipFilePath] = new Pixbuf(mapchipFilePath);
         }
@@ -73,7 +74,36 @@ class ProjectInfo{
         ret.mapSizeV = mapSizeV;
         ret.partsSizeH = partsSizeH;
         ret.partsSizeV = partsSizeV;
+        foreach(layerInfo;layerInfos){
+            ret.layerInfos ~= layerInfo.getSerializable();
+        }
 		return ret;
+    }
+    void initBySerializable(SerializableProjectInfo serializableProjectInfo){
+        mapSizeH = serializableProjectInfo.mapSizeH;
+        mapSizeV = serializableProjectInfo.mapSizeV;
+        partsSizeH = serializableProjectInfo.partsSizeH;
+        partsSizeV = serializableProjectInfo.partsSizeV;
+        layerInfos.clear;
+        foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
+            LayerInfo layerInfo = new LayerInfo();
+            layerInfo.initBySerializable(serializableLayerInfo);
+            printf("ProjectInfo.initBySerializable 1 %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));
+            printf("[%x] ProjectInfo.initBySerializable 2 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            layerInfos ~= layerInfo;
+            printf("[%x] ProjectInfo.initBySerializable 3 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+        }
+        // 基本データは設定完了したので画像など生成処理
+        foreach(layerInfo;layerInfos){
+            printf("[%x] ProjectInfo.initBySerializable 4 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            AddMapchipFile(layerInfo.mapchipFilePath);
+            layerInfo.CreateTransparentPixbuf();
+            layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
+        }
+        editWindow.Reload();
+        layerWindow.Reload();
+        overviewWindow.Reload();
+        partsWindow.Reload();
     }
     // 各種処理関数
     void SetEditWindow(EditWindow editWindow){
@@ -357,6 +387,7 @@ class LayerInfo{
         int endGridX = 0;
         int endGridY = 0;
     }
+    this(){}
     this(string name, bool visible, string mapchipFilePath){
         this.name = name;
         this.visible = visible;
@@ -375,11 +406,26 @@ class LayerInfo{
     }
     string name = "layer";
     bool visible = true;
-    string mapchipFilePath = "";
+    string mapchipFilePath = null;
     int chipLayout[];
     Pixbuf layoutPixbuf;
     Pixbuf transparentPixbuf;
     GridSelection gridSelection = null;
+    SerializableLayerInfo getSerializable(){
+        SerializableLayerInfo ret = new SerializableLayerInfo();
+        ret.name = name;
+        ret.visible = visible;
+        ret.mapchipFilePath = mapchipFilePath;
+        ret.chipLayout = chipLayout;
+        return ret;
+    }
+    void initBySerializable(SerializableLayerInfo serializableLayerInfo){
+        printf("LayerInfo.initBySerializable %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));
+        name = serializableLayerInfo.name;
+        visible = serializableLayerInfo.visible;
+        mapchipFilePath = serializableLayerInfo.mapchipFilePath;
+        chipLayout = serializableLayerInfo.chipLayout;
+    }
     void ReplaceChip(int gridX, int gridY, int newChipId){
         Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
         if(newChipId < 0){
@@ -442,11 +488,13 @@ class SerializableProjectInfo{
     int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
+    SerializableLayerInfo layerInfos[];
     void describe(T)(T ar){
         ar.describe(mapSizeH);
         ar.describe(mapSizeV);
         ar.describe(partsSizeH);
         ar.describe(partsSizeV);
+        ar.describe(layerInfos);
     }
 }
 

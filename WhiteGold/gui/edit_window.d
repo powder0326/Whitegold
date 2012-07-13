@@ -68,6 +68,19 @@ class EditWindow : MainWindow{
             dialog.onNewProjectFunction = onNewProjectFunction;
         }
     }
+    void OpenProject(){
+        FileChooserDialog fs = new FileChooserDialog("プロジェクト選択", this, FileChooserAction.OPEN);
+//                 fs.setCurrentFolderUri("file:///C:/Programing");
+        if( fs.run() == ResponseType.GTK_RESPONSE_OK )
+        {
+            SerializableProjectInfo serializableProjectInfo;
+            Serializer s = new Serializer(fs.getFilename(), FileMode.In);
+            s.describe(serializableProjectInfo);
+            delete s;
+            projectInfo.initBySerializable(serializableProjectInfo);
+        }
+        fs.hide();
+    }
     void SaveProjectWithName(){
         FileChooserDialog fs = new FileChooserDialog("保存先選択", this, FileChooserAction.SAVE);
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
@@ -164,6 +177,9 @@ class EditWindow : MainWindow{
             {
             case "file.new":
                 OpenNewProject();
+                break;
+            case "file.open":
+                OpenProject();
                 break;
             case "file.save_with_name":
                 SaveProjectWithName();
