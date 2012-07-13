@@ -43,6 +43,7 @@ class ProjectInfo{
     int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
+    string projectPath = null;
     // レイヤー関連
     int currentLayerIndex = 0;
     LayerInfo layerInfos[];
@@ -74,6 +75,7 @@ class ProjectInfo{
         ret.mapSizeV = mapSizeV;
         ret.partsSizeH = partsSizeH;
         ret.partsSizeV = partsSizeV;
+        ret.projectPath = projectPath;
         foreach(layerInfo;layerInfos){
             ret.layerInfos ~= layerInfo.getSerializable();
         }
@@ -84,6 +86,7 @@ class ProjectInfo{
         mapSizeV = serializableProjectInfo.mapSizeV;
         partsSizeH = serializableProjectInfo.partsSizeH;
         partsSizeV = serializableProjectInfo.partsSizeV;
+        projectPath = serializableProjectInfo.projectPath;
         layerInfos.clear;
         foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
             LayerInfo layerInfo = new LayerInfo();
@@ -387,7 +390,9 @@ class LayerInfo{
         int endGridX = 0;
         int endGridY = 0;
     }
-    this(){}
+    this(){
+        gridSelection = new GridSelection();
+    }
     this(string name, bool visible, string mapchipFilePath){
         this.name = name;
         this.visible = visible;
@@ -488,13 +493,15 @@ class SerializableProjectInfo{
     int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
-    SerializableLayerInfo layerInfos[];
+    string projectPath = null;
+   SerializableLayerInfo layerInfos[];
     void describe(T)(T ar){
         ar.describe(mapSizeH);
         ar.describe(mapSizeV);
         ar.describe(partsSizeH);
         ar.describe(partsSizeV);
         ar.describe(layerInfos);
+        ar.describe(projectPath);
     }
 }
 

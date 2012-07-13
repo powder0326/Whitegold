@@ -79,7 +79,16 @@ class EditWindow : MainWindow{
             delete s;
             projectInfo.initBySerializable(serializableProjectInfo);
         }
+        projectInfo.projectPath = fs.getFilename();
         fs.hide();
+    }
+    void SaveProject(){
+        if(projectInfo.projectPath !is null){
+            SerializableProjectInfo serializableProjectInfo = projectInfo.getSerializable();
+            Serializer s = new Serializer(projectInfo.projectPath, FileMode.Out);
+            s.describe(serializableProjectInfo);
+            delete s;
+        }
     }
     void SaveProjectWithName(){
         FileChooserDialog fs = new FileChooserDialog("保存先選択", this, FileChooserAction.SAVE);
@@ -91,6 +100,7 @@ class EditWindow : MainWindow{
             s.describe(serializableProjectInfo);
             delete s;
         }
+        projectInfo.projectPath = fs.getFilename();
         fs.hide();
     }
     void OpenResizeDialog(){
@@ -181,6 +191,9 @@ class EditWindow : MainWindow{
             case "file.open":
                 OpenProject();
                 break;
+            case "file.save":
+                SaveProject();
+                break;
             case "file.save_with_name":
                 SaveProjectWithName();
                 break;
@@ -240,12 +253,15 @@ class EditWindow : MainWindow{
             packStart(fileNewButton , false, false, 2 );
             Button fileOpenButton = new Button();
             fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
+            fileOpenButton.addOnClicked((Button button){OpenProject();});
             packStart(fileOpenButton , false, false, 2 );
             Button fileSaveButton = new Button();
             fileSaveButton.setImage(new Image(new Pixbuf("dat/icon/disk.png")));
+            fileSaveButton.addOnClicked((Button button){SaveProject();});
             packStart(fileSaveButton , false, false, 2 );
             Button fileSaveWithNameButton = new Button();
             fileSaveWithNameButton.setImage(new Image(new Pixbuf("dat/icon/disk--pencil.png")));
+            fileSaveWithNameButton.addOnClicked((Button button){SaveProjectWithName();});
             packStart(fileSaveWithNameButton , false, false, 2 );
             // 区切り線
             packStart(new VSeparator() , false, false, 4 );
@@ -865,7 +881,7 @@ class EditWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
-//                 printf("EditWindow.exposeCallback 1\n");
+                printf("EditWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
@@ -971,7 +987,7 @@ class EditWindow : MainWindow{
                         dr.drawRectangle(gc, false, x, y, width, height);
                     }
                 }
-//                 printf("EditWindow.exposeCallback 2\n");
+                printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){

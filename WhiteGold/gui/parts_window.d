@@ -117,6 +117,7 @@ class PartsWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
+                printf("PartsWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 if(mapchip !is null){
                     dr.drawPixbuf(mapchip, 0, 0);
@@ -158,6 +159,7 @@ class PartsWindow : MainWindow{
                 // 外枠
                 gc.setRgbFgColor(new Color(255,255,255));
                 dr.drawRectangle(gc, false, x, y, width, height);
+                printf("PartsWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget)
