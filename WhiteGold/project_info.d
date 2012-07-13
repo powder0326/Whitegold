@@ -350,8 +350,8 @@ class LayerInfo{
         int endGridY = 0;
     }
     this(string name, bool visible, string mapchipFilePath){
-        this.name_ = name;
-        this.visible_ = visible;
+        this.name = name;
+        this.visible = visible;
         this.mapchipFilePath = mapchipFilePath;
         gridSelection = new GridSelection();
     }
@@ -365,18 +365,8 @@ class LayerInfo{
             delete transparentPixbuf;
         }
     }
-    string name(){
-        return name_;
-    }
-    void name(string value){
-        name_ = value;
-    }
-    bool visible(){
-        return visible_;
-    }
-    void visible(bool value){
-        visible_ = value;
-    }
+    string name = "layer";
+    bool visible = true;
     string mapchipFilePath = "";
     int chipLayout[];
     Pixbuf layoutPixbuf;
@@ -437,9 +427,6 @@ class LayerInfo{
         }
         layoutPixbuf = CreatePixbufFromLayout(this);
     }
-private:
-    string name_ = "layer";
-    bool visible_ = true;
 }
 
 class SerializableProjectInfo{
@@ -452,5 +439,18 @@ class SerializableProjectInfo{
         ar.describe(mapSizeV);
         ar.describe(partsSizeH);
         ar.describe(partsSizeV);
+    }
+}
+
+class SerializableLayerInfo{
+    string name;
+    bool visible;
+    string mapchipFilePath;
+    int chipLayout[];
+    void describe(T)(T ar){
+        ar.describe(name);
+        ar.describe(visible);
+        ar.describe(mapchipFilePath);
+        ar.describe(chipLayout);
     }
 }
