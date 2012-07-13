@@ -152,8 +152,16 @@ class ProjectInfo{
         layerWindow.Reload();
     }
     void onMapSizeChanged(int mapSizeH, int mapSizeV){
+        int oldMapSizeH = this.mapSizeH;
+        int oldMapSizeV = this.mapSizeV;
         this.mapSizeH = mapSizeH;
         this.mapSizeV = mapSizeV;
+        foreach(layerInfo;layerInfos){
+            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
+            normalLayerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
+        }
+        editWindow.queueDraw();
+        overviewWindow.queueDraw();
     }
     void onCsvLoaded(CsvProjectInfo info){
         mapSizeH = info.mapSizeH;
@@ -412,9 +420,27 @@ class NormalLayerInfo : LayerInfoBase{
         return gridX + gridY * mapchipDivNumH;
     }
     void CreateTransparentPixbuf(){
+        if(transparentPixbuf !is null){
+            transparentPixbuf.unref();
+            delete transparentPixbuf;
+        }
         transparentPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
         char* pixels = transparentPixbuf.getPixels();
         pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+    }
+    void MapSizeChanged(int oldMapSizeH, int oldMapSizeV){
+        int oldChipLayout[] = chipLayout.dup;
+        chipLayout.clear;
+        chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+        chipLayout[0..length] = -1;
+        for(int gridY = 0 ; gridY < min(oldMapSizeV, projectInfo.mapSizeV) ; ++ gridY){
+            for(int gridX = 0 ; gridX < min(oldMapSizeH, projectInfo.mapSizeH) ; ++ gridX){
+                int oldLayoutIndex = gridX + gridY * oldMapSizeH;
+                int newLayoutIndex = gridX + gridY * projectInfo.mapSizeH;
+                chipLayout[newLayoutIndex] = oldChipLayout[oldLayoutIndex];
+            }
+        }
+        layoutPixbuf = CreatePixbufFromLayout(this);
     }
     void Reset(){
         gridSelection = new GridSelection();
@@ -422,6 +448,10 @@ class NormalLayerInfo : LayerInfoBase{
         chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         chipLayout[0..length] = -1;
         CreateTransparentPixbuf();
+        if(layoutPixbuf !is null){
+            layoutPixbuf.unref();
+            delete layoutPixbuf;
+        }
         layoutPixbuf = CreatePixbufFromLayout(this);
     }
 private:
