@@ -23,60 +23,20 @@ int main(string[] argv){
     Main.init(argv);
     projectInfo = new ProjectInfo();
     version(DRAW_SAMPLE){
-        NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
+//         NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
+        NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, null);
         projectInfo.layerInfos ~= layerInfo1;
         layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo1.chipLayout[0..length] = -1;
-//         layerInfo1.chipLayout = [128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,
-//                                  128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128];
-        projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
+//         projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
         layerInfo1.CreateTransparentPixbuf();
         layerInfo1.layoutPixbuf = CreatePixbufFromLayout(layerInfo1);
 
-        NormalLayerInfo layerInfo2 = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
+//         NormalLayerInfo layerInfo2 = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
 //         projectInfo.layerInfos ~= layerInfo2;
 //         layerInfo2.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
-        layerInfo2.chipLayout[0..length] = -1;
-
-//         layerInfo2.chipLayout = [130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,122,123,124,125,130,130,200,201,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,138,139,140,141,130,130,216,217,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,154,155,156,157,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,170,171,172,173,130,130,130,130,130,130,146,130,130,130,130,130,130,146,130,
-//                                  130,186,187,188,189,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,200,201,130,130,130,
-//                                  130,130,130,130,61,130,130,130,130,146,130,130,130,130,130,216,217,130,130,130,
-//                                  130,130,130,130,77,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,93,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,122,123,124,125,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,138,139,140,141,
-//                                  130,130,130,130,146,130,130,130,200,201,130,130,130,130,130,130,154,155,156,157,
-//                                  130,130,130,130,130,130,130,130,216,217,130,130,130,130,130,130,170,171,172,173,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,186,187,188,189,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,
-//                                  130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130];
-        projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
+//         layerInfo2.chipLayout[0..length] = -1;
+//         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
 //         layerInfo2.CreateTransparentPixbuf();
 //         layerInfo2.layoutPixbuf = CreatePixbufFromLayout(layerInfo2);
     }
@@ -99,6 +59,10 @@ int main(string[] argv){
 // Todo! これはNormalLayerInfoクラス自身に持たせよう
 Pixbuf CreatePixbufFromLayout(NormalLayerInfo layerInfo){
     Pixbuf ret = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
+    if(layerInfo.mapchipFilePath is null){
+        ret.fill(0x00000000);
+        return ret;
+    }
     Pixbuf mapChip = projectInfo.mapchipPixbufList[layerInfo.mapchipFilePath];
     int chipLayout[] = layerInfo.chipLayout;
     // マップチップの横分割数
@@ -188,16 +152,14 @@ Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSiz
 }
 Pixbuf CreateGuidePixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
     Pixbuf guidePixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, partsSizeH * mapSizeH, partsSizeV * mapSizeV);
-    char* pixels = guidePixbuf.getPixels();
-    int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
-    pixels[0..length] = 0;
+    guidePixbuf.fill(0x00000000);
     return guidePixbuf;
 }
 void UpdateGuidePixbuf(Pixbuf pixbuf, int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV, int cursorGridX, int cursorGridY, int selectWidth, int selectHeight, bool tiling){
     long time = std.datetime.Clock.currStdTime();
+    pixbuf.fill(0x00000000);
     char* pixels = pixbuf.getPixels();
     int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
-    pixels[0..length] = 0;
     int leftPixelX = cursorGridX * partsSizeH + 1;
     int rightPixelX = cursorGridX * partsSizeH + partsSizeH * selectWidth - 1 - 1;
     int topPixelY = cursorGridY * partsSizeV + 1;

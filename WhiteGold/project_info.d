@@ -425,8 +425,7 @@ class NormalLayerInfo : LayerInfoBase{
             delete transparentPixbuf;
         }
         transparentPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
-        char* pixels = transparentPixbuf.getPixels();
-        pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+        transparentPixbuf.fill(0x00000000);
     }
     void MapSizeChanged(int oldMapSizeH, int oldMapSizeV){
         int oldChipLayout[] = chipLayout.dup;

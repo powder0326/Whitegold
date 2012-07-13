@@ -572,8 +572,7 @@ class EditWindow : MainWindow{
                             // 元の場所を削除(Pixbufの表示だけ)
                             NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
                             Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                            char* pixels = pixbuf.getPixels();
-                            pixels[0..projectInfo.partsSizeH * projectInfo.partsSizeV * 4] = 0;
+                            pixbuf.fill(0x00000000);
                             for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
                                 for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
                                     pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
