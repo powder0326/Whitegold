@@ -67,6 +67,14 @@ class ProjectInfo{
     LayerWindow layerWindow = null;
     PartsWindow partsWindow = null;
     OverviewWindow overviewWindow = null;
+    SerializableProjectInfo getSerializable(){
+        SerializableProjectInfo ret = new SerializableProjectInfo();
+        ret.mapSizeH = mapSizeH;
+        ret.mapSizeV = mapSizeV;
+        ret.partsSizeH = partsSizeH;
+        ret.partsSizeV = partsSizeV;
+		return ret;
+    }
     // 各種処理関数
     void SetEditWindow(EditWindow editWindow){
         this.editWindow = editWindow;

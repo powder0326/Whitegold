@@ -68,6 +68,18 @@ class EditWindow : MainWindow{
             dialog.onNewProjectFunction = onNewProjectFunction;
         }
     }
+    void SaveProjectWithName(){
+        FileChooserDialog fs = new FileChooserDialog("保存先選択", this, FileChooserAction.SAVE);
+//                 fs.setCurrentFolderUri("file:///C:/Programing");
+        if( fs.run() == ResponseType.GTK_RESPONSE_OK )
+        {
+            SerializableProjectInfo serializableProjectInfo = projectInfo.getSerializable();
+            Serializer s = new Serializer(fs.getFilename(), FileMode.Out);
+            s.describe(serializableProjectInfo);
+            delete s;
+        }
+        fs.hide();
+    }
     void OpenResizeDialog(){
         ResizeDialog dialog = new ResizeDialog();
         dialog.setModal(true);
@@ -152,6 +164,9 @@ class EditWindow : MainWindow{
             {
             case "file.new":
                 OpenNewProject();
+                break;
+            case "file.save_with_name":
+                SaveProjectWithName();
                 break;
             case "file.import_csv":
                 FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.OPEN);
