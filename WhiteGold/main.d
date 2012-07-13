@@ -23,8 +23,8 @@ int main(string[] argv){
     Main.init(argv);
     projectInfo = new ProjectInfo();
     version(DRAW_SAMPLE){
-//         NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
-        NormalLayerInfo layerInfo1 = new NormalLayerInfo("レイヤー1", true, null);
+//         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
+        LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, null);
         projectInfo.layerInfos ~= layerInfo1;
         layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo1.chipLayout[0..length] = -1;
@@ -57,7 +57,7 @@ int main(string[] argv){
 }
 
 // Todo! これはNormalLayerInfoクラス自身に持たせよう
-Pixbuf CreatePixbufFromLayout(NormalLayerInfo layerInfo){
+Pixbuf CreatePixbufFromLayout(LayerInfo layerInfo){
     Pixbuf ret = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
     if(layerInfo.mapchipFilePath is null){
         ret.fill(0x00000000);

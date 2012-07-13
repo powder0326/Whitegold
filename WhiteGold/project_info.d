@@ -45,8 +45,8 @@ class ProjectInfo{
     int partsSizeV = 16;
     // レイヤー関連
     int currentLayerIndex = 0;
-    LayerInfoBase layerInfos[];
-    LayerInfoBase currentLayerInfo(){
+    LayerInfo layerInfos[];
+    LayerInfo currentLayerInfo(){
         return layerInfos[currentLayerIndex];
     }
     // マップチップ関連
@@ -108,7 +108,7 @@ class ProjectInfo{
         overviewWindow.queueDraw();
     }
     void onLayerAdded(){
-        NormalLayerInfo layerInfo = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
+        LayerInfo layerInfo = new LayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
         layerInfo.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo.chipLayout[0..length] = -1;
         AddMapchipFile("dat/sample/mapchip256_b.png");
@@ -143,8 +143,7 @@ class ProjectInfo{
         this.partsSizeV = partsSizeV;
         layerInfos = layerInfos[0..1];
         foreach(layerInfo;layerInfos){
-            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-            normalLayerInfo.Reset();
+            layerInfo.Reset();
         }
         editWindow.Reload();
         partsWindow.Reload();
@@ -157,8 +156,7 @@ class ProjectInfo{
         this.mapSizeH = mapSizeH;
         this.mapSizeV = mapSizeV;
         foreach(layerInfo;layerInfos){
-            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-            normalLayerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
+            layerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
         }
         editWindow.queueDraw();
         overviewWindow.Reload();
@@ -170,9 +168,9 @@ class ProjectInfo{
         partsSizeV = info.partsSizeV;
         layerInfos.clear;
         foreach(i,chipLayout;info.chipLayouts){
-            NormalLayerInfo normalLayerInfo = new NormalLayerInfo(format("レイヤー%d",i), true, "");
-            normalLayerInfo.chipLayout = chipLayout;
-            layerInfos ~= normalLayerInfo;
+            LayerInfo layerInfo = new LayerInfo(format("レイヤー%d",i), true, "");
+            layerInfo.chipLayout = chipLayout;
+            layerInfos ~= layerInfo;
         }
         editWindow.Reload();
         partsWindow.Reload();
@@ -181,26 +179,26 @@ class ProjectInfo{
     }
     void onMapchipFileLoaded(string mapchipFilePath){
         AddMapchipFile(mapchipFilePath);
-        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
-        normalLayerInfo.mapchipFilePath = mapchipFilePath;
-        normalLayerInfo.layoutPixbuf = CreatePixbufFromLayout(normalLayerInfo);
+        LayerInfo layerInfo = currentLayerInfo;
+        layerInfo.mapchipFilePath = mapchipFilePath;
+        layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         partsWindow.Reload();
         editWindow.Reload();
         overviewWindow.Reload();
     }
     void onSelectionChanged(double startX, double startY, double endX, double endY){
         printf("onSelectionChanged 1\n");
-        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
-        int oldStartGridX = normalLayerInfo.gridSelection.startGridX;
-        int oldStartGridY = normalLayerInfo.gridSelection.startGridY;
-        int oldEndGridX = normalLayerInfo.gridSelection.endGridX;
-        int oldEndGridY = normalLayerInfo.gridSelection.endGridY;
-        normalLayerInfo.gridSelection.startGridX = cast(int)(startX / partsSizeH);
-        normalLayerInfo.gridSelection.startGridY = cast(int)(startY / partsSizeV);
-        normalLayerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
-        normalLayerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
+        LayerInfo layerInfo = currentLayerInfo;
+        int oldStartGridX = layerInfo.gridSelection.startGridX;
+        int oldStartGridY = layerInfo.gridSelection.startGridY;
+        int oldEndGridX = layerInfo.gridSelection.endGridX;
+        int oldEndGridY = layerInfo.gridSelection.endGridY;
+        layerInfo.gridSelection.startGridX = cast(int)(startX / partsSizeH);
+        layerInfo.gridSelection.startGridY = cast(int)(startY / partsSizeV);
+        layerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
+        layerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
         // グリッド座標が変わっていない場合は再描画必要ない
-        if(oldStartGridX != normalLayerInfo.gridSelection.startGridX || oldStartGridY != normalLayerInfo.gridSelection.startGridY || oldEndGridX != normalLayerInfo.gridSelection.endGridX || oldEndGridY != normalLayerInfo.gridSelection.endGridY){
+        if(oldStartGridX != layerInfo.gridSelection.startGridX || oldStartGridY != layerInfo.gridSelection.startGridY || oldEndGridX != layerInfo.gridSelection.endGridX || oldEndGridY != layerInfo.gridSelection.endGridY){
             editWindow.UpdateGuide();
             editWindow.queueDraw();
             partsWindow.queueDraw();
@@ -216,16 +214,16 @@ class ProjectInfo{
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
         printf("onChipReplaced 1\n");
         EditInfo editInfos[];
-        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        LayerInfo layerInfo = currentLayerInfo;
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
-                int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
-                Pixbuf mapchip = mapchipPixbufList[normalLayerInfo.mapchipFilePath];
+                int oldChipId = layerInfo.GetChipId(gridX, gridY);
+                Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
                 int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
                 int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
-                normalLayerInfo.ReplaceChip(gridX,gridY,newChipId);
+                layerInfo.ReplaceChip(gridX,gridY,newChipId);
             }
         }
         tmpEditInfosTree ~= editInfos;
@@ -234,7 +232,7 @@ class ProjectInfo{
         printf("onChipReplaced 2\n");
     }
     void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
-        NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)currentLayerInfo;
+        LayerInfo layerInfo = currentLayerInfo;
         struct ReplaceInfo{
             int gridX;
             int gridY;
@@ -251,7 +249,7 @@ class ProjectInfo{
         for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
             for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
                 int newChipId = -1;
-                int oldChipId = normalLayerInfo.GetChipId(gridX, gridY);
+                int oldChipId = layerInfo.GetChipId(gridX, gridY);
                 int layoutIndex = gridX + gridY * mapSizeH;
                 replaceInfos ~= ReplaceInfo(gridX, gridY, newChipId);
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
@@ -261,15 +259,15 @@ class ProjectInfo{
         // 移動後の反映
         for(int offsetY = 0 ; offsetY < gridHeight ; ++ offsetY){
             for(int offsetX = 0 ; offsetX < gridWidth ; ++ offsetX){
-                int newChipId = normalLayerInfo.GetChipId(srcGridX + offsetX, srcGridY + offsetY);
-                int oldChipId = normalLayerInfo.GetChipId(dstGridX + offsetX, dstGridY + offsetY);
+                int newChipId = layerInfo.GetChipId(srcGridX + offsetX, srcGridY + offsetY);
+                int oldChipId = layerInfo.GetChipId(dstGridX + offsetX, dstGridY + offsetY);
                 int layoutIndex = (dstGridX + offsetX) + (dstGridY + offsetY) * mapSizeH;
                 replaceInfos ~= ReplaceInfo(dstGridX + offsetX,dstGridY + offsetY,newChipId);
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
             }
         }
         foreach(replaceInfo;replaceInfos){
-            normalLayerInfo.ReplaceChip(replaceInfo.gridX, replaceInfo.gridY ,replaceInfo.newChipId);
+            layerInfo.ReplaceChip(replaceInfo.gridX, replaceInfo.gridY ,replaceInfo.newChipId);
         }
         EditInfo editInfosTree[][] = [editInfos];
         undoQueue ~= editInfosTree;
@@ -302,10 +300,10 @@ class ProjectInfo{
             redoQueue ~= editInfosTree;
             foreach_reverse(editInfos;editInfosTree){
                 foreach(editInfo;editInfos){
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                    LayerInfo layerInfo = layerInfos[editInfo.layerIndex];
                     int gridX = editInfo.layoutIndex % mapSizeH;
                     int gridY = editInfo.layoutIndex / mapSizeH;
-                    normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.oldChipId);
+                    layerInfo.ReplaceChip(gridX,gridY,editInfo.oldChipId);
                 }
             }
             undoQueue = undoQueue[0..$ - 1];
@@ -319,10 +317,10 @@ class ProjectInfo{
             undoQueue ~= editInfosTree;
             foreach_reverse(editInfos;editInfosTree){
                 foreach(editInfo;editInfos){
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfos[editInfo.layerIndex];
+                    LayerInfo layerInfo = layerInfos[editInfo.layerIndex];
                     int gridX = editInfo.layoutIndex % mapSizeH;
                     int gridY = editInfo.layoutIndex / mapSizeH;
-                    normalLayerInfo.ReplaceChip(gridX,gridY,editInfo.newChipId);
+                    layerInfo.ReplaceChip(gridX,gridY,editInfo.newChipId);
                 }
             }
             redoQueue = redoQueue[0..$ - 1];
@@ -344,18 +342,7 @@ class ProjectInfo{
         adjustmentV.setValue(min(y, adjustmentV.getUpper() - adjustmentV.getPageSize()));
     }
 }
-enum ELayerType{
-    NORMAL,
-    JSON,
-}
-abstract class LayerInfoBase{
-    abstract ELayerType type();
-    abstract string name();
-    abstract void name(string value);
-    abstract bool visible();
-    abstract void visible(bool value);
-}
-class NormalLayerInfo : LayerInfoBase{
+class LayerInfo{
     class GridSelection{
         int startGridX = 0;
         int startGridY = 0;
@@ -378,19 +365,16 @@ class NormalLayerInfo : LayerInfoBase{
             delete transparentPixbuf;
         }
     }
-    override ELayerType type(){
-        return ELayerType.NORMAL;
-    }
-    override string name(){
+    string name(){
         return name_;
     }
-    override void name(string value){
+    void name(string value){
         name_ = value;
     }
-    override bool visible(){
+    bool visible(){
         return visible_;
     }
-    override void visible(bool value){
+    void visible(bool value){
         visible_ = value;
     }
     string mapchipFilePath = "";

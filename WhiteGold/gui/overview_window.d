@@ -99,12 +99,11 @@ class OverviewWindow : MainWindow{
                 Drawable dr = getWindow();
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
-                    if(layerInfo.type != ELayerType.NORMAL || !layerInfo.visible){
+                    if(!layerInfo.visible){
                         continue;
                     }
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-                    if(normalLayerInfo.layoutPixbuf !is null){
-                        Pixbuf scaledPixbuf = normalLayerInfo.layoutPixbuf.scaleSimple(cast(int)getWidth(), cast(int)getHeight(), GdkInterpType.NEAREST/*,TILES,BILINEAR,HYPER*/);
+                    if(layerInfo.layoutPixbuf !is null){
+                        Pixbuf scaledPixbuf = layerInfo.layoutPixbuf.scaleSimple(cast(int)getWidth(), cast(int)getHeight(), GdkInterpType.NEAREST/*,TILES,BILINEAR,HYPER*/);
                         dr.drawPixbuf(scaledPixbuf, 0, 0);
                         scaledPixbuf.unref();
                         delete scaledPixbuf;

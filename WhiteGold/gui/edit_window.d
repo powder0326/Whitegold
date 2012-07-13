@@ -405,8 +405,8 @@ class EditWindow : MainWindow{
             void drawChip(int gridX, int gridY){
                 printf("drawChip 1\n");
                 ChipReplaceInfo[] chipReplaceInfos;
-                NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                with(normalLayerInfo.gridSelection){
+                LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                with(layerInfo.gridSelection){
                     for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
                         for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
                             if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
@@ -432,8 +432,8 @@ class EditWindow : MainWindow{
             void tilingChip(int gridX1, int gridY1, int gridX2, int gridY2){
                     printf("tilingChip 1\n");
                     ChipReplaceInfo[] chipReplaceInfos;
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                    with(normalLayerInfo.gridSelection){
+                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                    with(layerInfo.gridSelection){
                         int width = endGridX - startGridX + 1;
                         int height = endGridY - startGridY + 1;
                         for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
@@ -570,7 +570,7 @@ class EditWindow : MainWindow{
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
                             // 元の場所を削除(Pixbufの表示だけ)
-                            NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
                             pixbuf.fill(0x00000000);
                             for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
@@ -594,7 +594,7 @@ class EditWindow : MainWindow{
                         selection.endGridY = mouseGridY;
                         selection.Normalize();
                         // 元の場所をSelection側にコピー
-                        NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
                         selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
                         layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
                     }
@@ -628,7 +628,7 @@ class EditWindow : MainWindow{
                     long time = std.datetime.Clock.currStdTime();
                     int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
                     int cursorGridY = cast(int)(event.y / projectInfo.partsSizeV);
-                    NormalLayerInfo layerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
                     int layoutIndex = cursorGridY * projectInfo.mapSizeH + cursorGridX;
                     int startChipId = layerInfo.chipLayout[layoutIndex];
                     int newChipId = -1;
@@ -839,11 +839,10 @@ class EditWindow : MainWindow{
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
                 foreach(layerInfo;projectInfo.layerInfos){
-                    if(layerInfo.type != ELayerType.NORMAL || !layerInfo.visible){
+                    if(!layerInfo.visible){
                         continue;
                     }
-                    NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)layerInfo;
-                    dr.drawPixbuf(normalLayerInfo.layoutPixbuf, 0, 0);
+                    dr.drawPixbuf(layerInfo.layoutPixbuf, 0, 0);
                 }
                 // グリッド描画
                 if(showGrid){
@@ -853,9 +852,9 @@ class EditWindow : MainWindow{
                 version(DRAW_GUIDE_DIRECT){
                     if(chipDrawStrategy.type != EDrawingType.SELECT){
                         if(guideMode == EGuideMode.CURSOR){
-                            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
-                            int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-                            int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                            int selectWidth = layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1;
+                            int selectHeight = layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1;
                             int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
                             int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
                             int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
@@ -864,10 +863,10 @@ class EditWindow : MainWindow{
                             dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
                         }
                         else if(guideMode == EGuideMode.TILING){
-                            NormalLayerInfo normalLayerInfo = cast(NormalLayerInfo)projectInfo.currentLayerInfo;
+                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                            int selectWidth = normalLayerInfo.gridSelection.endGridX - normalLayerInfo.gridSelection.startGridX + 1;
-                            int selectHeight = normalLayerInfo.gridSelection.endGridY - normalLayerInfo.gridSelection.startGridY + 1;
+                            int selectWidth = layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1;
+                            int selectHeight = layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1;
                             int startGridX = 0;
                             int i = 0;
                             for(;;++i){
