@@ -196,6 +196,11 @@
    <File path="imports\gtk.d" />
    <File path="imports\std.d" />
   </Folder>
+  <Folder name="serialization">
+   <File path="serialization\basicarchive.d" />
+   <File path="serialization\classregister.d" />
+   <File path="serialization\serializer.d" />
+  </Folder>
   <File path="..\GtkD.lib" />
   <File path="main.d" />
   <File path="project_info.d" />

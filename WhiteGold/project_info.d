@@ -442,3 +442,15 @@ private:
     bool visible_ = true;
 }
 
+class SerializableProjectInfo{
+    int mapSizeH = 20;
+    int mapSizeV = 20;
+    int partsSizeH = 16;
+    int partsSizeV = 16;
+    void describe(T)(T ar){
+        ar.describe(mapSizeH);
+        ar.describe(mapSizeV);
+        ar.describe(partsSizeH);
+        ar.describe(partsSizeV);
+    }
+}

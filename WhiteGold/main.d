@@ -20,8 +20,27 @@ private import gui.overview_window;
 ProjectInfo projectInfo = null;
 
 int main(string[] argv){
+    Serializer.registerClassConstructor!(SerializableProjectInfo)({ return new SerializableProjectInfo(); });
+
+
     Main.init(argv);
     projectInfo = new ProjectInfo();
+    // シリアライズテスト
+    static if(false){
+        SerializableProjectInfo serializableProjectInfo = new SerializableProjectInfo();
+        serializableProjectInfo.mapSizeH = 255;
+        {
+            Serializer s = new Serializer("save.dat", FileMode.Out);
+            s.describe(serializableProjectInfo);
+            delete s;
+        }
+        {
+            Serializer s = new Serializer("save.dat", FileMode.In);
+            s.describe(serializableProjectInfo);
+            delete s;
+        }
+    }
+
     version(DRAW_SAMPLE){
 //         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, null);
