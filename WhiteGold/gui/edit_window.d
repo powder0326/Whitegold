@@ -209,6 +209,15 @@ class EditWindow : MainWindow{
                 }
                 fs.hide();
                 break;
+            case "file.export_csv":
+                FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.SAVE);
+                if( fs.run() == ResponseType.GTK_RESPONSE_OK )
+                {
+                    string exported = ExportCsv(projectInfo);
+                    std.file.write(fs.getFilename(), exported);
+                }
+                fs.hide();
+                break;
             case "edit.resize":
                 OpenResizeDialog();
                 break;

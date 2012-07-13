@@ -151,6 +151,27 @@ CsvProjectInfo ParseCsv(string csvFilePath){
     ret.chipLayouts = chipLayouts;
     return ret;
 }
+string ExportCsv(ProjectInfo projectInfo){
+    string ret;
+    with(projectInfo){
+        ret ~= format("%d,%d,%d,%d,%d\r\n",mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerInfos.length);
+        foreach(layerInfo;layerInfos){
+            for(int gridY = 0 ; gridY < mapSizeV ; ++gridY){
+                for(int gridX = 0 ; gridX < mapSizeH ; ++gridX){
+                    int index = gridX + gridY * mapSizeH;
+                    if(gridX == mapSizeH - 1){
+                        ret ~= format("%d",layerInfo.chipLayout[index]);
+                    }else{
+                        ret ~= format("%d,",layerInfo.chipLayout[index]);
+                    }
+                }
+                ret ~= "\r\n";
+            }
+            ret ~= "\r\n";
+        }
+    }
+	return ret;
+}
 Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
     long time = std.datetime.Clock.currStdTime();
     Pixbuf gridPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, partsSizeH * mapSizeH, partsSizeV * mapSizeV);
