@@ -17,29 +17,23 @@ private import gui.parts_window;
 private import gui.layer_window;
 private import gui.overview_window;
 
+SerializableBaseInfo baseInfo = null;
 ProjectInfo projectInfo = null;
 
 int main(string[] argv){
     Serializer.registerClassConstructor!(SerializableProjectInfo)({ return new SerializableProjectInfo(); });
     Serializer.registerClassConstructor!(SerializableLayerInfo)({ return new SerializableLayerInfo(); });
+    Serializer.registerClassConstructor!(SerializableBaseInfo)({ return new SerializableBaseInfo(); });
     Main.init(argv);
     projectInfo = new ProjectInfo();
-    // シリアライズテスト
-    static if(false){
-        SerializableProjectInfo serializableProjectInfo = new SerializableProjectInfo();
-        serializableProjectInfo.mapSizeH = 255;
-        {
-            Serializer s = new Serializer("save.dat", FileMode.Out);
-            s.describe(serializableProjectInfo);
-            delete s;
-        }
-        {
-            Serializer s = new Serializer("save.dat", FileMode.In);
-            s.describe(serializableProjectInfo);
-            delete s;
-        }
+    if(std.file.exists("setting.dat")){
+        SerializableProjectInfo serializableProjectInfo;
+        Serializer s = new Serializer("setting.dat", FileMode.In);
+        s.describe(baseInfo);
+        delete s;
+    }else{
+        baseInfo = new SerializableBaseInfo();
     }
-
     version(DRAW_SAMPLE){
 //         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, null);
@@ -71,6 +65,13 @@ int main(string[] argv){
     projectInfo.SetOverviewWindow(overviewWindow);
     overviewWindow.showAll();
     Main.run();
+    // 設定保存
+    {
+        SerializableProjectInfo serializableProjectInfo;
+        Serializer s = new Serializer("setting.dat", FileMode.Out);
+        s.describe(baseInfo);
+        delete s;
+    }
     return 0;
 }
 

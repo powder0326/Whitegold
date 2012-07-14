@@ -519,3 +519,14 @@ class SerializableLayerInfo{
         ar.describe(chipLayout);
     }
 }
+
+class SerializableBaseInfo{
+    string lastProjectPath;
+    string lastImportCsvPath;
+    string lastExportCsvPath;
+    void describe(T)(T ar){
+        ar.describe(lastProjectPath);
+        ar.describe(lastImportCsvPath);
+        ar.describe(lastExportCsvPath);
+    }
+}

@@ -199,22 +199,37 @@ class EditWindow : MainWindow{
                 break;
             case "file.import_csv":
                 FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.OPEN);
-//                 fs.setCurrentFolderUri("file:///C:/Programing");
+                if(baseInfo.lastImportCsvPath !is null){
+                    fs.setCurrentFolder(baseInfo.lastImportCsvPath);
+                }
                 if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
                     CsvProjectInfo info = ParseCsv(fs.getFilename());
                     if(this.outer.onCsvLoadedFunction !is null){
                         this.outer.onCsvLoadedFunction(info);
                     }
+                    string splited[] = fs.getFilename().split("\\");
+                    baseInfo.lastImportCsvPath = "";
+                    foreach(tmp;splited[0..length - 1]){
+                        baseInfo.lastImportCsvPath ~= tmp ~ "\\";
+                    }
                 }
                 fs.hide();
                 break;
             case "file.export_csv":
                 FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.SAVE);
+                if(baseInfo.lastExportCsvPath !is null){
+                    fs.setCurrentFolder(baseInfo.lastExportCsvPath);
+                }
                 if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
                     string exported = ExportCsv(projectInfo);
                     std.file.write(fs.getFilename(), exported);
+                    string splited[] = fs.getFilename().split("\\");
+                    baseInfo.lastExportCsvPath = "";
+                    foreach(tmp;splited[0..length - 1]){
+                        baseInfo.lastExportCsvPath ~= tmp ~ "\\";
+                    }
                 }
                 fs.hide();
                 break;
