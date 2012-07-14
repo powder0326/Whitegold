@@ -71,6 +71,9 @@ class EditWindow : MainWindow{
     void OpenProject(){
         FileChooserDialog fs = new FileChooserDialog("プロジェクト選択", this, FileChooserAction.OPEN);
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
+        if(baseInfo.lastProjectPath !is null){
+            fs.setCurrentFolder(baseInfo.lastProjectPath);
+        }
         if( fs.run() == ResponseType.GTK_RESPONSE_OK )
         {
             SerializableProjectInfo serializableProjectInfo;
@@ -78,6 +81,11 @@ class EditWindow : MainWindow{
             s.describe(serializableProjectInfo);
             delete s;
             projectInfo.initBySerializable(serializableProjectInfo);
+            string splited[] = fs.getFilename().split("\\");
+            baseInfo.lastProjectPath = "";
+            foreach(tmp;splited[0..length - 1]){
+                baseInfo.lastProjectPath ~= tmp ~ "\\";
+            }
         }
         projectInfo.projectPath = fs.getFilename();
         fs.hide();
@@ -93,12 +101,20 @@ class EditWindow : MainWindow{
     void SaveProjectWithName(){
         FileChooserDialog fs = new FileChooserDialog("保存先選択", this, FileChooserAction.SAVE);
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
+        if(baseInfo.lastProjectPath !is null){
+            fs.setCurrentFolder(baseInfo.lastProjectPath);
+        }
         if( fs.run() == ResponseType.GTK_RESPONSE_OK )
         {
             SerializableProjectInfo serializableProjectInfo = projectInfo.getSerializable();
             Serializer s = new Serializer(fs.getFilename(), FileMode.Out);
             s.describe(serializableProjectInfo);
             delete s;
+            string splited[] = fs.getFilename().split("\\");
+            baseInfo.lastProjectPath = "";
+            foreach(tmp;splited[0..length - 1]){
+                baseInfo.lastProjectPath ~= tmp ~ "\\";
+            }
         }
         projectInfo.projectPath = fs.getFilename();
         fs.hide();
