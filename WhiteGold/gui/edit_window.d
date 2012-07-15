@@ -32,6 +32,7 @@ class EditWindow : MainWindow{
     void delegate() onRedoFunction;
     void delegate() onScrollChangedFunction;
     EditWindowEditArea editArea = null;
+    EditWindowMenubar menuBar = null;
     EditWindowToolArea toolArea = null;
     bool showGrid = false;
     this(){
@@ -41,7 +42,8 @@ class EditWindow : MainWindow{
         printf("EditWindow.this %d,%d,%d,%d\n",baseInfo.editWindowInfo.x, baseInfo.editWindowInfo.y,baseInfo.editWindowInfo.width, baseInfo.editWindowInfo.height);
         setIcon(new Pixbuf("dat/icon/application--pencil.png"));
         VBox mainBox = new VBox(false,0);
-		mainBox.packStart(new EditWindowMenubar(),false,false,0);
+        menuBar = new EditWindowMenubar();
+		mainBox.packStart(menuBar,false,false,0);
         toolArea = new EditWindowToolArea();
 		mainBox.packStart(toolArea,false,false,0);
         editArea = new EditWindowEditArea();
@@ -149,6 +151,16 @@ class EditWindow : MainWindow{
             dialog.onMapSizeChangedFunction = onMapSizeChangedFunction;
         }
     }
+    void Undo(){
+        if(onUndoFunction !is null){
+            onUndoFunction();
+        }
+    }
+    void Redo(){
+        if(onRedoFunction !is null){
+            onRedoFunction();
+        }
+    }
     void UpdateGuide(){
         editArea.drawingArea.queueDraw();
     }
@@ -183,6 +195,8 @@ class EditWindow : MainWindow{
                 this.windowType = windowType;
             }
         }
+        MenuItem menuItemUndo = null;
+        MenuItem menuItemRedo = null;
         this(){
             super();
             AccelGroup accelGroup = new AccelGroup();
@@ -199,8 +213,12 @@ class EditWindow : MainWindow{
             fileMenu.append(new SeparatorMenuItem());
             fileMenu.append(new MenuItem(&onMenuActivate, "終了","file.quit", true));
             Menu editMenu = append("編集");
-            editMenu.append(new MenuItem(&onMenuActivate, "取り消し","edit.undo", true, accelGroup, 'z'));
-            editMenu.append(new MenuItem(&onMenuActivate, "やり直し","edit.redo", true, accelGroup, 'y'));
+            menuItemUndo = new MenuItem(&onMenuActivate, "取り消し","edit.undo", true, accelGroup, 'z');
+            menuItemUndo.setSensitive(false);
+            editMenu.append(menuItemUndo);
+            menuItemRedo = new MenuItem(&onMenuActivate, "やり直し","edit.redo", true, accelGroup, 'y');
+            menuItemRedo.setSensitive(false);
+            editMenu.append(menuItemRedo);
             editMenu.append(new SeparatorMenuItem());
             editMenu.append(new MenuItem(&onMenuActivate, "リサイズ","edit.resize", true));
             editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
@@ -271,6 +289,12 @@ class EditWindow : MainWindow{
                 }
                 fs.hide();
                 break;
+            case "edit.undo":
+                Undo();
+                break;
+            case "edit.redo":
+                Redo();
+                break;
             case "edit.resize":
                 OpenResizeDialog();
                 break;
@@ -332,18 +356,14 @@ class EditWindow : MainWindow{
             editUndoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return-180-left.png")));
             editUndoButton.setSensitive(false);
             editUndoButton.addOnClicked((Button button){
-                    if(this.outer.onUndoFunction !is null){
-                        this.outer.onUndoFunction();
-                    }
+                    Undo();
                 });
             packStart(editUndoButton , false, false, 2 );
             editRedoButton = new Button();
             editRedoButton.setImage(new Image(new Pixbuf("dat/icon/arrow-return.png")));
             editRedoButton.setSensitive(false);
             editRedoButton.addOnClicked((Button button){
-                    if(this.outer.onRedoFunction !is null){
-                        this.outer.onRedoFunction();
-                    }
+                    Redo();
                 });
             packStart(editRedoButton , false, false, 2 );
             // 区切り線

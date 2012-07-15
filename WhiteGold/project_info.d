@@ -336,6 +336,8 @@ class ProjectInfo{
     void updateUndoRedo(){
         editWindow.toolArea.editUndoButton.setSensitive(undoQueue.length >= 1);
         editWindow.toolArea.editRedoButton.setSensitive(redoQueue.length >= 1);
+        editWindow.menuBar.menuItemUndo.setSensitive(undoQueue.length >= 1);
+        editWindow.menuBar.menuItemRedo.setSensitive(redoQueue.length >= 1);
     }
     void onUndo(){
         if(undoQueue.length >= 1){
