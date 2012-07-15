@@ -1105,6 +1105,11 @@ class EditWindow : MainWindow{
         }
         void Reload(){
             drawingArea.setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
+            if(drawingArea.gridPixbuf !is null){
+                drawingArea.gridPixbuf.unref();
+                delete drawingArea.gridPixbuf;
+            }
+            drawingArea.gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
             queueDraw();
         }
     }

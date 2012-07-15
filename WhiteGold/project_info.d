@@ -199,7 +199,7 @@ class ProjectInfo{
         foreach(layerInfo;layerInfos){
             layerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
         }
-        editWindow.queueDraw();
+        editWindow.Reload();
         overviewWindow.Reload();
     }
     void onCsvLoaded(CsvProjectInfo info){
