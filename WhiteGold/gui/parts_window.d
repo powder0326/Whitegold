@@ -46,10 +46,18 @@ class PartsWindow : MainWindow{
             fileOpenButton.setImage(new Image(new Pixbuf("dat/icon/folder-horizontal-open.png")));
             fileOpenButton.addOnClicked((Button button){
                     FileChooserDialog fs = new FileChooserDialog("マップチップファイル選択", this.outer, FileChooserAction.OPEN);
+                    if(baseInfo.lastMapchipPath !is null){
+                        fs.setCurrentFolder(baseInfo.lastMapchipPath);
+                    }
                     if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                     {
                         if(this.outer.onMapchipFileLoadedFunction !is null){
                             this.outer.onMapchipFileLoadedFunction(fs.getFilename());
+                        }
+                        string splited[] = fs.getFilename().split("\\");
+                        baseInfo.lastMapchipPath = "";
+                        foreach(tmp;splited[0..length - 1]){
+                            baseInfo.lastMapchipPath ~= tmp ~ "\\";
                         }
                     }
                     fs.hide();

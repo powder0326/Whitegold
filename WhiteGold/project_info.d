@@ -134,6 +134,7 @@ class ProjectInfo{
         this.editWindow.onUndoFunction = &onUndo;
         this.editWindow.onRedoFunction = &onRedo;
         this.editWindow.onScrollChangedFunction = &onScrollChanged;
+        this.editWindow.onSyringeUsedFunction = &onSyringeUsed;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -397,6 +398,11 @@ class ProjectInfo{
             overviewWindow.queueDraw();
         }
     }
+    void onSyringeUsed(int chipId){
+        LayerInfo layerInfo = currentLayerInfo;
+        layerInfo.SetSelectionByChipId(chipId);
+        partsWindow.queueDraw();
+    }
     void onScrollCenterChanged(double centerX, double centerY){
         Adjustment adjustmentH = editWindow.editArea.getHadjustment();
         double x = (adjustmentH.getUpper() - adjustmentH.getLower()) * centerX - adjustmentH.getPageSize() / 2.0;
@@ -506,6 +512,24 @@ class LayerInfo{
         }
         layoutPixbuf = CreatePixbufFromLayout(this);
     }
+    void SetSelectionByChipId(int chipId){
+        if(!mapchipFileExists){
+            return;
+        }
+        Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
+        int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
+        int mapchipDivNumV = cast(int)mapchip.getHeight() / projectInfo.partsSizeV;
+        with(gridSelection){
+            for(int gridY = 0 ; gridY < mapchipDivNumV ; ++ gridY){
+                for(int gridX = 0 ; gridX < mapchipDivNumH ; ++ gridX){
+                    if(chipId == GetChipIdInMapchip(gridX, gridY)){
+                        startGridX = endGridX = gridX;
+                        startGridY = endGridY = gridY;
+                    }
+                }
+            }
+        }
+    }
     void Reset(){
         gridSelection = new GridSelection();
         chipLayout.clear;
@@ -562,6 +586,7 @@ class SerializableBaseInfo{
     string lastProjectPath;
     string lastImportCsvPath;
     string lastExportCsvPath;
+    string lastMapchipPath;
     SerializableWindowInfo editWindowInfo;
     SerializableWindowInfo partsWindowInfo;
     SerializableWindowInfo layerWindowInfo;
@@ -592,6 +617,7 @@ class SerializableBaseInfo{
         ar.describe(lastProjectPath);
         ar.describe(lastImportCsvPath);
         ar.describe(lastExportCsvPath);
+        ar.describe(lastMapchipPath);
         ar.describe(editWindowInfo);
         ar.describe(partsWindowInfo);
         ar.describe(layerWindowInfo);

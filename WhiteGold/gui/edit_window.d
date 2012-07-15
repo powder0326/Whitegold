@@ -31,6 +31,7 @@ class EditWindow : MainWindow{
     void delegate() onUndoFunction;
     void delegate() onRedoFunction;
     void delegate() onScrollChangedFunction;
+    void delegate(int) onSyringeUsedFunction;
     EditWindowEditArea editArea = null;
     EditWindowMenubar menuBar = null;
     EditWindowToolArea toolArea = null;
@@ -1099,7 +1100,12 @@ class EditWindow : MainWindow{
                     UpdateGuide();
                     queueDraw();
                 }
-                return chipDrawStrategy.onButtonPress(event, widget);
+                // 右クリックはスポイト専用なのでStrategyに渡さない
+                if(event.button == 3){
+                    return true;
+                }else{
+                    return chipDrawStrategy.onButtonPress(event, widget);
+                }
             }
             bool onButtonRelease(GdkEventButton* event, Widget widget){
                 int lastMouseGridX = mouseGridX;
@@ -1110,7 +1116,17 @@ class EditWindow : MainWindow{
                     UpdateGuide();
                     queueDraw();
                 }
-                return chipDrawStrategy.onButtonRelease(event, widget);
+                // 右クリックはスポイト専用なのでStrategyに渡さない
+                if(event.button == 3){
+                    if(this.outer.outer.onSyringeUsedFunction){
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                        int chipId = layerInfo.GetChipId(mouseGridX, mouseGridY);
+                        this.outer.outer.onSyringeUsedFunction(chipId);
+                    }
+                    return true;
+                }else{
+                    return chipDrawStrategy.onButtonRelease(event, widget);
+                }
             }
             bool onMotionNotify(GdkEventMotion* event, Widget widget){
                 int lastMouseGridX = mouseGridX;
