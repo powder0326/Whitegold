@@ -617,7 +617,10 @@ class EditWindow : MainWindow{
                     printf("ChipDrawStrategyTilingPen.onButtonRelease\n");
                     mode = EMode.NORMAL;
                     guideMode = EGuideMode.CURSOR;
-                    tilingChip(startGridX, startGridY, mouseGridX, mouseGridY);
+                    tilingChip(min(startGridX, mouseGridX),
+                               min(startGridY, mouseGridY),
+                               max(startGridX, mouseGridX),
+                               max(startGridY, mouseGridY));
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
                     }
