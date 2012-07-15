@@ -16,7 +16,7 @@ class PartsWindow : MainWindow{
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
-        setDefaultSize(240, 240);
+        setDefaultSize(baseInfo.partsWindowInfo.width, baseInfo.partsWindowInfo.height);
         setIcon(new Pixbuf("dat/icon/palette.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new PartsWindowToolArea(),false,false,0);
@@ -24,6 +24,9 @@ class PartsWindow : MainWindow{
 		mainBox.packStart(mapchipArea,true,true,0);
         add(mainBox);
         setDeletable(false);
+        addOnRealize((Widget widget){
+                move(baseInfo.partsWindowInfo.x, baseInfo.partsWindowInfo.y);
+            });
     }
     void Reload(){
         mapchipArea.Reload();

@@ -37,8 +37,8 @@ class EditWindow : MainWindow{
     this(){
         super("エディットウインドウ");
 //         setSizeRequest(320, 320);
-        setDefaultSize(240, 240);
-        move(10, 10);
+        setDefaultSize(baseInfo.editWindowInfo.width, baseInfo.editWindowInfo.height);
+        printf("EditWindow.this %d,%d,%d,%d\n",baseInfo.editWindowInfo.x, baseInfo.editWindowInfo.y,baseInfo.editWindowInfo.width, baseInfo.editWindowInfo.height);
         setIcon(new Pixbuf("dat/icon/application--pencil.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new EditWindowMenubar(),false,false,0);
@@ -50,15 +50,37 @@ class EditWindow : MainWindow{
         toolArea.penButton.setActive(1);
         add(mainBox);
         addOnHide(&onHide);
+        addOnDelete(&onDelete);
+        addOnRealize((Widget widget){
+                move(baseInfo.editWindowInfo.x, baseInfo.editWindowInfo.y);
+            });
     }
     void Reload(){
         editArea.Reload();
     }
     void onHide(Widget widget){
-        printf("EditWindow.onHide\n");
         if(onHideFunction !is null){
             onHideFunction();
         }
+    }
+    bool onDelete(Event e, Widget widget){
+        with(baseInfo.editWindowInfo){
+            getSize(width, height);
+            getPosition(x, y);
+        }
+        with(baseInfo.partsWindowInfo){
+            projectInfo.partsWindow.getSize(width, height);
+            projectInfo.partsWindow.getPosition(x, y);
+        }
+        with(baseInfo.layerWindowInfo){
+            projectInfo.layerWindow.getSize(width, height);
+            projectInfo.layerWindow.getPosition(x, y);
+        }
+        with(baseInfo.overviewWindowInfo){
+            projectInfo.overviewWindow.getSize(width, height);
+            projectInfo.overviewWindow.getPosition(x, y);
+        }
+        return false;
     }
     void OpenNewProject(){
         NewProjectDialog dialog = new NewProjectDialog();
@@ -921,7 +943,7 @@ class EditWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
-                printf("EditWindow.exposeCallback 1\n");
+//                 printf("EditWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
@@ -1027,7 +1049,7 @@ class EditWindow : MainWindow{
                         dr.drawRectangle(gc, false, x, y, width, height);
                     }
                 }
-                printf("EditWindow.exposeCallback 2\n");
+//                 printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){

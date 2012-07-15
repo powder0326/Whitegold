@@ -524,9 +524,52 @@ class SerializableBaseInfo{
     string lastProjectPath;
     string lastImportCsvPath;
     string lastExportCsvPath;
+    SerializableWindowInfo editWindowInfo;
+    SerializableWindowInfo partsWindowInfo;
+    SerializableWindowInfo layerWindowInfo;
+    SerializableWindowInfo overviewWindowInfo;
+    this(){
+        editWindowInfo = new SerializableWindowInfo();
+        editWindowInfo.x = 0;
+        editWindowInfo.y = 0;
+        editWindowInfo.width = 240;
+        editWindowInfo.height = 240;
+        layerWindowInfo = new SerializableWindowInfo();
+        layerWindowInfo.x = 240 * 0;
+        layerWindowInfo.y = 240;
+        layerWindowInfo.width = 240;
+        layerWindowInfo.height = 240;
+        overviewWindowInfo = new SerializableWindowInfo();
+        overviewWindowInfo.x = 240 * 1;
+        overviewWindowInfo.y = 240;
+        overviewWindowInfo.width = 240;
+        overviewWindowInfo.height = 240;
+        partsWindowInfo = new SerializableWindowInfo();
+        partsWindowInfo.x = 240 * 2;
+        partsWindowInfo.y = 240;
+        partsWindowInfo.width = 240;
+        partsWindowInfo.height = 240;
+    }
     void describe(T)(T ar){
         ar.describe(lastProjectPath);
         ar.describe(lastImportCsvPath);
         ar.describe(lastExportCsvPath);
+        ar.describe(editWindowInfo);
+        ar.describe(partsWindowInfo);
+        ar.describe(layerWindowInfo);
+        ar.describe(overviewWindowInfo);
     }
 }
+
+class SerializableWindowInfo{
+    int x;
+    int y;
+    int width;
+    int height;
+    void describe(T)(T ar){
+        ar.describe(x);
+        ar.describe(y);
+        ar.describe(width);
+        ar.describe(height);
+    }
+ }

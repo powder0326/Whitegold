@@ -24,6 +24,7 @@ int main(string[] argv){
     Serializer.registerClassConstructor!(SerializableProjectInfo)({ return new SerializableProjectInfo(); });
     Serializer.registerClassConstructor!(SerializableLayerInfo)({ return new SerializableLayerInfo(); });
     Serializer.registerClassConstructor!(SerializableBaseInfo)({ return new SerializableBaseInfo(); });
+    Serializer.registerClassConstructor!(SerializableWindowInfo)({ return new SerializableWindowInfo(); });
     Main.init(argv);
     projectInfo = new ProjectInfo();
     if(std.file.exists("setting.dat")){
@@ -67,7 +68,6 @@ int main(string[] argv){
     Main.run();
     // 設定保存
     {
-        SerializableProjectInfo serializableProjectInfo;
         Serializer s = new Serializer("setting.dat", FileMode.Out);
         s.describe(baseInfo);
         delete s;

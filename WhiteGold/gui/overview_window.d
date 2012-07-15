@@ -20,8 +20,7 @@ class OverviewWindow : MainWindow{
     this(){
         super("オーバービュー");
 //         setSizeRequest(320, 320);
-        setDefaultSize(240, 240);
-        move(0, 240);
+        setDefaultSize(baseInfo.overviewWindowInfo.width, baseInfo.overviewWindowInfo.height);
         setIcon(new Pixbuf("dat/icon/picture-sunset.png"));
         VBox mainBox = new VBox(false,0);
 		mainBox.packStart(new OverviewWindowToolArea(),false,false,0);
@@ -37,6 +36,9 @@ class OverviewWindow : MainWindow{
                 //cursorNormal = new Cursor(widget.getDisplay(), GdkCursorType.HAND2);
                 cursorDragging = new Cursor(widget.getDisplay() , new Pixbuf("dat/cursor/hand2.png"), 0, 0);
                 setCursor(cursorNormal);
+            });
+        addOnRealize((Widget widget){
+                move(baseInfo.overviewWindowInfo.x, baseInfo.overviewWindowInfo.y);
             });
     }
     void Reload(){
