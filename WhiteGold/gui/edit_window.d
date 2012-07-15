@@ -764,6 +764,12 @@ class EditWindow : MainWindow{
                     int layoutIndex = cursorGridY * projectInfo.mapSizeH + cursorGridX;
                     int startChipId = layerInfo.chipLayout[layoutIndex];
                     int newChipId = -1;
+                    if(layerInfo.mapchipFilePath is null){
+                        return true;
+                    }
+                    if(!(layerInfo.mapchipFilePath in projectInfo.mapchipPixbufList)){
+                        return true;
+                    }
                     if(layerInfo.gridSelection !is null){
                         newChipId = layerInfo.GetChipIdInMapchip(layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
                     }

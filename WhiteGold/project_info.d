@@ -274,11 +274,17 @@ class ProjectInfo{
         printf("onChipReplaced 1\n");
         EditInfo editInfos[];
         LayerInfo layerInfo = currentLayerInfo;
+        if(layerInfo.mapchipFilePath is null){
+            return;
+        }
+        if(!(layerInfo.mapchipFilePath in mapchipPixbufList)){
+            return;
+        }
+		Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
+		int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
                 int oldChipId = layerInfo.GetChipId(gridX, gridY);
-                Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
-                int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
                 int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
