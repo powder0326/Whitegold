@@ -976,9 +976,18 @@ class EditWindow : MainWindow{
                     }
                     dr.drawPixbuf(layerInfo.layoutPixbuf, 0, 0);
                 }
-                // グリッド描画
                 if(showGrid){
+                    // グリッド描画
                     dr.drawPixbuf(gridPixbuf, 0, 0);
+                    // エクスポート範囲描画
+                    gc.setRgbFgColor(new Color(100, 100, 255));
+                    dr.drawRectangle(
+                        gc,false,
+                        projectInfo.exportStartGridX * projectInfo.partsSizeH,
+                        projectInfo.exportStartGridY * projectInfo.partsSizeV,
+                        (projectInfo.exportEndGridX + 1) * projectInfo.partsSizeH,
+                        (projectInfo.exportEndGridY + 1) * projectInfo.partsSizeH,
+                        );
                 }
                 // カーソル位置の四角描画
                 version(DRAW_GUIDE_DIRECT){

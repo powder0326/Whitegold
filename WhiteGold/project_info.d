@@ -43,6 +43,10 @@ class ProjectInfo{
     int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
+    int exportStartGridX = 0;
+    int exportStartGridY = 0;
+    int exportEndGridX = 20 - 1;
+    int exportEndGridY = 20 - 1;
     string projectPath = null;
     // レイヤー関連
     int currentLayerIndex = 0;
@@ -76,6 +80,10 @@ class ProjectInfo{
         ret.partsSizeH = partsSizeH;
         ret.partsSizeV = partsSizeV;
         ret.projectPath = projectPath;
+        ret.exportStartGridX = exportStartGridX;
+        ret.exportStartGridY = exportStartGridY;
+        ret.exportEndGridX = exportEndGridX;
+        ret.exportEndGridY = exportEndGridY;
         foreach(layerInfo;layerInfos){
             ret.layerInfos ~= layerInfo.getSerializable();
         }
@@ -87,6 +95,10 @@ class ProjectInfo{
         partsSizeH = serializableProjectInfo.partsSizeH;
         partsSizeV = serializableProjectInfo.partsSizeV;
         projectPath = serializableProjectInfo.projectPath;
+        exportStartGridX = serializableProjectInfo.exportStartGridX;
+        exportStartGridY = serializableProjectInfo.exportStartGridY;
+        exportEndGridX = serializableProjectInfo.exportEndGridX;
+        exportEndGridY = serializableProjectInfo.exportEndGridY;
         layerInfos.clear;
         foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
             LayerInfo layerInfo = new LayerInfo();
@@ -199,6 +211,10 @@ class ProjectInfo{
         foreach(layerInfo;layerInfos){
             layerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
         }
+        this.exportStartGridX = 0;
+        this.exportStartGridY = 0;
+        this.exportEndGridX = this.mapSizeH - 1;
+        this.exportEndGridY = this.mapSizeV - 1;
         editWindow.Reload();
         overviewWindow.Reload();
     }
@@ -497,6 +513,10 @@ class SerializableProjectInfo{
     int mapSizeV = 20;
     int partsSizeH = 16;
     int partsSizeV = 16;
+    int exportStartGridX = 0;
+    int exportStartGridY = 0;
+    int exportEndGridX = 20 - 1;
+    int exportEndGridY = 20 - 1;
     string projectPath = null;
    SerializableLayerInfo layerInfos[];
     void describe(T)(T ar){
@@ -506,6 +526,10 @@ class SerializableProjectInfo{
         ar.describe(partsSizeV);
         ar.describe(layerInfos);
         ar.describe(projectPath);
+        ar.describe(exportStartGridX);
+        ar.describe(exportStartGridY);
+        ar.describe(exportEndGridX);
+        ar.describe(exportEndGridY);
     }
 }
 
