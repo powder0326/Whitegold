@@ -193,6 +193,10 @@ class ProjectInfo{
     void onNewProject(int mapSizeH, int mapSizeV, int partsSizeH, int partsSizeV){
         this.mapSizeH = mapSizeH;
         this.mapSizeV = mapSizeV;
+        this.exportStartGridX = 0;
+        this.exportStartGridY = 0;
+        this.exportEndGridX = this.mapSizeH - 1;
+        this.exportEndGridY = this.mapSizeV - 1;
         this.partsSizeH = partsSizeH;
         this.partsSizeV = partsSizeV;
         layerInfos = layerInfos[0..1];
@@ -222,6 +226,10 @@ class ProjectInfo{
     void onCsvLoaded(CsvProjectInfo info){
         mapSizeH = info.mapSizeH;
         mapSizeV = info.mapSizeV;
+        exportStartGridX = 0;
+        exportStartGridY = 0;
+        exportEndGridX = mapSizeH - 1;
+        exportEndGridY = mapSizeV - 1;
         partsSizeH = info.partsSizeH;
         partsSizeV = info.partsSizeV;
         layerInfos.clear;
