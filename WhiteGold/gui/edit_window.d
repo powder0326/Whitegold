@@ -693,6 +693,10 @@ class EditWindow : MainWindow{
                 }
                 override bool onButtonPress(GdkEventButton* event, Widget widget){
 //                     printf("ChipDrawStrategySelect.onButtonPress\n");
+                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                    if(!layerInfo.mapchipFileExists()){
+                        return true;
+                    }
                     if(mode == EMode.NORMAL){
                         if(selection !is null &&
                            selection.startGridX <= mouseGridX &&
@@ -702,7 +706,6 @@ class EditWindow : MainWindow{
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
                             // 元の場所を削除(Pixbufの表示だけ)
-                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
                             pixbuf.fill(0x00000000);
                             for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
@@ -764,10 +767,7 @@ class EditWindow : MainWindow{
                     int layoutIndex = cursorGridY * projectInfo.mapSizeH + cursorGridX;
                     int startChipId = layerInfo.chipLayout[layoutIndex];
                     int newChipId = -1;
-                    if(layerInfo.mapchipFilePath is null){
-                        return true;
-                    }
-                    if(!(layerInfo.mapchipFilePath in projectInfo.mapchipPixbufList)){
+                    if(!layerInfo.mapchipFileExists()){
                         return true;
                     }
                     if(layerInfo.gridSelection !is null){

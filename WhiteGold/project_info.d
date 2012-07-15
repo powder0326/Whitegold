@@ -274,10 +274,7 @@ class ProjectInfo{
         printf("onChipReplaced 1\n");
         EditInfo editInfos[];
         LayerInfo layerInfo = currentLayerInfo;
-        if(layerInfo.mapchipFilePath is null){
-            return;
-        }
-        if(!(layerInfo.mapchipFilePath in mapchipPixbufList)){
+        if(!layerInfo.mapchipFileExists()){
             return;
         }
 		Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
@@ -456,6 +453,15 @@ class LayerInfo{
         visible = serializableLayerInfo.visible;
         mapchipFilePath = serializableLayerInfo.mapchipFilePath;
         chipLayout = serializableLayerInfo.chipLayout;
+    }
+    bool mapchipFileExists(){
+        if(mapchipFilePath is null){
+            return false;
+        }
+        if(!(mapchipFilePath in projectInfo.mapchipPixbufList)){
+            return false;
+        }
+        return true;
     }
     void ReplaceChip(int gridX, int gridY, int newChipId){
         Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
