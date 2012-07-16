@@ -18,11 +18,13 @@ struct ChipReplaceInfo{
     int gridY;
     int newChipGridX;
     int newChipGridY;
-    this(int gridX,int gridY,int newChipGridX,int newChipGridY){
+    int layerIndex;
+    this(int gridX,int gridY,int newChipGridX,int newChipGridY, int layerIndex){
         this.gridX = gridX;
         this.gridY = gridY;
         this.newChipGridX = newChipGridX;
         this.newChipGridY = newChipGridY;
+        this.layerIndex = layerIndex;
     }
 }
 struct EditInfo{
@@ -290,19 +292,20 @@ class ProjectInfo{
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
         printf("onChipReplaced 1\n");
         EditInfo editInfos[];
-        LayerInfo layerInfo = currentLayerInfo;
-        if(!layerInfo.mapchipFileExists()){
-            return;
-        }
-		Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
-		int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
+                LayerInfo layerInfo = layerInfos[layerIndex];
+                if(!layerInfo.mapchipFileExists()){
+                    continue;
+                }
+                Pixbuf mapchip = mapchipPixbufList[layerInfo.mapchipFilePath];
+                int mapchipDivNumH = cast(int)mapchip.getWidth() / partsSizeH;
                 int oldChipId = layerInfo.GetChipId(gridX, gridY);
                 int newChipId = (newChipGridX < 0 || newChipGridY < 0) ? -1 : newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
                 layerInfo.ReplaceChip(gridX,gridY,newChipId);
+                printf("onChipReplaced[%d:(%d,%d)(%d->%d)]",layerIndex,gridX,gridY,oldChipId,newChipId);
             }
         }
         tmpEditInfosTree ~= editInfos;

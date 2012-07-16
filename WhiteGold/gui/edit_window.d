@@ -557,7 +557,7 @@ class EditWindow : MainWindow{
                             if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
                                 continue;
                             }
-                            chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y);
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y, projectInfo.currentLayerIndex);
                         }
                     }
                 }
@@ -585,7 +585,7 @@ class EditWindow : MainWindow{
                         for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
                             int x = startGridX + (gridX - gridX1) % width;
                             int y = startGridY + (gridY - gridY1) % height;
-                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y);
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y, projectInfo.currentLayerIndex);
                         }
                     }
                 }
@@ -727,7 +727,11 @@ class EditWindow : MainWindow{
                            selection.endGridY >= mouseGridY){
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
-                            // 元の場所を削除(Pixbufの表示だけ)
+                            // 元の場所をSelection側にコピー(Todo! SHIFT押下時は全てのレイヤーを対象に)
+                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                            selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
+                            layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
+                            // 元の場所を削除(Pixbufの表示だけ)(Todo! SHIFT押下時は全てのレイヤーを対象に)
                             Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
                             pixbuf.fill(0x00000000);
                             for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
@@ -750,10 +754,6 @@ class EditWindow : MainWindow{
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
                         selection.Normalize();
-                        // 元の場所をSelection側にコピー
-                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                        selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
-                        layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
                     }
                     else if(mode == EMode.MOVING){
                         mode = EMode.NORMAL;
@@ -784,9 +784,19 @@ class EditWindow : MainWindow{
                         case GdkKeysyms.GDK_Delete:
                             printf("delete\n");
                             ChipReplaceInfo[] chipReplaceInfos;
-                            for(int gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ gridY){
-                                for(int gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ gridX){
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1);
+                            if(event.state & GdkModifierType.SHIFT_MASK){
+                                for(int layerIndex = 0 ; layerIndex < projectInfo.layerInfos.length ; ++ layerIndex){
+                                    for(int gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ gridY){
+                                        for(int gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ gridX){
+                                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, layerIndex);
+                                        }
+                                    }
+                                }
+                            }else{
+                                for(int gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ gridY){
+                                    for(int gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ gridX){
+                                        chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
+                                    }
                                 }
                             }
                             if(this.outer.outer.outer.onChipReplacedFunction !is null){
@@ -878,7 +888,7 @@ class EditWindow : MainWindow{
                                 if(currentChipId == startChipId){
                                     editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
                                     tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY, projectInfo.currentLayerIndex);
                                 }else{
                                     rightGridX = gridX;
                                     break;
@@ -891,7 +901,7 @@ class EditWindow : MainWindow{
                                 if(currentChipId == startChipId){
                                     editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
                                     tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY, projectInfo.currentLayerIndex);
                                 }else{
                                     leftGridX = gridX;
                                     break;
@@ -1054,11 +1064,24 @@ class EditWindow : MainWindow{
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
-                foreach(layerInfo;projectInfo.layerInfos){
+                foreach(i, layerInfo;projectInfo.layerInfos){
                     if(!layerInfo.visible){
                         continue;
                     }
                     dr.drawPixbuf(layerInfo.layoutPixbuf, 0, 0);
+                    // 選択領域用画像描画
+                    if(i == projectInfo.currentLayerIndex){
+                        if(chipDrawStrategy.type == EDrawingType.SELECT){
+                            auto strategySelect = cast(ChipDrawStrategySelect)chipDrawStrategy;
+                            if(strategySelect.selection !is null){
+                                int leftGridX = min(strategySelect.selection.startGridX, strategySelect.selection.endGridX);
+                                int topGridY = min(strategySelect.selection.startGridY, strategySelect.selection.endGridY);
+                                int x = (leftGridX + strategySelect.selection.moveGridX) * projectInfo.partsSizeH;
+                                int y = (topGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
+                                dr.drawPixbuf(strategySelect.selection.pixbuf, x, y);
+                            }
+                        }
+                    }
                 }
                 if(showGrid){
                     // グリッド描画
@@ -1130,8 +1153,6 @@ class EditWindow : MainWindow{
                         int y = (topGridY + strategySelect.selection.moveGridY) * projectInfo.partsSizeV;
                         int width = projectInfo.partsSizeH * (std.math.abs(strategySelect.selection.endGridX - strategySelect.selection.startGridX) + 1) - 1;
                         int height = projectInfo.partsSizeV * (std.math.abs(strategySelect.selection.endGridY - strategySelect.selection.startGridY) + 1) - 1;
-                        // 画像描画
-                        dr.drawPixbuf(strategySelect.selection.pixbuf, x, y);
                         GC gc = new GC(dr);
                         gc.setRgbFgColor(new Color(0,0,0));
                         // 内部の斜線(上辺から)
