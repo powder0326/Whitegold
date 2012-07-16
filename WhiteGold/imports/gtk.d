@@ -50,4 +50,5 @@ public import gdk.Color;
 public import gdk.Drawable;
 public import gdk.GC;
 public import gdk.RGB;
+public import gdk.Keysyms;
 public import glib.Idle;

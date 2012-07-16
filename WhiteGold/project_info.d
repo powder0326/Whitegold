@@ -299,7 +299,7 @@ class ProjectInfo{
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
                 int oldChipId = layerInfo.GetChipId(gridX, gridY);
-                int newChipId = newChipGridX + newChipGridY * mapchipDivNumH;
+                int newChipId = (newChipGridX < 0 || newChipGridY < 0) ? -1 : newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
                 editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
                 layerInfo.ReplaceChip(gridX,gridY,newChipId);
@@ -390,6 +390,7 @@ class ProjectInfo{
             undoQueue = undoQueue[0..$ - 1];
             updateUndoRedo();
             editWindow.queueDraw();
+            overviewWindow.queueDraw();
         }
     }
     void onRedo(){
@@ -407,6 +408,7 @@ class ProjectInfo{
             redoQueue = redoQueue[0..$ - 1];
             updateUndoRedo();
             editWindow.queueDraw();
+            overviewWindow.queueDraw();
         }
     }
     void onScrollChanged(){

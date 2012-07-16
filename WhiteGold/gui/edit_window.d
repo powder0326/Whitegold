@@ -777,7 +777,53 @@ class EditWindow : MainWindow{
                     return true;
                 }
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
-                    printf("ChipDrawStrategySelect.onKeyPress keyval = %d type = %d\n",event.keyval,event.type);
+                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                    if(mode == EMode.NORMAL && selection !is null){
+                        switch(event.keyval){
+                            // 削除
+                        case GdkKeysyms.GDK_Delete:
+                            printf("delete\n");
+                            ChipReplaceInfo[] chipReplaceInfos;
+                            for(int gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ gridY){
+                                for(int gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ gridX){
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1);
+                                }
+                            }
+                            if(this.outer.outer.outer.onChipReplacedFunction !is null){
+                                this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                            }
+                            // 元の場所をSelection側にコピー
+                            selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
+                            layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
+                            if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
+                                this.outer.outer.outer.onChipReplaceCompletedFunction();
+                            }
+                            break;
+                            // コピー
+                        case GdkKeysyms.GDK_c:
+                        case GdkKeysyms.GDK_C:
+                            if(event.state & GdkModifierType.CONTROL_MASK){
+                                printf("copy\n");
+                            }
+                            break;
+                            // カット
+                        case GdkKeysyms.GDK_x:
+                        case GdkKeysyms.GDK_X:
+                            if(event.state & GdkModifierType.CONTROL_MASK){
+                                printf("cut\n");
+                            }
+                            break;
+                            // ペースト
+                        case GdkKeysyms.GDK_v:
+                        case GdkKeysyms.GDK_V:
+                            if(event.state & GdkModifierType.CONTROL_MASK){
+                                printf("paste\n");
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    }
                     return true;
                 }
             }
@@ -1172,11 +1218,6 @@ class EditWindow : MainWindow{
                 return chipDrawStrategy.onMotionNotify(event, widget);
             }
             bool onKeyPress(GdkEventKey* event, Widget widget){
-                printf("EditWindowDrawingArea.onKeyPress keyval = %d type = %d state = %d\n",event.keyval,event.type,event.state);
-                printf("GdkModifierType.CONTROL_MASK = %d\n",GdkModifierType.CONTROL_MASK);
-                if(event.state & GdkModifierType.CONTROL_MASK){
-                    printf("event.state & GdkModifierType.CONTROL_MASK\n");
-                }
                 return chipDrawStrategy.onKeyPress(event, widget);
             }
         }
