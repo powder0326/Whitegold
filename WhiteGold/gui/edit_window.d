@@ -545,6 +545,7 @@ class EditWindow : MainWindow{
                 abstract bool onButtonPress(GdkEventButton* event, Widget widget);
                 abstract bool onButtonRelease(GdkEventButton* event, Widget widget);
                 abstract bool onMotionNotify(GdkEventMotion* event, Widget widget);
+                abstract bool onKeyPress(GdkEventKey* event, Widget widget);
             }
             void drawChip(int gridX, int gridY){
                 printf("drawChip 1\n");
@@ -574,24 +575,24 @@ class EditWindow : MainWindow{
                endGridY:右下グリッド座標
             */
             void tilingChip(int gridX1, int gridY1, int gridX2, int gridY2){
-                    printf("tilingChip 1\n");
-                    ChipReplaceInfo[] chipReplaceInfos;
-                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                    with(layerInfo.gridSelection){
-                        int width = endGridX - startGridX + 1;
-                        int height = endGridY - startGridY + 1;
-                        for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
-                            for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
-                                int x = startGridX + (gridX - gridX1) % width;
-                                int y = startGridY + (gridY - gridY1) % height;
-                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y);
-                            }
+                printf("tilingChip 1\n");
+                ChipReplaceInfo[] chipReplaceInfos;
+                LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                with(layerInfo.gridSelection){
+                    int width = endGridX - startGridX + 1;
+                    int height = endGridY - startGridY + 1;
+                    for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
+                        for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
+                            int x = startGridX + (gridX - gridX1) % width;
+                            int y = startGridY + (gridY - gridY1) % height;
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y);
                         }
                     }
-                    if(this.outer.outer.onChipReplacedFunction !is null){
-                        this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
-                    }
-                    printf("tilingChip 2\n");
+                }
+                if(this.outer.outer.onChipReplacedFunction !is null){
+                    this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                }
+                printf("tilingChip 2\n");
             }
             void selectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
                 if(this.outer.outer.onSelectionMovedFunction !is null){
@@ -626,6 +627,9 @@ class EditWindow : MainWindow{
                             drawChip(mouseGridX, mouseGridY);
                         }
                     }
+                    return true;
+                }
+                override bool onKeyPress(GdkEventKey* event, Widget widget){
                     return true;
                 }
             }
@@ -663,6 +667,9 @@ class EditWindow : MainWindow{
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
                     printf("ChipDrawStrategyTilingPen.onMotionNotify\n");
+                    return true;
+                }
+                override bool onKeyPress(GdkEventKey* event, Widget widget){
                     return true;
                 }
             }
@@ -767,6 +774,10 @@ class EditWindow : MainWindow{
                         selection.moveGridX = mouseGridX - moveStartGridX;
                         selection.moveGridY = mouseGridY - moveStartGridY;
                     }
+                    return true;
+                }
+                override bool onKeyPress(GdkEventKey* event, Widget widget){
+                    printf("ChipDrawStrategySelect.onKeyPress keyval = %d type = %d\n",event.keyval,event.type);
                     return true;
                 }
             }
@@ -930,6 +941,9 @@ class EditWindow : MainWindow{
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
                     return true;
                 }
+                override bool onKeyPress(GdkEventKey* event, Widget widget){
+                    return true;
+                }
             }
             ChipDrawStrategyBase chipDrawStrategy = null;
             void ChangeDrawingType(EDrawingType type){
@@ -955,6 +969,9 @@ class EditWindow : MainWindow{
                 addOnButtonPress(&onButtonPress);
                 addOnButtonRelease(&onButtonRelease);
                 addOnMotionNotify(&onMotionNotify);
+                addOnKeyPress(&onKeyPress);
+                setCanFocus(1);
+                addEvents(EventMask.BUTTON_PRESS_MASK);
                 addOnExpose(&exposeCallback);
                 setSizeRequest(projectInfo.partsSizeH * projectInfo.mapSizeH, projectInfo.partsSizeV * projectInfo.mapSizeV);
                 gridPixbuf = CreateGridPixbuf(projectInfo.mapSizeH, projectInfo.mapSizeV, projectInfo.partsSizeH, projectInfo.partsSizeV);
@@ -1106,6 +1123,7 @@ class EditWindow : MainWindow{
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){
+                this.outer.outer.setFocus(this);
                 int lastMouseGridX = mouseGridX;
                 int lastMouseGridY = mouseGridY;
                 mouseGridX = min(cast(int)(event.x / projectInfo.partsSizeH), projectInfo.mapSizeH - 1);
@@ -1152,6 +1170,14 @@ class EditWindow : MainWindow{
                     queueDraw();
                 }
                 return chipDrawStrategy.onMotionNotify(event, widget);
+            }
+            bool onKeyPress(GdkEventKey* event, Widget widget){
+                printf("EditWindowDrawingArea.onKeyPress keyval = %d type = %d state = %d\n",event.keyval,event.type,event.state);
+                printf("GdkModifierType.CONTROL_MASK = %d\n",GdkModifierType.CONTROL_MASK);
+                if(event.state & GdkModifierType.CONTROL_MASK){
+                    printf("event.state & GdkModifierType.CONTROL_MASK\n");
+                }
+                return chipDrawStrategy.onKeyPress(event, widget);
             }
         }
         EditDrawingArea drawingArea = null;
