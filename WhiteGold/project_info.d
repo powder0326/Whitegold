@@ -303,7 +303,7 @@ class ProjectInfo{
                 int oldChipId = layerInfo.GetChipId(gridX, gridY);
                 int newChipId = (newChipGridX < 0 || newChipGridY < 0) ? -1 : newChipGridX + newChipGridY * mapchipDivNumH;
                 int layoutIndex = gridX + gridY * mapSizeH;
-                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                editInfos ~= EditInfo(layerIndex,layoutIndex,oldChipId,newChipId);
                 layerInfo.ReplaceChip(gridX,gridY,newChipId);
                 printf("onChipReplaced[%d:(%d,%d)(%d->%d)]",layerIndex,gridX,gridY,oldChipId,newChipId);
             }
