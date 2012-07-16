@@ -127,6 +127,7 @@ class ProjectInfo{
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
         this.editWindow.onNewProjectFunction = &onNewProject;
         this.editWindow.onMapSizeChangedFunction = &onMapSizeChanged;
+        this.editWindow.onExportSettingChangedFunction = &onExportSettingChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
         this.editWindow.onSelectionMovedFunction = &onSelectionMoved;
@@ -222,6 +223,13 @@ class ProjectInfo{
         this.exportEndGridY = this.mapSizeV - 1;
         editWindow.Reload();
         overviewWindow.Reload();
+    }
+    void onExportSettingChanged(int startX, int endX, int startY, int endY){
+        this.exportStartGridX = startX;
+        this.exportStartGridY = startY;
+        this.exportEndGridX = endX;
+        this.exportEndGridY = endY;
+        editWindow.queueDraw();
     }
     void onCsvLoaded(CsvProjectInfo info){
         mapSizeH = info.mapSizeH;

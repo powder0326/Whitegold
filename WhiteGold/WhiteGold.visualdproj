@@ -182,6 +182,7 @@
  </Config>
  <Folder name="WhiteGold">
   <Folder name="dialog">
+   <File path="dialog\export_setting_dialog.d" />
    <File path="dialog\new_project_dialog.d" />
    <File path="dialog\resize_dialog.d" />
   </Folder>

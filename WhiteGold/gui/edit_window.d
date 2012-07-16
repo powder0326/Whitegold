@@ -5,6 +5,7 @@ import main;
 import project_info;
 import dialog.new_project_dialog;
 import dialog.resize_dialog;
+import dialog.export_setting_dialog;
 
 /**
    エディット用ウインドウ
@@ -23,6 +24,7 @@ class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     void delegate(int,int) onMapSizeChangedFunction;
+    void delegate(int,int,int,int) onExportSettingChangedFunction;
     void delegate(int,int,int,int) onNewProjectFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
@@ -162,6 +164,14 @@ class EditWindow : MainWindow{
             onRedoFunction();
         }
     }
+    void ExportSetting(){
+        ExportSettingDialog dialog = new ExportSettingDialog();
+        dialog.setModal(true);
+        dialog.showAll();
+        if(onExportSettingChangedFunction !is null){
+            dialog.onExportSettingChangedFunction = onExportSettingChangedFunction;
+        }
+    }
     void UpdateGuide(){
         editArea.drawingArea.queueDraw();
     }
@@ -222,6 +232,7 @@ class EditWindow : MainWindow{
             editMenu.append(menuItemRedo);
             editMenu.append(new SeparatorMenuItem());
             editMenu.append(new MenuItem(&onMenuActivate, "リサイズ","edit.resize", true));
+            editMenu.append(new MenuItem(&onMenuActivate, "エクスポート設定","edit.export_setting", true));
             editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
             Menu windowMenu = append("ウインドウ");
             CustomCheckMenuItem checkMenuItemPartsWindow = new CustomCheckMenuItem("パーツウインドウ", true, EWindowType.PARTS);
@@ -298,6 +309,9 @@ class EditWindow : MainWindow{
                 break;
             case "edit.resize":
                 OpenResizeDialog();
+                break;
+            case "edit.export_setting":
+                ExportSetting();
                 break;
             default:
                 break;
