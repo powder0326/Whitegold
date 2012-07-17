@@ -13,6 +13,8 @@ class LayerWindow : MainWindow{
     void delegate(int index) onSelectedLayerChangedFunction;
     void delegate(int index, bool visible) onLayerVisibilityChangedFunction;
     void delegate() onLayerAddedFunction;
+    void delegate() onLayerDeletedFunction;
+    void delegate(bool isUp) onLayerMovedFunction;
     VBox mainBox;
     LayerWindowListview layerWindowListview = null;
     this(){
@@ -85,12 +87,27 @@ class LayerWindow : MainWindow{
             packStart(addLayerButton , false, false, 2 );
             Button deleteLayerButton = new Button();
             deleteLayerButton.setImage(new Image(new Pixbuf("dat/icon/cross-circle.png")));
+            deleteLayerButton.addOnClicked((Button button){
+                    if(this.outer.onLayerDeletedFunction !is null){
+                        this.outer.onLayerDeletedFunction();
+                    }
+                });
             packStart(deleteLayerButton , false, false, 2 );
             Button moveUpLayerButton = new Button();
             moveUpLayerButton.setImage(new Image(new Pixbuf("dat/icon/arrow-090.png")));
+            moveUpLayerButton.addOnClicked((Button button){
+                    if(this.outer.onLayerMovedFunction !is null){
+                        this.outer.onLayerMovedFunction(true);
+                    }
+                });
             packStart(moveUpLayerButton , false, false, 2 );
             Button moveDownButton = new Button();
             moveDownButton.setImage(new Image(new Pixbuf("dat/icon/arrow-270.png")));
+            moveDownButton.addOnClicked((Button button){
+                    if(this.outer.onLayerMovedFunction !is null){
+                        this.outer.onLayerMovedFunction(false);
+                    }
+                });
             packStart(moveDownButton , false, false, 2 );
             Button editLayerButton = new Button();
             editLayerButton.setImage(new Image(new Pixbuf("dat/icon/wrench-screwdriver.png")));

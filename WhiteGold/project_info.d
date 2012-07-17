@@ -149,6 +149,8 @@ class ProjectInfo{
         this.layerWindow.onSelectedLayerChangedFunction = &onSelectedLayerChanged;
         this.layerWindow.onLayerVisibilityChangedFunction = &onLayerVisibilityChanged;
         this.layerWindow.onLayerAddedFunction = &onLayerAdded;
+        this.layerWindow.onLayerDeletedFunction = &onLayerDeleted;
+        this.layerWindow.onLayerMovedFunction = &onLayerMoved;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
@@ -177,6 +179,31 @@ class ProjectInfo{
         layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         layerInfos ~= layerInfo;
         layerWindow.Reload();
+    }
+    void onLayerDeleted(){
+        bool Remover(LayerInfo layerInfo){
+            return currentLayerInfo is layerInfo;
+        }
+        if(layerInfos.length <= 1){
+            return;
+        }
+        layerInfos = remove!(Remover)(layerInfos);
+        layerWindow.Reload();
+    }
+    void onLayerMoved(bool isUp){
+        if(isUp){
+            if(currentLayerIndex >= 1){
+                swap(layerInfos[currentLayerIndex], layerInfos[currentLayerIndex - 1]);
+            }
+        }else{
+            if(currentLayerIndex <= layerInfos.length - 2){
+                swap(layerInfos[currentLayerIndex], layerInfos[currentLayerIndex + 1]);
+            }
+        }
+        layerWindow.Reload();
+        editWindow.queueDraw();
+        overviewWindow.queueDraw();
+        partsWindow.Reload();
     }
     void onHideEditWindow(){
         Main.quit();
