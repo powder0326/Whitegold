@@ -172,7 +172,7 @@ class ProjectInfo{
         overviewWindow.queueDraw();
     }
     void onLayerAdded(){
-        LayerInfo layerInfo = new LayerInfo("レイヤー2", true, null);
+        LayerInfo layerInfo = new LayerInfo(format("レイヤー%d",layerInfos.length), true, null);
         layerInfo.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo.chipLayout[0..length] = -1;
         layerInfo.CreateTransparentPixbuf();

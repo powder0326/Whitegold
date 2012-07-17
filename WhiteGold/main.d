@@ -36,8 +36,8 @@ int main(string[] argv){
         baseInfo = new SerializableBaseInfo();
     }
     version(DRAW_SAMPLE){
-//         LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, "dat/sample/mapchip256_a.png");
-        LayerInfo layerInfo1 = new LayerInfo("レイヤー1", true, null);
+//         LayerInfo layerInfo1 = new LayerInfo("レイヤー0", true, "dat/sample/mapchip256_a.png");
+        LayerInfo layerInfo1 = new LayerInfo("レイヤー0", true, null);
         projectInfo.layerInfos ~= layerInfo1;
         layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo1.chipLayout[0..length] = -1;
