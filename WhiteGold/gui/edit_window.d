@@ -69,6 +69,9 @@ class EditWindow : MainWindow{
         }
     }
     bool onDelete(Event e, Widget widget){
+        if(projectInfo.changeExists){
+            return true;
+        }
         with(baseInfo.editWindowInfo){
             getSize(width, height);
             getPosition(x, y);
@@ -119,6 +122,7 @@ class EditWindow : MainWindow{
             }
         }
         projectInfo.projectPath = fs.getFilename();
+        projectInfo.changeExists = false;
         setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath) );
         fs.hide();
     }
@@ -128,6 +132,7 @@ class EditWindow : MainWindow{
             Serializer s = new Serializer(projectInfo.projectPath, FileMode.Out);
             s.describe(serializableProjectInfo);
             delete s;
+            projectInfo.changeExists = false;
             setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath));
         }
     }
@@ -153,6 +158,7 @@ class EditWindow : MainWindow{
                 baseInfo.lastProjectPath ~= tmp ~ "\\";
             }
 			projectInfo.projectPath = filePath;
+            projectInfo.changeExists = false;
 			setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath));
         }
         fs.hide();

@@ -52,6 +52,7 @@ class ProjectInfo{
     int exportEndGridX = 20 - 1;
     int exportEndGridY = 20 - 1;
     string projectPath = null;
+    bool changeExists = false;
     // レイヤー関連
     int currentLayerIndex = 0;
     LayerInfo layerInfos[];
@@ -119,6 +120,7 @@ class ProjectInfo{
             layerInfo.CreateTransparentPixbuf();
             layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         }
+        changeExists = false;
         editWindow.setTitle(APPLICATION_NAME ~ " " ~ (projectPath is null ? "名称未設定" : projectPath) );
         editWindow.Reload();
         layerWindow.Reload();
@@ -379,6 +381,7 @@ class ProjectInfo{
         editWindow.toolArea.editRedoButton.setSensitive(redoQueue.length >= 1);
         editWindow.menuBar.menuItemUndo.setSensitive(undoQueue.length >= 1);
         editWindow.menuBar.menuItemRedo.setSensitive(redoQueue.length >= 1);
+        changeExists = true;
         editWindow.setTitle(APPLICATION_NAME ~ " " ~ (projectPath is null ? "名称未設定" : projectPath) ~ " *");
     }
     void onUndo(){
