@@ -70,7 +70,9 @@ class EditWindow : MainWindow{
     }
     bool onDelete(Event e, Widget widget){
         if(projectInfo.changeExists){
-            return true;
+            if(!OpenYesNoDialog(format("%sへの変更が保存されていません。\n本当に終了しますか？",projectInfo.projectPath))){
+                return true;
+            }
         }
         with(baseInfo.editWindowInfo){
             getSize(width, height);
@@ -90,7 +92,23 @@ class EditWindow : MainWindow{
         }
         return false;
     }
+    bool OpenYesNoDialog(string message){
+        MessageDialog d = new MessageDialog(
+            this,
+            GtkDialogFlags.MODAL,
+            MessageType.QUESTION,
+            ButtonsType.YES_NO,
+            message);
+        int responce = d.run();
+        d.destroy();
+        return responce == ResponseType.GTK_RESPONSE_YES;
+    }
     void OpenNewProject(){
+        if(projectInfo.changeExists){
+            if(!OpenYesNoDialog(format("%sへの変更が保存されていません。\n変更を破棄してよろしいですか？",projectInfo.projectPath))){
+                return;
+            }
+        }
         NewProjectDialog dialog = new NewProjectDialog();
         dialog.setModal(true);
         dialog.showAll();
@@ -99,8 +117,12 @@ class EditWindow : MainWindow{
         }
     }
     void OpenProject(){
+        if(projectInfo.changeExists){
+            if(!OpenYesNoDialog(format("%sへの変更が保存されていません。\n変更を破棄してよろしいですか？",projectInfo.projectPath))){
+                return;
+            }
+        }
         FileChooserDialog fs = new FileChooserDialog("プロジェクト選択", this, FileChooserAction.OPEN);
-//                 fs.setCurrentFolderUri("file:///C:/Programing");
         FileFilter fileFilter = new FileFilter();
         fileFilter.setName("mapファイル");
         fileFilter.addPattern("*.map");
@@ -283,6 +305,11 @@ class EditWindow : MainWindow{
                 SaveProjectWithName();
                 break;
             case "file.import_csv":
+                if(projectInfo.changeExists){
+                    if(!OpenYesNoDialog(format("%sへの変更が保存されていません。\n変更を破棄してよろしいですか？",projectInfo.projectPath))){
+                        return;
+                    }
+                }
                 FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.OPEN);
                 FileFilter fileFilter = new FileFilter();
                 fileFilter.setName("csvファイル");
