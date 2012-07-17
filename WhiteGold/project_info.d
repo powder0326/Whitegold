@@ -119,7 +119,7 @@ class ProjectInfo{
             layerInfo.CreateTransparentPixbuf();
             layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         }
-        editWindow.setTitle(APPLICATION_NAME ~ " " ~ projectPath );
+        editWindow.setTitle(APPLICATION_NAME ~ " " ~ (projectPath is null ? "名称未設定" : projectPath) );
         editWindow.Reload();
         layerWindow.Reload();
         overviewWindow.Reload();
@@ -379,6 +379,7 @@ class ProjectInfo{
         editWindow.toolArea.editRedoButton.setSensitive(redoQueue.length >= 1);
         editWindow.menuBar.menuItemUndo.setSensitive(undoQueue.length >= 1);
         editWindow.menuBar.menuItemRedo.setSensitive(redoQueue.length >= 1);
+        editWindow.setTitle(APPLICATION_NAME ~ " " ~ (projectPath is null ? "名称未設定" : projectPath) ~ " *");
     }
     void onUndo(){
         if(undoQueue.length >= 1){

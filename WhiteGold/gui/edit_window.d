@@ -119,7 +119,7 @@ class EditWindow : MainWindow{
             }
         }
         projectInfo.projectPath = fs.getFilename();
-        setTitle(APPLICATION_NAME ~ " " ~ projectInfo.projectPath );
+        setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath) );
         fs.hide();
     }
     void SaveProject(){
@@ -128,6 +128,7 @@ class EditWindow : MainWindow{
             Serializer s = new Serializer(projectInfo.projectPath, FileMode.Out);
             s.describe(serializableProjectInfo);
             delete s;
+            setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath));
         }
     }
     void SaveProjectWithName(){
@@ -152,7 +153,7 @@ class EditWindow : MainWindow{
                 baseInfo.lastProjectPath ~= tmp ~ "\\";
             }
 			projectInfo.projectPath = filePath;
-			setTitle(APPLICATION_NAME ~ " " ~ projectInfo.projectPath);
+			setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath));
         }
         fs.hide();
     }
