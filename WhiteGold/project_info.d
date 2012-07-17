@@ -165,10 +165,9 @@ class ProjectInfo{
         overviewWindow.queueDraw();
     }
     void onLayerAdded(){
-        LayerInfo layerInfo = new LayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
+        LayerInfo layerInfo = new LayerInfo("レイヤー2", true, null);
         layerInfo.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         layerInfo.chipLayout[0..length] = -1;
-        AddMapchipFile("dat/sample/mapchip256_b.png");
         layerInfo.CreateTransparentPixbuf();
         layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         layerInfos ~= layerInfo;
