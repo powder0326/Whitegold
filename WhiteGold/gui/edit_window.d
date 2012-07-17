@@ -98,6 +98,10 @@ class EditWindow : MainWindow{
     void OpenProject(){
         FileChooserDialog fs = new FileChooserDialog("プロジェクト選択", this, FileChooserAction.OPEN);
 //                 fs.setCurrentFolderUri("file:///C:/Programing");
+        FileFilter fileFilter = new FileFilter();
+        fileFilter.setName("mapファイル");
+        fileFilter.addPattern("*.map");
+        fs.addFilter(fileFilter);
         if(baseInfo.lastProjectPath !is null){
             fs.setCurrentFolder(baseInfo.lastProjectPath);
         }
@@ -134,7 +138,11 @@ class EditWindow : MainWindow{
         if( fs.run() == ResponseType.GTK_RESPONSE_OK )
         {
             SerializableProjectInfo serializableProjectInfo = projectInfo.getSerializable();
-            Serializer s = new Serializer(fs.getFilename(), FileMode.Out);
+            string filePath = fs.getFilename();
+            if(filePath.length < ".map".length || filePath[length - 4..length] != ".map"){
+                filePath ~= ".map";
+            }
+            Serializer s = new Serializer(filePath, FileMode.Out);
             s.describe(serializableProjectInfo);
             delete s;
             string splited[] = fs.getFilename().split("\\");
@@ -267,6 +275,10 @@ class EditWindow : MainWindow{
                 break;
             case "file.import_csv":
                 FileChooserDialog fs = new FileChooserDialog("CSVファイル選択", this.outer, FileChooserAction.OPEN);
+                FileFilter fileFilter = new FileFilter();
+                fileFilter.setName("csvファイル");
+                fileFilter.addPattern("*.csv");
+                fs.addFilter(fileFilter);
                 if(baseInfo.lastImportCsvPath !is null){
                     fs.setCurrentFolder(baseInfo.lastImportCsvPath);
                 }
@@ -292,7 +304,11 @@ class EditWindow : MainWindow{
                 if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
                     string exported = ExportCsv(projectInfo);
-                    std.file.write(fs.getFilename(), exported);
+                    string filePath = fs.getFilename();
+                    if(filePath.length < ".csv".length || filePath[length - 4..length] != ".csv"){
+                        filePath ~= ".csv";
+                    }
+                    std.file.write(filePath, exported);
                     string splited[] = fs.getFilename().split("\\");
                     baseInfo.lastExportCsvPath = "";
                     foreach(tmp;splited[0..length - 1]){
@@ -708,6 +724,19 @@ class EditWindow : MainWindow{
                     }
                 }
                 Selection selection = null;
+                struct ClipBoardInfo{
+                    int layerIndex;
+                    int offsetGridX;
+                    int offsetGridY;
+                    int chipId;
+                    this(int layerIndex, int offsetGridX, int offsetGridY, int chipId){
+                        this.layerIndex = layerIndex;
+                        this.offsetGridX = offsetGridX;
+                        this.offsetGridY = offsetGridY;
+                        this.chipId = chipId;
+                    }
+                }
+                ClipBoardInfo clipBoard[];
                 int moveStartGridX = 0;
                 int moveStartGridY = 0;
                 override EDrawingType type(){
@@ -814,6 +843,25 @@ class EditWindow : MainWindow{
                         case GdkKeysyms.GDK_C:
                             if(event.state & GdkModifierType.CONTROL_MASK){
                                 printf("copy\n");
+                                clipBoard.clear;
+                                if(event.state & GdkModifierType.SHIFT_MASK){
+                                    foreach(i,layerInfo;projectInfo.layerInfos){
+                                        for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
+                                            for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
+                                                int chipId = layerInfo.GetChipId(gridX, gridY);
+                                                clipBoard ~= ClipBoardInfo(i, offsetX, offsetY, chipId);
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                                    for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
+                                        for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
+                                            int chipId = layerInfo.GetChipId(gridX, gridY);
+                                            clipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, offsetX, offsetY, chipId);
+                                        }
+                                    }
+                                }
                             }
                             break;
                             // カット
@@ -827,6 +875,26 @@ class EditWindow : MainWindow{
                         case GdkKeysyms.GDK_v:
                         case GdkKeysyms.GDK_V:
                             if(event.state & GdkModifierType.CONTROL_MASK){
+                                if(clipBoard.length > 0){
+                                    ChipReplaceInfo[] chipReplaceInfos;
+                                    foreach(one;clipBoard){
+                                        int gridX = mouseGridX + one.offsetGridX;
+                                        int gridY = mouseGridY + one.offsetGridY;
+                                        if(gridX >= projectInfo.mapSizeH || gridY >= projectInfo.mapSizeV || gridX < 0 || gridY < 0){
+                                            continue;
+                                        }
+                                        LayerInfo layerInfo = projectInfo.layerInfos[one.layerIndex];
+                                        int gridXInMapchip,gridYInMapchip;
+                                        layerInfo.GetGridXYInMapchip(one.chipId, gridXInMapchip, gridYInMapchip);
+                                        chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, gridXInMapchip, gridYInMapchip, one.layerIndex);
+                                    }
+                                    if(this.outer.outer.outer.onChipReplacedFunction !is null){
+                                        this.outer.outer.outer.onChipReplacedFunction(chipReplaceInfos);
+                                    }
+                                    if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
+                                        this.outer.outer.outer.onChipReplaceCompletedFunction();
+                                    }
+                                }
                                 printf("paste\n");
                             }
                             break;

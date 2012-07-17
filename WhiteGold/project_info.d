@@ -511,6 +511,12 @@ class LayerInfo{
         int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
         return gridX + gridY * mapchipDivNumH;
     }
+    void GetGridXYInMapchip(int chipId, out int gridX, out int gridY){
+        Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
+        int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
+        gridX = chipId % mapchipDivNumH;
+        gridY = chipId / mapchipDivNumH;
+    }
     void CreateTransparentPixbuf(){
         if(transparentPixbuf !is null){
             transparentPixbuf.unref();
