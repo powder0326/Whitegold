@@ -6,6 +6,8 @@ private import gui.layer_window;
 private import gui.parts_window;
 private import gui.overview_window;
 
+static const string APPLICATION_NAME = "Whitegold";
+
 enum EWindowType{
     EDIT,
     LAYER,
@@ -117,6 +119,7 @@ class ProjectInfo{
             layerInfo.CreateTransparentPixbuf();
             layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);
         }
+        editWindow.setTitle(APPLICATION_NAME ~ " " ~ projectPath );
         editWindow.Reload();
         layerWindow.Reload();
         overviewWindow.Reload();

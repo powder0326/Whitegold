@@ -39,7 +39,7 @@ class EditWindow : MainWindow{
     EditWindowToolArea toolArea = null;
     bool showGrid = false;
     this(){
-        super("エディットウインドウ");
+        super(APPLICATION_NAME ~ " " ~ "名称未設定");
 //         setSizeRequest(320, 320);
         setDefaultSize(baseInfo.editWindowInfo.width, baseInfo.editWindowInfo.height);
         printf("EditWindow.this %d,%d,%d,%d\n",baseInfo.editWindowInfo.x, baseInfo.editWindowInfo.y,baseInfo.editWindowInfo.width, baseInfo.editWindowInfo.height);
@@ -119,6 +119,7 @@ class EditWindow : MainWindow{
             }
         }
         projectInfo.projectPath = fs.getFilename();
+        setTitle(APPLICATION_NAME ~ " " ~ projectInfo.projectPath );
         fs.hide();
     }
     void SaveProject(){
@@ -145,13 +146,14 @@ class EditWindow : MainWindow{
             Serializer s = new Serializer(filePath, FileMode.Out);
             s.describe(serializableProjectInfo);
             delete s;
-            string splited[] = fs.getFilename().split("\\");
+            string splited[] = filePath.split("\\");
             baseInfo.lastProjectPath = "";
             foreach(tmp;splited[0..length - 1]){
                 baseInfo.lastProjectPath ~= tmp ~ "\\";
             }
+			projectInfo.projectPath = filePath;
+			setTitle(APPLICATION_NAME ~ " " ~ projectInfo.projectPath);
         }
-        projectInfo.projectPath = fs.getFilename();
         fs.hide();
     }
     void OpenResizeDialog(){
@@ -309,7 +311,7 @@ class EditWindow : MainWindow{
                         filePath ~= ".csv";
                     }
                     std.file.write(filePath, exported);
-                    string splited[] = fs.getFilename().split("\\");
+                    string splited[] = filePath.split("\\");
                     baseInfo.lastExportCsvPath = "";
                     foreach(tmp;splited[0..length - 1]){
                         baseInfo.lastExportCsvPath ~= tmp ~ "\\";
@@ -808,10 +810,28 @@ class EditWindow : MainWindow{
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
                     LayerInfo layerInfo = projectInfo.currentLayerInfo;
                     if(mode == EMode.NORMAL && selection !is null){
-                        switch(event.keyval){
-                            // 削除
-                        case GdkKeysyms.GDK_Delete:
-                            printf("delete\n");
+                        void copyFunc(){
+                            clipBoard.clear;
+                            if(event.state & GdkModifierType.SHIFT_MASK){
+                                foreach(i,layerInfo;projectInfo.layerInfos){
+                                    for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
+                                        for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
+                                            int chipId = layerInfo.GetChipId(gridX, gridY);
+                                            clipBoard ~= ClipBoardInfo(i, offsetX, offsetY, chipId);
+                                        }
+                                    }
+                                }
+                            }else{
+                                LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                                for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
+                                    for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
+                                        int chipId = layerInfo.GetChipId(gridX, gridY);
+                                        clipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, offsetX, offsetY, chipId);
+                                    }
+                                }
+                            }
+                        }
+                        void deleteFunc(){
                             ChipReplaceInfo[] chipReplaceInfos;
                             if(event.state & GdkModifierType.SHIFT_MASK){
                                 for(int layerIndex = 0 ; layerIndex < projectInfo.layerInfos.length ; ++ layerIndex){
@@ -837,31 +857,19 @@ class EditWindow : MainWindow{
                             if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                                 this.outer.outer.outer.onChipReplaceCompletedFunction();
                             }
+                        }
+                        switch(event.keyval){
+                            // 削除
+                        case GdkKeysyms.GDK_Delete:
+                            printf("delete\n");
+                            deleteFunc();
                             break;
                             // コピー
                         case GdkKeysyms.GDK_c:
                         case GdkKeysyms.GDK_C:
                             if(event.state & GdkModifierType.CONTROL_MASK){
                                 printf("copy\n");
-                                clipBoard.clear;
-                                if(event.state & GdkModifierType.SHIFT_MASK){
-                                    foreach(i,layerInfo;projectInfo.layerInfos){
-                                        for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
-                                            for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
-                                                int chipId = layerInfo.GetChipId(gridX, gridY);
-                                                clipBoard ~= ClipBoardInfo(i, offsetX, offsetY, chipId);
-                                            }
-                                        }
-                                    }
-                                }else{
-                                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                                    for(int offsetY = 0, gridY = selection.startGridY ; gridY <= selection.endGridY ; ++ offsetY, ++ gridY){
-                                        for(int offsetX = 0, gridX = selection.startGridX ; gridX <= selection.endGridX ; ++ offsetX, ++ gridX){
-                                            int chipId = layerInfo.GetChipId(gridX, gridY);
-                                            clipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, offsetX, offsetY, chipId);
-                                        }
-                                    }
-                                }
+                                copyFunc();
                             }
                             break;
                             // カット
@@ -869,6 +877,8 @@ class EditWindow : MainWindow{
                         case GdkKeysyms.GDK_X:
                             if(event.state & GdkModifierType.CONTROL_MASK){
                                 printf("cut\n");
+                                copyFunc();
+                                deleteFunc();
                             }
                             break;
                             // ペースト
