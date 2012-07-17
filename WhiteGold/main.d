@@ -121,7 +121,12 @@ CsvProjectInfo ParseCsv(string csvFilePath){
         printf("ReadProjectInfo %d,%d,%d,%d,%d\n",mapSizeH,mapSizeV,partsSizeH,partsSizeV,layerNum);
     }
     string readedText = std.file.readText(csvFilePath);
-    string texts[] = readedText.split("\r\n");
+    string texts[];
+    if(count(readedText, "\r\n") == 0){
+        texts = readedText.split("\n");
+    }else{
+        texts = readedText.split("\r\n");
+    }
     printf("1 texts.length = %d\n",texts.length);
     // 最初の一行目がプロジェクト情報領域
     string projectInfoText = texts[0];
