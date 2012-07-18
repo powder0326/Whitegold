@@ -15,6 +15,18 @@ enum EWindowType{
     OVERVIEW,
 }
 
+enum EAnchor{
+    DIRECTION_1,
+    DIRECTION_2,
+    DIRECTION_3,
+    DIRECTION_4,
+    DIRECTION_5,
+    DIRECTION_6,
+    DIRECTION_7,
+    DIRECTION_8,
+    DIRECTION_9,
+}
+
 struct ChipReplaceInfo{
     int gridX;
     int gridY;
@@ -242,13 +254,13 @@ class ProjectInfo{
         overviewWindow.Reload();
         layerWindow.Reload();
     }
-    void onMapSizeChanged(int mapSizeH, int mapSizeV){
+    void onMapSizeChanged(int mapSizeH, int mapSizeV, EAnchor anchor){
         int oldMapSizeH = this.mapSizeH;
         int oldMapSizeV = this.mapSizeV;
         this.mapSizeH = mapSizeH;
         this.mapSizeV = mapSizeV;
         foreach(layerInfo;layerInfos){
-            layerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV);
+            layerInfo.MapSizeChanged(oldMapSizeH, oldMapSizeV, anchor);
         }
         this.exportStartGridX = 0;
         this.exportStartGridY = 0;
@@ -558,16 +570,83 @@ class LayerInfo{
         transparentPixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
         transparentPixbuf.fill(0x00000000);
     }
-    void MapSizeChanged(int oldMapSizeH, int oldMapSizeV){
+    void MapSizeChanged(int oldMapSizeH, int oldMapSizeV, EAnchor anchor){
         int oldChipLayout[] = chipLayout.dup;
         chipLayout.clear;
         chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
         chipLayout[0..length] = -1;
-        for(int gridY = 0 ; gridY < min(oldMapSizeV, projectInfo.mapSizeV) ; ++ gridY){
-            for(int gridX = 0 ; gridX < min(oldMapSizeH, projectInfo.mapSizeH) ; ++ gridX){
-                int oldLayoutIndex = gridX + gridY * oldMapSizeH;
-                int newLayoutIndex = gridX + gridY * projectInfo.mapSizeH;
-                chipLayout[newLayoutIndex] = oldChipLayout[oldLayoutIndex];
+        // アンカー対応
+        static if(true){
+            int oldStartX,oldStartY;
+            int newStartX,newStartY;
+            int sizeX = min(projectInfo.mapSizeH, oldMapSizeH);
+            int sizeY = min(projectInfo.mapSizeV, oldMapSizeV);
+            // 横
+            switch(anchor){
+            case EAnchor.DIRECTION_1:
+            case EAnchor.DIRECTION_4:
+            case EAnchor.DIRECTION_7:
+                oldStartX = newStartX = 0;
+                break;
+            case EAnchor.DIRECTION_2:
+            case EAnchor.DIRECTION_5:
+            case EAnchor.DIRECTION_8:
+                oldStartX = (oldMapSizeH - 1) - min(oldMapSizeH - 1, projectInfo.mapSizeH - 1);
+                newStartX = (projectInfo.mapSizeH - 1) - min(oldMapSizeH - 1, projectInfo.mapSizeH - 1);
+                if(oldStartX > 0){
+                    oldStartX /= 2;
+                }
+                if(newStartX > 0){
+                    newStartX /= 2;
+                }
+                break;
+            case EAnchor.DIRECTION_3:
+            case EAnchor.DIRECTION_6:
+            case EAnchor.DIRECTION_9:
+                oldStartX = (oldMapSizeH - 1) - min(oldMapSizeH - 1, projectInfo.mapSizeH - 1);
+                newStartX = (projectInfo.mapSizeH - 1) - min(oldMapSizeH - 1, projectInfo.mapSizeH - 1);
+                break;
+            }
+            // 縦
+            switch(anchor){
+            case EAnchor.DIRECTION_7:
+            case EAnchor.DIRECTION_8:
+            case EAnchor.DIRECTION_9:
+                oldStartY = newStartY = 0;
+                break;
+            case EAnchor.DIRECTION_4:
+            case EAnchor.DIRECTION_5:
+            case EAnchor.DIRECTION_6:
+                oldStartY = (oldMapSizeV - 1) - min(oldMapSizeV - 1, projectInfo.mapSizeV - 1);
+                newStartY = (projectInfo.mapSizeV - 1) - min(oldMapSizeV - 1, projectInfo.mapSizeV - 1);
+                if(oldStartY > 0){
+                    oldStartY /= 2;
+                }
+                if(newStartY > 0){
+                    newStartY /= 2;
+                }
+                break;
+            case EAnchor.DIRECTION_1:
+            case EAnchor.DIRECTION_2:
+            case EAnchor.DIRECTION_3:
+                oldStartY = (oldMapSizeV - 1) - min(oldMapSizeV - 1, projectInfo.mapSizeV - 1);
+                newStartY = (projectInfo.mapSizeV - 1) - min(oldMapSizeV - 1, projectInfo.mapSizeV - 1);
+                break;
+            }
+            for(int oldY = oldStartY, newY = newStartY, countY = 0 ; countY < sizeY ; ++ oldY, ++ newY, ++ countY){
+                for(int oldX = oldStartX, newX = newStartX, countX = 0 ; countX < sizeX ; ++ oldX, ++ newX, ++ countX){
+                    int oldLayoutIndex = oldX + oldY * oldMapSizeH;
+                    int newLayoutIndex = newX + newY * projectInfo.mapSizeH;
+                    chipLayout[newLayoutIndex] = oldChipLayout[oldLayoutIndex];
+                }
+            }
+        }else{
+            for(int gridY = 0 ; gridY < min(oldMapSizeV, projectInfo.mapSizeV) ; ++ gridY){
+                for(int gridX = 0 ; gridX < min(oldMapSizeH, projectInfo.mapSizeH) ; ++ gridX){
+                    int oldLayoutIndex = gridX + gridY * oldMapSizeH;
+                    int newLayoutIndex = gridX + gridY * projectInfo.mapSizeH;
+                    chipLayout[newLayoutIndex] = oldChipLayout[oldLayoutIndex];
+                }
             }
         }
         layoutPixbuf = CreatePixbufFromLayout(this);

@@ -23,7 +23,7 @@ enum EDrawingType{
 class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
-    void delegate(int,int) onMapSizeChangedFunction;
+    void delegate(int,int,EAnchor) onMapSizeChangedFunction;
     void delegate(int,int,int,int) onExportSettingChangedFunction;
     void delegate(int,int,int,int) onNewProjectFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;

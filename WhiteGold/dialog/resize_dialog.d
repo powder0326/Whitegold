@@ -4,9 +4,13 @@ private import project_info;
 private import main;
 
 class ResizeDialog : Window{
-    void delegate(int,int) onMapSizeChangedFunction;
+    void delegate(int,int,EAnchor) onMapSizeChangedFunction;
+    Button anchorButtons[EAnchor.max + 1];
+    Pixbuf anchorPixbuf = null;
+    EAnchor currentAnchor = EAnchor.DIRECTION_7;
     this(){
         super("マップのリサイズ");
+        anchorPixbuf = new Pixbuf("dat/icon/picture-sunset.png");
         setBorderWidth(10);
         HBox mainBox = new HBox(false, 5);
         add(mainBox);
@@ -34,6 +38,33 @@ class ResizeDialog : Window{
         leftBox.packStart(frame2, false, false, 0);
         mainBox.packStart(leftBox, false, false, 0);
 
+        Table table3 = new Table(0,0,true);
+        foreach(ref anchorButton;anchorButtons){
+            anchorButton = new Button();
+            anchorButton.addOnClicked((Button button){
+                    for(int i = 0 ; i <= EAnchor.max ; ++ i){
+                        if(anchorButtons[i] is button){
+                            anchorButtons[i].setImage(new Image(anchorPixbuf));
+                            currentAnchor = cast(EAnchor)i;
+                        }else{
+                            anchorButtons[i].setImage(null);
+                        }
+                    }
+                });
+        }
+        anchorButtons[currentAnchor].setImage(new Image(anchorPixbuf));
+        table3.attach(anchorButtons[EAnchor.DIRECTION_7],0,1,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_8],1,2,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_9],2,3,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_4],0,1,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_5],1,2,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_6],2,3,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_1],0,1,2,3,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_2],1,2,2,3,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table3.attach(anchorButtons[EAnchor.DIRECTION_3],2,3,2,3,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        Frame frame3 = new Frame(table3, "アンカー");
+        leftBox.packStart(frame3, false, false, 0);
+        mainBox.packStart(leftBox, false, false, 0);
 
         VBox rightBox = new VBox(false, 5);
         Button buttonOk = new Button("OK");
@@ -41,7 +72,8 @@ class ResizeDialog : Window{
                 if(onMapSizeChangedFunction !is null){
                     onMapSizeChangedFunction(
                         cast(int)spinMapH.getValue(),
-                        cast(int)spinMapV.getValue());
+                        cast(int)spinMapV.getValue(),
+                        currentAnchor);
                 }
                 destroy();
             });
@@ -52,7 +84,10 @@ class ResizeDialog : Window{
             });
         rightBox.packStart(buttonCancel, false, false, 0);
         mainBox.packStart(rightBox, false, false, 0);
-        
         showAll();
+    }
+    ~this(){
+        anchorPixbuf.unref;
+        delete anchorPixbuf;
     }
 }
