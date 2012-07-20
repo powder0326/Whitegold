@@ -14,14 +14,99 @@ version(UNUSE_TREEVIEW){
         void delegate() onLayerDeletedFunction;
         void delegate(bool isUp) onLayerMovedFunction;
         VBox mainBox;
-        class LayerListview : VBox{
+/**
+   レイヤー用ウインドウ上部のメニュー
+
+   レイヤーの作成や移動を行う。
+*/
+        class LayerWindowMenubar : MenuBar{
+            this(){
+                super();
+                AccelGroup accelGroup = new AccelGroup();
+                this.outer.addAccelGroup(accelGroup);
+                Menu editMenu = append("編集");
+                editMenu.append(new MenuItem(&onMenuActivate, "新規レイヤー作成","edit.add_layer", true));
+                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを削除","edit.delete_layer", true));
+                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを隠す","edit.hide_layer", true));
+                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを上に移動","edit.moveup_layer", true));
+                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを下に移動","edit.movedown_layer", true));
+                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーの設定","edit.edit_layer", true));
+            }
+            void onMenuActivate(MenuItem menuItem)
+            {
+                string action = menuItem.getActionName();
+                switch( action )
+                {
+                default:
+                    break;
+                }
+            }
+        }
+/**
+   レイヤー用ウインドウ上部のツールボタン郡表示領域
+
+   ここの領域のボタンを押すといろいろ処理する。メニューとかぶる項目がほとんど。
+*/
+        class LayerWindowToolArea : HBox{
+            this(){
+                super(false,0);
+                setBorderWidth(2);
+                Button addLayerButton = new Button();
+                addLayerButton.setImage(new Image(new Pixbuf("dat/icon/layer--plus.png")));
+                addLayerButton.addOnClicked((Button button){
+                        if(this.outer.onLayerAddedFunction !is null){
+                            this.outer.onLayerAddedFunction();
+                        }
+                    });
+                packStart(addLayerButton , false, false, 2 );
+                Button deleteLayerButton = new Button();
+                deleteLayerButton.setImage(new Image(new Pixbuf("dat/icon/cross-circle.png")));
+                deleteLayerButton.addOnClicked((Button button){
+                        if(this.outer.onLayerDeletedFunction !is null){
+                            this.outer.onLayerDeletedFunction();
+                        }
+                    });
+                packStart(deleteLayerButton , false, false, 2 );
+                Button moveUpLayerButton = new Button();
+                moveUpLayerButton.setImage(new Image(new Pixbuf("dat/icon/arrow-090.png")));
+                moveUpLayerButton.addOnClicked((Button button){
+                        if(this.outer.onLayerMovedFunction !is null){
+                            this.outer.onLayerMovedFunction(true);
+                        }
+                    });
+                packStart(moveUpLayerButton , false, false, 2 );
+                Button moveDownButton = new Button();
+                moveDownButton.setImage(new Image(new Pixbuf("dat/icon/arrow-270.png")));
+                moveDownButton.addOnClicked((Button button){
+                        if(this.outer.onLayerMovedFunction !is null){
+                            this.outer.onLayerMovedFunction(false);
+                        }
+                    });
+                packStart(moveDownButton , false, false, 2 );
+                Button editLayerButton = new Button();
+                editLayerButton.setImage(new Image(new Pixbuf("dat/icon/wrench-screwdriver.png")));
+                packStart(editLayerButton , false, false, 2 );
+                ToggleButton showHideLayerButton = new ToggleButton();
+                showHideLayerButton.setImage(new Image(new Pixbuf("dat/icon/eye.png")));
+                packStart(showHideLayerButton , false, false, 2 );
+            }
+        }
+/**
+   レイヤー用ウインドウのレイヤー一覧表示領域
+
+   レイヤー毎にレイヤー名を表示。左のチェックボックスクリックで可視、非可視の切り替え可能。
+*/
+        class LayerWindowListview : VBox{
             class LayerInfoBox : EventBox{
                 int layerIndex;
+                CheckButton checkButton;
+                Label label;
                 this(int layerIndex){
                     super();
                     this.layerIndex = layerIndex;
                     HBox hbox = new HBox(false,0);
-                    CheckButton checkButton = new CheckButton();
+                    hbox.setBorderWidth(3);
+                    checkButton = new CheckButton();
                     checkButton.setActive(1);
                     checkButton.addOnClicked((Button button){
                             CheckButton checkButton = cast(CheckButton)button;
@@ -31,7 +116,7 @@ version(UNUSE_TREEVIEW){
                             }
                         });
                     hbox.packStart(checkButton,false,false,0);
-                    Label label = new Label(format("レイヤー%d",layerIndex));
+                    label = new Label(format("レイヤー%d",layerIndex));
                     hbox.packStart(label,false,false,0);
                     add(hbox);
                     addOnButtonPress((GdkEventButton* event, Widget widget){
@@ -49,22 +134,34 @@ version(UNUSE_TREEVIEW){
                             return true;
                         });
                 }
+                void name(string name){
+                    label.setText(name);
+                }
+                void active(bool flag){
+                    checkButton.setActive(flag);
+                }
             };
             LayerInfoBox layerInfoBoxes[];
             this(){
                 super(false,0);
-                for(int i = 0 ; i < 4 ; ++ i){
+                foreach(i,layerInfo ; projectInfo.layerInfos){
                     layerInfoBoxes ~= new LayerInfoBox(i);
+                    layerInfoBoxes[i].active = layerInfo.visible;
+                    layerInfoBoxes[i].name = layerInfo.name;
                     packStart(layerInfoBoxes[i],false,false,0);
                 }
             }
         }
+        LayerWindowListview layerWindowListview = null;
         this(){
             super("レイヤー");
             setDefaultSize(baseInfo.layerWindowInfo.width, baseInfo.layerWindowInfo.height);
             setIcon(new Pixbuf("dat/icon/layers.png"));
             mainBox = new VBox(false,0);
-            mainBox.packStart(new LayerListview(),false,false,0);
+            mainBox.packStart(new LayerWindowMenubar(),false,false,0);
+            mainBox.packStart(new LayerWindowToolArea(),false,false,0);
+            layerWindowListview = new LayerWindowListview();
+            mainBox.packStart(layerWindowListview,false,false,0);
             add(mainBox);
             setDeletable(false);
             addOnRealize((Widget widget){
@@ -72,6 +169,10 @@ version(UNUSE_TREEVIEW){
                 });
         }
         void Reload(){
+            layerWindowListview.destroy();
+            layerWindowListview = new LayerWindowListview();
+            mainBox.packStart(layerWindowListview,true,true,0);
+            mainBox.showAll();
         }
     }
 }
