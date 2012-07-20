@@ -310,6 +310,11 @@ class ProjectInfo{
     void onSelectionChanged(double startX, double startY, double endX, double endY){
         printf("onSelectionChanged 1\n");
         LayerInfo layerInfo = currentLayerInfo;
+		bool forceDraw = false;
+		if(layerInfo.gridSelection is null){
+			layerInfo.generateGridSelection();
+			forceDraw = true;
+		}
         int oldStartGridX = layerInfo.gridSelection.startGridX;
         int oldStartGridY = layerInfo.gridSelection.startGridY;
         int oldEndGridX = layerInfo.gridSelection.endGridX;
@@ -319,7 +324,7 @@ class ProjectInfo{
         layerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
         layerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
         // グリッド座標が変わっていない場合は再描画必要ない
-        if(oldStartGridX != layerInfo.gridSelection.startGridX || oldStartGridY != layerInfo.gridSelection.startGridY || oldEndGridX != layerInfo.gridSelection.endGridX || oldEndGridY != layerInfo.gridSelection.endGridY){
+        if(forceDraw || oldStartGridX != layerInfo.gridSelection.startGridX || oldStartGridY != layerInfo.gridSelection.startGridY || oldEndGridX != layerInfo.gridSelection.endGridX || oldEndGridY != layerInfo.gridSelection.endGridY){
             editWindow.UpdateGuide();
             editWindow.queueDraw();
             partsWindow.queueDraw();
@@ -519,6 +524,9 @@ class LayerInfo{
         ret.chipLayout = chipLayout;
         return ret;
     }
+    void generateGridSelection(){
+        gridSelection = new GridSelection();
+    }
     void initBySerializable(SerializableLayerInfo serializableLayerInfo){
         printf("LayerInfo.initBySerializable %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));
         name = serializableLayerInfo.name;
@@ -658,15 +666,20 @@ class LayerInfo{
         Pixbuf mapchip = projectInfo.mapchipPixbufList[mapchipFilePath];
         int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
         int mapchipDivNumV = cast(int)mapchip.getHeight() / projectInfo.partsSizeV;
+        bool found = false;
         with(gridSelection){
             for(int gridY = 0 ; gridY < mapchipDivNumV ; ++ gridY){
                 for(int gridX = 0 ; gridX < mapchipDivNumH ; ++ gridX){
                     if(chipId == GetChipIdInMapchip(gridX, gridY)){
                         startGridX = endGridX = gridX;
                         startGridY = endGridY = gridY;
+                        found = true;
                     }
                 }
             }
+        }
+        if(!found){
+            gridSelection = null;
         }
     }
     void Reset(){

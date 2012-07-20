@@ -603,15 +603,19 @@ class EditWindow : MainWindow{
                 printf("drawChip 1\n");
                 ChipReplaceInfo[] chipReplaceInfos;
                 LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                with(layerInfo.gridSelection){
-                    for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
-                        for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
-                            if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
-                                continue;
+                if(layerInfo.gridSelection !is null){
+                    with(layerInfo.gridSelection){
+                        for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
+                            for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
+                                if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
+                                    continue;
+                                }
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y, projectInfo.currentLayerIndex);
                             }
-                            chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y, projectInfo.currentLayerIndex);
                         }
                     }
+                }else{
+                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
                 }
                 if(this.outer.outer.onChipReplacedFunction !is null){
                     this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
@@ -630,14 +634,22 @@ class EditWindow : MainWindow{
                 printf("tilingChip 1\n");
                 ChipReplaceInfo[] chipReplaceInfos;
                 LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                with(layerInfo.gridSelection){
-                    int width = endGridX - startGridX + 1;
-                    int height = endGridY - startGridY + 1;
+                if(layerInfo.gridSelection !is null){
+                    with(layerInfo.gridSelection){
+                        int width = endGridX - startGridX + 1;
+                        int height = endGridY - startGridY + 1;
+                        for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
+                            for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
+                                int x = startGridX + (gridX - gridX1) % width;
+                                int y = startGridY + (gridY - gridY1) % height;
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y, projectInfo.currentLayerIndex);
+                            }
+                        }
+                    }
+                }else{
                     for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
                         for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
-                            int x = startGridX + (gridX - gridX1) % width;
-                            int y = startGridY + (gridY - gridY1) % height;
-                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y, projectInfo.currentLayerIndex);
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
                         }
                     }
                 }
@@ -1000,7 +1012,7 @@ class EditWindow : MainWindow{
                                 if(currentChipId == startChipId){
                                     editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
                                     tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY, projectInfo.currentLayerIndex);
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
                                 }else{
                                     rightGridX = gridX;
                                     break;
@@ -1013,7 +1025,7 @@ class EditWindow : MainWindow{
                                 if(currentChipId == startChipId){
                                     editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
                                     tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY, projectInfo.currentLayerIndex);
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
                                 }else{
                                     leftGridX = gridX;
                                     break;
@@ -1172,7 +1184,7 @@ class EditWindow : MainWindow{
                     });
             }
             bool exposeCallback(GdkEventExpose* event, Widget widget){
-//                 printf("EditWindow.exposeCallback 1\n");
+                printf("EditWindow.exposeCallback 1\n");
                 Drawable dr = getWindow();
                 GC gc = new GC(dr);
                 // 全てのレイヤーに対して
@@ -1213,8 +1225,8 @@ class EditWindow : MainWindow{
                     if(chipDrawStrategy.type != EDrawingType.SELECT){
                         if(guideMode == EGuideMode.CURSOR){
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                            int selectWidth = layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1;
-                            int selectHeight = layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1;
+                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
                             int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
                             int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
                             int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
@@ -1225,8 +1237,8 @@ class EditWindow : MainWindow{
                         else if(guideMode == EGuideMode.TILING){
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                            int selectWidth = layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1;
-                            int selectHeight = layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1;
+                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
                             int startGridX = 0;
                             int i = 0;
                             for(;;++i){
@@ -1298,7 +1310,7 @@ class EditWindow : MainWindow{
                         dr.drawRectangle(gc, false, x, y, width, height);
                     }
                 }
-//                 printf("EditWindow.exposeCallback 2\n");
+                printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
             bool onButtonPress(GdkEventButton* event, Widget widget){
