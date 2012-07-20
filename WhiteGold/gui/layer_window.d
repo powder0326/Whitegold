@@ -103,6 +103,7 @@ version(UNUSE_TREEVIEW){
                 Label label;
                 this(int layerIndex){
                     super();
+                    modifyBg(GtkStateType.ACTIVE, new Color(100,100,255));
                     this.layerIndex = layerIndex;
                     HBox hbox = new HBox(false,0);
                     hbox.setBorderWidth(3);
@@ -123,9 +124,11 @@ version(UNUSE_TREEVIEW){
                             printf("EventBox.onClicked\n");
                             foreach(i, layerInfoBox ; this.outer.layerInfoBoxes){
                                 if(i == layerIndex){
-                                    layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(200,200,200));
+                                    layerInfoBox.setState(GtkStateType.ACTIVE);
+//                                     layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(200,200,200));
                                 }else{
-                                    layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(255,255,255));
+                                    layerInfoBox.setState(GtkStateType.NORMAL);
+//                                     layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(255,255,255));
                                 }
                             }
                             if(this.outer.outer.onSelectedLayerChangedFunction !is null){
@@ -148,6 +151,9 @@ version(UNUSE_TREEVIEW){
                     layerInfoBoxes ~= new LayerInfoBox(i);
                     layerInfoBoxes[i].active = layerInfo.visible;
                     layerInfoBoxes[i].name = layerInfo.name;
+                    if(i == 0){
+                        layerInfoBoxes[i].setState(GtkStateType.ACTIVE);
+                    }
                     packStart(layerInfoBoxes[i],false,false,0);
                 }
             }
@@ -161,7 +167,7 @@ version(UNUSE_TREEVIEW){
             mainBox.packStart(new LayerWindowMenubar(),false,false,0);
             mainBox.packStart(new LayerWindowToolArea(),false,false,0);
             layerWindowListview = new LayerWindowListview();
-            mainBox.packStart(layerWindowListview,false,false,0);
+            mainBox.packStart(layerWindowListview,true,true,0);
             add(mainBox);
             setDeletable(false);
             addOnRealize((Widget widget){
