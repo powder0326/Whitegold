@@ -333,7 +333,7 @@ class ProjectInfo{
      */
     EditInfo tmpEditInfosTree[][];
     void onChipReplaced(ChipReplaceInfo[] chipReplaceInfos){
-        printf("onChipReplaced 1\n");
+//         printf("onChipReplaced 1\n");
         EditInfo editInfos[];
         foreach(chipReplaceInfo;chipReplaceInfos){
             with(chipReplaceInfo){
@@ -348,13 +348,13 @@ class ProjectInfo{
                 int layoutIndex = gridX + gridY * mapSizeH;
                 editInfos ~= EditInfo(layerIndex,layoutIndex,oldChipId,newChipId);
                 layerInfo.ReplaceChip(gridX,gridY,newChipId);
-                printf("onChipReplaced[%d:(%d,%d)(%d->%d)]",layerIndex,gridX,gridY,oldChipId,newChipId);
+//                 printf("onChipReplaced[%d:(%d,%d)(%d->%d)]",layerIndex,gridX,gridY,oldChipId,newChipId);
             }
         }
         tmpEditInfosTree ~= editInfos;
         editWindow.queueDraw();
         overviewWindow.queueDraw();
-        printf("onChipReplaced 2\n");
+//         printf("onChipReplaced 2\n");
     }
     void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
         LayerInfo layerInfo = currentLayerInfo;

@@ -12,6 +12,7 @@ public import gtk.SpinButton;
 public import gtk.Adjustment;
 public import gtk.Button;
 public import gtk.ToggleButton;
+public import gtk.CheckButton;
 public import gtk.VBox;
 public import gtk.HBox;
 public import gtk.EventBox;
