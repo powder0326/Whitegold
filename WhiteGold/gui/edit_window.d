@@ -12,8 +12,6 @@ import dialog.export_setting_dialog;
 
    マップチップを配置していくウインドウ。このウインドウはアプリ起動時に開かれ、アプリを終了するまで閉じない。
  */
-version = USE_SCANLINE;
-
 enum EDrawingType{
     PEN,
     TILING_PEN,
@@ -997,113 +995,77 @@ class EditWindow : MainWindow{
                     int i = 0;
                     ChipReplaceInfo[] chipReplaceInfos;
                     int[] tmpChipLayout = layerInfo.chipLayout.dup;
-                    version(USE_SCANLINE){
-                        while(infos.length>= 1){
-                            Info info = infos[$-1];
-                            infos = infos[0..$-1];
-                            // 指定座標から左右を検索
-                            int leftGridX = 0;
-						    int rightGridX =  projectInfo.mapSizeH - 1;
-                            // 右方向
-                            int gridY = info.gridY;
-                            for(int gridX = info.gridX ; gridX < projectInfo.mapSizeH ; ++ gridX){
-                                int tmpLayoutIndex = gridY * projectInfo.mapSizeH + gridX;
-                                int currentChipId = tmpChipLayout[tmpLayoutIndex];
-                                if(currentChipId == startChipId){
-                                    editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
-                                    tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
-                                }else{
-                                    rightGridX = gridX;
-                                    break;
-                                }
-                            }
-                            // 左方向
-                            for(int gridX = info.gridX - 1; gridX >= 0 ; -- gridX){
-                                int tmpLayoutIndex = gridY * projectInfo.mapSizeH + gridX;
-                                int currentChipId = tmpChipLayout[tmpLayoutIndex];
-                                if(currentChipId == startChipId){
-                                    editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
-                                    tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
-                                }else{
-                                    leftGridX = gridX;
-                                    break;
-                                }
-                            }
-                            // 上下のラインでキュー追加
-                            // 上
-                            if(gridY - 1 >= 0){
-                                bool lastGridOk = false;
-                                for(int gridX = leftGridX ; gridX <= rightGridX ; ++ gridX){
-                                    int tmpLayoutIndex = (gridY - 1) * projectInfo.mapSizeH + gridX;
-                                    int currentChipId = tmpChipLayout[tmpLayoutIndex];
-                                    if(currentChipId == startChipId){
-                                        lastGridOk = true;
-                                        if(gridX == rightGridX){
-                                            infos ~= Info(gridX, gridY - 1);
-                                        }
-                                    }else{
-                                        if(lastGridOk){
-                                            infos ~= Info(gridX - 1, gridY - 1);
-                                        }
-                                        lastGridOk = false;
-                                    }
-                                }
-                            }
-                            // 下
-                            if(gridY + 1 < projectInfo.mapSizeV){
-                                bool lastGridOk = false;
-                                for(int gridX = leftGridX ; gridX <= rightGridX ; ++ gridX){
-                                    int tmpLayoutIndex = (gridY + 1) * projectInfo.mapSizeH + gridX;
-                                    int currentChipId = tmpChipLayout[tmpLayoutIndex];
-                                    if(currentChipId == startChipId){
-                                        lastGridOk = true;
-                                        if(gridX == rightGridX){
-                                            infos ~= Info(gridX, gridY + 1);
-                                        }
-                                    }else{
-                                        if(lastGridOk){
-                                            infos ~= Info(gridX - 1, gridY + 1);
-                                        }
-                                        lastGridOk = false;
-                                    }
-                                }
-                            }
-                        }
-                    }else{
-                        while(infos.length>= 1){
-                            Info info = infos[$-1];
-                            infos = infos[0..$-1];
-                            int tmpLayoutIndex = info.gridY * projectInfo.mapSizeH + info.gridX;
+                    while(infos.length>= 1){
+                        Info info = infos[$-1];
+                        infos = infos[0..$-1];
+                        // 指定座標から左右を検索
+                        int leftGridX = 0;
+                        int rightGridX =  projectInfo.mapSizeH - 1;
+                        // 右方向
+                        int gridY = info.gridY;
+                        for(int gridX = info.gridX ; gridX < projectInfo.mapSizeH ; ++ gridX){
+                            int tmpLayoutIndex = gridY * projectInfo.mapSizeH + gridX;
                             int currentChipId = tmpChipLayout[tmpLayoutIndex];
                             if(currentChipId == startChipId){
                                 editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
                                 tmpChipLayout[tmpLayoutIndex] = newChipId;
-                                chipReplaceInfos ~= ChipReplaceInfo(info.gridX, info.gridY, layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
-                                // 領域を超えない範囲で周り4方向のキュー追加
-                                int leftGridX = info.gridX - 1;
-                                int leftGridY = info.gridY;
-                                if(leftGridX >= 0){
-                                    infos ~= Info(leftGridX, leftGridY);
-                                }
-                                int rightGridX = info.gridX + 1;
-                                int rightGridY = info.gridY;
-                                if(rightGridX < projectInfo.mapSizeH){
-                                    infos ~= Info(rightGridX, rightGridY);
-                                }
-                                int upGridX = info.gridX;
-                                int upGridY = info.gridY - 1;
-                                if(upGridY >= 0){
-                                    infos ~= Info(upGridX, upGridY);
-                                }
-                                int downGridX = info.gridX;
-                                int downGridY = info.gridY + 1;
-                                if(downGridY < projectInfo.mapSizeV){
-                                    infos ~= Info(downGridX, downGridY);
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
+                            }else{
+                                rightGridX = gridX;
+                                break;
+                            }
+                        }
+                        // 左方向
+                        for(int gridX = info.gridX - 1; gridX >= 0 ; -- gridX){
+                            int tmpLayoutIndex = gridY * projectInfo.mapSizeH + gridX;
+                            int currentChipId = tmpChipLayout[tmpLayoutIndex];
+                            if(currentChipId == startChipId){
+                                editInfos ~= EditInfo(projectInfo.currentLayerIndex, tmpLayoutIndex, currentChipId, newChipId);
+                                tmpChipLayout[tmpLayoutIndex] = newChipId;
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
+                            }else{
+                                leftGridX = gridX;
+                                break;
+                            }
+                        }
+                        // 上下のラインでキュー追加
+                        // 上
+                        if(gridY - 1 >= 0){
+                            bool lastGridOk = false;
+                            for(int gridX = leftGridX ; gridX <= rightGridX ; ++ gridX){
+                                int tmpLayoutIndex = (gridY - 1) * projectInfo.mapSizeH + gridX;
+                                int currentChipId = tmpChipLayout[tmpLayoutIndex];
+                                if(currentChipId == startChipId){
+                                    lastGridOk = true;
+                                    if(gridX == rightGridX){
+                                        infos ~= Info(gridX, gridY - 1);
+                                    }
+                                }else{
+                                    if(lastGridOk){
+                                        infos ~= Info(gridX - 1, gridY - 1);
+                                    }
+                                    lastGridOk = false;
                                 }
                             }
-                            ++ i;
+                        }
+                        // 下
+                        if(gridY + 1 < projectInfo.mapSizeV){
+                            bool lastGridOk = false;
+                            for(int gridX = leftGridX ; gridX <= rightGridX ; ++ gridX){
+                                int tmpLayoutIndex = (gridY + 1) * projectInfo.mapSizeH + gridX;
+                                int currentChipId = tmpChipLayout[tmpLayoutIndex];
+                                if(currentChipId == startChipId){
+                                    lastGridOk = true;
+                                    if(gridX == rightGridX){
+                                        infos ~= Info(gridX, gridY + 1);
+                                    }
+                                }else{
+                                    if(lastGridOk){
+                                        infos ~= Info(gridX - 1, gridY + 1);
+                                    }
+                                    lastGridOk = false;
+                                }
+                            }
                         }
                     }
                     printf("Fill %ld ms\n",(std.datetime.Clock.currStdTime() - time) / 10000);
@@ -1221,50 +1183,46 @@ class EditWindow : MainWindow{
                         );
                 }
                 // カーソル位置の四角描画
-                version(DRAW_GUIDE_DIRECT){
-                    if(chipDrawStrategy.type != EDrawingType.SELECT){
-                        if(guideMode == EGuideMode.CURSOR){
-                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
-                            int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
-                            int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
-                            int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
-                            int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
-                            gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                            dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                if(chipDrawStrategy.type != EDrawingType.SELECT){
+                    if(guideMode == EGuideMode.CURSOR){
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                        int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
+                        int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
+                        int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
+                        int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                    }
+                    else if(guideMode == EGuideMode.TILING){
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                        int startGridX = 0;
+                        int i = 0;
+                        for(;;++i){
+                            startGridX = tilingStartGridX - selectWidth * i;
+                            if(startGridX <= 0){
+                                break;
+                            }
                         }
-                        else if(guideMode == EGuideMode.TILING){
-                            LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                            gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
-                            int startGridX = 0;
-                            int i = 0;
-                            for(;;++i){
-                                startGridX = tilingStartGridX - selectWidth * i;
-                                if(startGridX <= 0){
-                                    break;
-                                }
+                        int startGridY = 0;
+                        int j = 0;
+                        for(;;++j){
+                            startGridY = tilingStartGridY - selectHeight * j;
+                            if(startGridY <= 0){
+                                break;
                             }
-                            int startGridY = 0;
-                            int j = 0;
-                            for(;;++j){
-                                startGridY = tilingStartGridY - selectHeight * j;
-                                if(startGridY <= 0){
-                                    break;
-                                }
-                            }
-                            for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
-                                for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
-                                    gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                                    dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
-                                }
+                        }
+                        for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
+                            for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
+                                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                                dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
                             }
                         }
                     }
-                }else{
-                    dr.drawPixbuf(guidePixbuf, 0, 0);
                 }
                 // 選択領域描画
                 if(chipDrawStrategy.type == EDrawingType.SELECT){

@@ -35,15 +35,14 @@ int main(string[] argv){
     }else{
         baseInfo = new SerializableBaseInfo();
     }
-    version(DRAW_SAMPLE){
 //         LayerInfo layerInfo1 = new LayerInfo("レイヤー0", true, "dat/sample/mapchip256_a.png");
-        LayerInfo layerInfo1 = new LayerInfo("レイヤー0", true, null);
-        projectInfo.layerInfos ~= layerInfo1;
-        layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
-        layerInfo1.chipLayout[0..length] = -1;
+    LayerInfo layerInfo1 = new LayerInfo("レイヤー0", true, null);
+    projectInfo.layerInfos ~= layerInfo1;
+    layerInfo1.chipLayout.length = projectInfo.mapSizeH * projectInfo.mapSizeV;
+    layerInfo1.chipLayout[0..length] = -1;
 //         projectInfo.AddMapchipFile("dat/sample/mapchip256_a.png");
-        layerInfo1.CreateTransparentPixbuf();
-        layerInfo1.layoutPixbuf = CreatePixbufFromLayout(layerInfo1);
+    layerInfo1.CreateTransparentPixbuf();
+    layerInfo1.layoutPixbuf = CreatePixbufFromLayout(layerInfo1);
 
 //         NormalLayerInfo layerInfo2 = new NormalLayerInfo("レイヤー2", true, "dat/sample/mapchip256_b.png");
 //         projectInfo.layerInfos ~= layerInfo2;
@@ -52,7 +51,6 @@ int main(string[] argv){
 //         projectInfo.AddMapchipFile("dat/sample/mapchip256_b.png");
 //         layerInfo2.CreateTransparentPixbuf();
 //         layerInfo2.layoutPixbuf = CreatePixbufFromLayout(layerInfo2);
-    }
     EditWindow editWindow = new EditWindow();
     projectInfo.SetEditWindow(editWindow);
     editWindow.showAll();
