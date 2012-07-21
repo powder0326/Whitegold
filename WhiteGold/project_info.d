@@ -323,6 +323,7 @@ class ProjectInfo{
         layerInfo.gridSelection.startGridY = cast(int)(startY / partsSizeV);
         layerInfo.gridSelection.endGridX = cast(int)(endX / partsSizeH);
         layerInfo.gridSelection.endGridY = cast(int)(endY / partsSizeV);
+        layerInfo.clipBoard.clear;
         // グリッド座標が変わっていない場合は再描画必要ない
         if(forceDraw || oldStartGridX != layerInfo.gridSelection.startGridX || oldStartGridY != layerInfo.gridSelection.startGridY || oldEndGridX != layerInfo.gridSelection.endGridX || oldEndGridY != layerInfo.gridSelection.endGridY){
             editWindow.UpdateGuide();
@@ -476,8 +477,10 @@ class ProjectInfo{
                 layerInfo.SetSelectionByChipId(clipBoard[0].chipId);
                 partsWindow.queueDraw();
             }else{
-                // Todo!
                 // 複数マスが選択された場合はクリップボードに格納し、そのチップ群を描画するように。
+                layerInfo.clipBoard = clipBoard;
+                layerInfo.gridSelection = null;
+                partsWindow.queueDraw();
             }
         }
     }else{
@@ -530,6 +533,28 @@ class LayerInfo{
     Pixbuf transparentPixbuf;
     GridSelection gridSelection = null;
     ClipBoardInfo clipBoard[];
+    int GetClipBoardWidth(){
+        int minValue,maxValue;
+        if(clipBoard.length == 0){
+            return 0;
+        }
+        foreach(tmp;clipBoard){
+            minValue = min(tmp.offsetGridX, minValue);
+            maxValue = max(tmp.offsetGridX, maxValue);
+        }
+        return maxValue - minValue + 1;
+    }
+    int GetClipBoardHeight(){
+        int minValue,maxValue;
+        if(clipBoard.length == 0){
+            return 0;
+        }
+        foreach(tmp;clipBoard){
+            minValue = min(tmp.offsetGridY, minValue);
+            maxValue = max(tmp.offsetGridY, maxValue);
+        }
+        return maxValue - minValue + 1;
+    }
     SerializableLayerInfo getSerializable(){
         SerializableLayerInfo ret = new SerializableLayerInfo();
         ret.name = name;
@@ -674,6 +699,7 @@ class LayerInfo{
         layoutPixbuf = CreatePixbufFromLayout(this);
     }
     void SetSelectionByChipId(int chipId){
+        clipBoard.clear;
         if(!mapchipFileExists){
             return;
         }
@@ -681,14 +707,15 @@ class LayerInfo{
         int mapchipDivNumH = cast(int)mapchip.getWidth() / projectInfo.partsSizeH;
         int mapchipDivNumV = cast(int)mapchip.getHeight() / projectInfo.partsSizeV;
         bool found = false;
-        with(gridSelection){
-            for(int gridY = 0 ; gridY < mapchipDivNumV ; ++ gridY){
-                for(int gridX = 0 ; gridX < mapchipDivNumH ; ++ gridX){
-                    if(chipId == GetChipIdInMapchip(gridX, gridY)){
-                        startGridX = endGridX = gridX;
-                        startGridY = endGridY = gridY;
-                        found = true;
+        for(int gridY = 0 ; gridY < mapchipDivNumV ; ++ gridY){
+            for(int gridX = 0 ; gridX < mapchipDivNumH ; ++ gridX){
+                if(chipId == GetChipIdInMapchip(gridX, gridY)){
+                    if(gridSelection is null){
+                        gridSelection = new GridSelection();
                     }
+                    gridSelection.startGridX = gridSelection.endGridX = gridX;
+                    gridSelection.startGridY = gridSelection.endGridY = gridY;
+                    found = true;
                 }
             }
         }

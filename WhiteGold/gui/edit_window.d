@@ -617,19 +617,31 @@ class EditWindow : MainWindow{
                 printf("drawChip 1\n");
                 ChipReplaceInfo[] chipReplaceInfos;
                 LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                if(layerInfo.gridSelection !is null){
-                    with(layerInfo.gridSelection){
-                        for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
-                            for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
-                                if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
-                                    continue;
+                if(layerInfo.clipBoard.length >= 1){
+                    foreach(tmp;layerInfo.clipBoard){
+                        if(gridX + tmp.offsetGridX >= projectInfo.mapSizeH || gridY + tmp.offsetGridY >= projectInfo.mapSizeV || gridX + tmp.offsetGridX < 0 || gridY + tmp.offsetGridY < 0){
+                            continue;
+                        }
+                        int partsGridX,partsGridY;
+                        layerInfo.GetGridXYInMapchip(tmp.chipId, partsGridX, partsGridY);
+                        chipReplaceInfos ~= ChipReplaceInfo(gridX + tmp.offsetGridX, gridY + tmp.offsetGridY, partsGridX, partsGridY, projectInfo.currentLayerIndex);
+                    }
+                }
+                else{
+                    if(layerInfo.gridSelection !is null){
+                        with(layerInfo.gridSelection){
+                            for(int yi = 0, y = startGridY ; y <= endGridY ; ++ yi, ++ y){
+                                for(int xi = 0, x = startGridX ; x <= endGridX ; ++ xi, ++ x){
+                                    if(gridX + xi >= projectInfo.mapSizeH || gridY + yi >= projectInfo.mapSizeV || gridX + xi < 0 || gridY + yi < 0){
+                                        continue;
+                                    }
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y, projectInfo.currentLayerIndex);
                                 }
-                                chipReplaceInfos ~= ChipReplaceInfo(gridX + xi, gridY + yi, x, y, projectInfo.currentLayerIndex);
                             }
                         }
+                    }else{
+                        chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
                     }
-                }else{
-                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
                 }
                 if(this.outer.outer.onChipReplacedFunction !is null){
                     this.outer.outer.onChipReplacedFunction(chipReplaceInfos);
@@ -648,22 +660,43 @@ class EditWindow : MainWindow{
                 printf("tilingChip 1\n");
                 ChipReplaceInfo[] chipReplaceInfos;
                 LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                if(layerInfo.gridSelection !is null){
-                    with(layerInfo.gridSelection){
-                        int width = endGridX - startGridX + 1;
-                        int height = endGridY - startGridY + 1;
-                        for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
-                            for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
-                                int x = startGridX + (gridX - gridX1) % width;
-                                int y = startGridY + (gridY - gridY1) % height;
-                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y, projectInfo.currentLayerIndex);
-                            }
-                        }
-                    }
-                }else{
+                if(layerInfo.clipBoard.length >= 1){
+                    int width = layerInfo.GetClipBoardWidth();
+                    int height = layerInfo.GetClipBoardHeight();
                     for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
                         for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
-                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
+                            int offsetGridX = (gridX - gridX1) % width;
+                            int offsetGridY = (gridY - gridY1) % height;
+                            int chipId;
+                            foreach(tmp;layerInfo.clipBoard){
+                                if(tmp.offsetGridX == offsetGridX && tmp.offsetGridY == offsetGridY){
+                                    chipId = tmp.chipId;
+                                }
+                            }
+                            int partsGridX,partsGridY;
+                            layerInfo.GetGridXYInMapchip(chipId, partsGridX, partsGridY);
+                            chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, partsGridX, partsGridY, projectInfo.currentLayerIndex);
+                        }
+                    }
+                }
+                else{
+                    if(layerInfo.gridSelection !is null){
+                        with(layerInfo.gridSelection){
+                            int width = endGridX - startGridX + 1;
+                            int height = endGridY - startGridY + 1;
+                            for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
+                                for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
+                                    int x = startGridX + (gridX - gridX1) % width;
+                                    int y = startGridY + (gridY - gridY1) % height;
+                                    chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, x, y, projectInfo.currentLayerIndex);
+                                }
+                            }
+                        }
+                    }else{
+                        for(int gridY = gridY1 ; gridY <= gridY2 ; ++ gridY){
+                            for(int gridX = gridX1 ; gridX <= gridX2 ; ++ gridX){
+                                chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, -1, -1, projectInfo.currentLayerIndex);
+                            }
                         }
                     }
                 }
@@ -1188,11 +1221,10 @@ class EditWindow : MainWindow{
                         (projectInfo.exportEndGridY + 1) * projectInfo.partsSizeH,
                         );
                 }
-                // カーソル位置の四角描画
+                // 選択領域描画
                 void DrawGridSelection(int startGridX, int startGridY, int endGridX, int endGridY, int moveGridX, int moveGridY){
                     int leftGridX = min(startGridX, endGridX);
                     int topGridY = min(startGridY, endGridY);
-                    // 選択領域描画
                     int x = (leftGridX + moveGridX) * projectInfo.partsSizeH;
                     int y = (topGridY + moveGridY) * projectInfo.partsSizeV;
                     int width = projectInfo.partsSizeH * (std.math.abs(endGridX - startGridX) + 1) - 1;
@@ -1246,10 +1278,11 @@ class EditWindow : MainWindow{
                     break;
                     default:
                     {
+                        // カーソル位置の四角描画
                         if(guideMode == EGuideMode.CURSOR){
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                            int selectWidth = layerInfo.clipBoard.length >= 1 ? layerInfo.GetClipBoardWidth() : (layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1);;
+                            int selectHeight = layerInfo.clipBoard.length >= 1 ? layerInfo.GetClipBoardHeight() : (layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1);
                             int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
                             int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
                             int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
@@ -1260,8 +1293,8 @@ class EditWindow : MainWindow{
                         else if(guideMode == EGuideMode.TILING){
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                            int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                            int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                            int selectWidth = layerInfo.clipBoard.length >= 1 ? layerInfo.GetClipBoardWidth() : (layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1);
+                            int selectHeight = layerInfo.clipBoard.length >= 1 ? layerInfo.GetClipBoardHeight() : (layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1);
                             int startGridX = 0;
                             int i = 0;
                             for(;;++i){
