@@ -818,6 +818,7 @@ class EditWindow : MainWindow{
                         }else{
                             mode = EMode.DRAGGING;
                             selection = new Selection(mouseGridX, mouseGridY, mouseGridX, mouseGridY);
+                            queueDraw();
                         }
                     }
                     return true;
@@ -1183,49 +1184,9 @@ class EditWindow : MainWindow{
                         );
                 }
                 // カーソル位置の四角描画
-                if(chipDrawStrategy.type != EDrawingType.SELECT){
-                    if(guideMode == EGuideMode.CURSOR){
-                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
-                        int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
-                        int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
-                        int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
-                        int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
-                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                        dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
-                    }
-                    else if(guideMode == EGuideMode.TILING){
-                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
-                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
-                        int startGridX = 0;
-                        int i = 0;
-                        for(;;++i){
-                            startGridX = tilingStartGridX - selectWidth * i;
-                            if(startGridX <= 0){
-                                break;
-                            }
-                        }
-                        int startGridY = 0;
-                        int j = 0;
-                        for(;;++j){
-                            startGridY = tilingStartGridY - selectHeight * j;
-                            if(startGridY <= 0){
-                                break;
-                            }
-                        }
-                        for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
-                            for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
-                                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
-                                dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
-                            }
-                        }
-                    }
-                }
-                // 選択領域描画
-                if(chipDrawStrategy.type == EDrawingType.SELECT){
+                switch(chipDrawStrategy.type){
+                case EDrawingType.SELECT:
+                {
                     auto strategySelect = cast(ChipDrawStrategySelect)chipDrawStrategy;
                     if(strategySelect.selection !is null){
                         int leftGridX = min(strategySelect.selection.startGridX, strategySelect.selection.endGridX);
@@ -1267,6 +1228,51 @@ class EditWindow : MainWindow{
                         gc.setRgbFgColor(new Color(255,255,255));
                         dr.drawRectangle(gc, false, x, y, width, height);
                     }
+                }
+                break;
+                default:
+                {
+                    if(guideMode == EGuideMode.CURSOR){
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                        int leftPixelX = mouseGridX * projectInfo.partsSizeH + 1;
+                        int rightPixelX = mouseGridX * projectInfo.partsSizeH + projectInfo.partsSizeH * selectWidth - 1 - 1;
+                        int topPixelY = mouseGridY * projectInfo.partsSizeV + 1;
+                        int bottomPixelY = mouseGridY * projectInfo.partsSizeV + projectInfo.partsSizeV * selectHeight - 1 - 1;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        dr.drawRectangle(gc, false, leftPixelX, topPixelY, rightPixelX - leftPixelX ,bottomPixelY - topPixelY);
+                    }
+                    else if(guideMode == EGuideMode.TILING){
+                        LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                        gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                        int selectWidth = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridX - layerInfo.gridSelection.startGridX + 1 : 1;
+                        int selectHeight = layerInfo.gridSelection !is null ? layerInfo.gridSelection.endGridY - layerInfo.gridSelection.startGridY + 1 : 1;
+                        int startGridX = 0;
+                        int i = 0;
+                        for(;;++i){
+                            startGridX = tilingStartGridX - selectWidth * i;
+                            if(startGridX <= 0){
+                                break;
+                            }
+                        }
+                        int startGridY = 0;
+                        int j = 0;
+                        for(;;++j){
+                            startGridY = tilingStartGridY - selectHeight * j;
+                            if(startGridY <= 0){
+                                break;
+                            }
+                        }
+                        for(int gridY = startGridY ; gridY < projectInfo.mapSizeV ; gridY += selectHeight){
+                            for(int gridX = startGridX ; gridX < projectInfo.mapSizeH ; gridX += selectWidth){
+                                gdk.RGB.RGB.rgbGcSetForeground(gc, 0xFF0000);
+                                dr.drawRectangle(gc, false, gridX * projectInfo.partsSizeH + 1, gridY * projectInfo.partsSizeV + 1, selectWidth * projectInfo.partsSizeH - 2, selectHeight * projectInfo.partsSizeV - 2);
+                            }
+                        }
+                    }
+                }
+                break;
                 }
                 printf("EditWindow.exposeCallback 2\n");
                 return true;
