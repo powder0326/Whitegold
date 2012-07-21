@@ -469,10 +469,23 @@ class ProjectInfo{
             overviewWindow.queueDraw();
         }
     }
-    void onSyringeUsed(int chipId){
-        LayerInfo layerInfo = currentLayerInfo;
-        layerInfo.SetSelectionByChipId(chipId);
-        partsWindow.queueDraw();
+    static if(true){
+        void onSyringeUsed(ClipBoardInfo clipBoard[]){
+            LayerInfo layerInfo = currentLayerInfo;
+            if(clipBoard.length == 1){
+                layerInfo.SetSelectionByChipId(clipBoard[0].chipId);
+                partsWindow.queueDraw();
+            }else{
+                // Todo!
+                // 複数マスが選択された場合はクリップボードに格納し、そのチップ群を描画するように。
+            }
+        }
+    }else{
+        void onSyringeUsed(int chipId){
+            LayerInfo layerInfo = currentLayerInfo;
+            layerInfo.SetSelectionByChipId(chipId);
+            partsWindow.queueDraw();
+        }
     }
     void onScrollCenterChanged(double centerX, double centerY){
         Adjustment adjustmentH = editWindow.editArea.getHadjustment();
@@ -483,13 +496,13 @@ class ProjectInfo{
         adjustmentV.setValue(min(y, adjustmentV.getUpper() - adjustmentV.getPageSize()));
     }
 }
+class GridSelection{
+    int startGridX = 0;
+    int startGridY = 0;
+    int endGridX = 0;
+    int endGridY = 0;
+}
 class LayerInfo{
-    class GridSelection{
-        int startGridX = 0;
-        int startGridY = 0;
-        int endGridX = 0;
-        int endGridY = 0;
-    }
     this(){
         gridSelection = new GridSelection();
     }
@@ -516,6 +529,7 @@ class LayerInfo{
     Pixbuf layoutPixbuf;
     Pixbuf transparentPixbuf;
     GridSelection gridSelection = null;
+    ClipBoardInfo clipBoard[];
     SerializableLayerInfo getSerializable(){
         SerializableLayerInfo ret = new SerializableLayerInfo();
         ret.name = name;
