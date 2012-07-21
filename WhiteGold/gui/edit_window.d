@@ -170,6 +170,8 @@ class EditWindow : MainWindow{
             delete s;
             projectInfo.changeExists = false;
             setTitle(APPLICATION_NAME ~ " " ~ (projectInfo.projectPath is null ? "名称未設定" : projectInfo.projectPath));
+        }else{
+            SaveProjectWithName();
         }
     }
     void SaveProjectWithName(){
