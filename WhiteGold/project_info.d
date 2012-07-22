@@ -106,7 +106,7 @@ class ProjectInfo{
         }
 		return ret;
     }
-    void initBySerializable(SerializableProjectInfo serializableProjectInfo){
+    void initBySerializable(Window parentWindow, SerializableProjectInfo serializableProjectInfo){
         mapSizeH = serializableProjectInfo.mapSizeH;
         mapSizeV = serializableProjectInfo.mapSizeV;
         partsSizeH = serializableProjectInfo.partsSizeH;
@@ -128,6 +128,31 @@ class ProjectInfo{
         // 基本データは設定完了したので画像など生成処理
         foreach(layerInfo;layerInfos){
             printf("[%x] ProjectInfo.initBySerializable 4 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            // mapchipファイルが存在しないなら
+            if(!std.file.exists(layerInfo.mapchipFilePath)){
+                MessageDialog d = new MessageDialog(
+                    parentWindow,
+                    GtkDialogFlags.MODAL,
+                    MessageType.WARNING,
+                    ButtonsType.OK,
+                    format("%sがありません。マップチップファイルを選択してください。",layerInfo.mapchipFilePath));
+                d.run();
+                d.destroy();
+                FileChooserDialog fs = new FileChooserDialog("マップチップファイル選択", parentWindow, FileChooserAction.OPEN);
+                if(baseInfo.lastMapchipPath !is null){
+                    fs.setCurrentFolder(baseInfo.lastMapchipPath);
+                }
+                if( fs.run() == ResponseType.GTK_RESPONSE_OK )
+                {
+                    layerInfo.mapchipFilePath = fs.getFilename();
+                    string splited[] = fs.getFilename().split("\\");
+                    baseInfo.lastMapchipPath = "";
+                    foreach(tmp;splited[0..length - 1]){
+                        baseInfo.lastMapchipPath ~= tmp ~ "\\";
+                    }
+                }
+                fs.hide();
+            }
             AddMapchipFile(layerInfo.mapchipFilePath);
             layerInfo.CreateTransparentPixbuf();
             layerInfo.layoutPixbuf = CreatePixbufFromLayout(layerInfo);

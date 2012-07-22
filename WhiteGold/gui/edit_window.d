@@ -106,12 +106,12 @@ class EditWindow : MainWindow{
         }
         return false;
     }
-    bool OpenYesNoDialog(string message){
+    bool OpenYesNoDialog(string message, MessageType messageType = MessageType.QUESTION, ButtonsType buttonsType = ButtonsType.YES_NO){
         MessageDialog d = new MessageDialog(
             this,
             GtkDialogFlags.MODAL,
-            MessageType.QUESTION,
-            ButtonsType.YES_NO,
+            messageType,
+            buttonsType,
             message);
         int responce = d.run();
         d.destroy();
@@ -150,7 +150,7 @@ class EditWindow : MainWindow{
             Serializer s = new Serializer(fs.getFilename(), FileMode.In);
             s.describe(serializableProjectInfo);
             delete s;
-            projectInfo.initBySerializable(serializableProjectInfo);
+            projectInfo.initBySerializable(this, serializableProjectInfo);
             string splited[] = fs.getFilename().split("\\");
             baseInfo.lastProjectPath = "";
             foreach(tmp;splited[0..length - 1]){
