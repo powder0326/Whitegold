@@ -126,8 +126,25 @@ class ProjectInfo{
             printf("[%x] ProjectInfo.initBySerializable 3 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
         }
         // 基本データは設定完了したので画像など生成処理
+        struct MapchipPathReplaceInfo{
+            string src;
+            string dst;
+            this(string src, string dst){
+                this.src = src;
+                this.dst = dst;
+            }
+        }
+        MapchipPathReplaceInfo mapchipPathReplaceInfos[];
         foreach(layerInfo;layerInfos){
             printf("[%x] ProjectInfo.initBySerializable 4 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            // mapchipファイルパスの置換情報が存在するなら
+            bool Finder(MapchipPathReplaceInfo info){
+                return info.src == layerInfo.mapchipFilePath;
+            }
+            MapchipPathReplaceInfo founds[] = std.algorithm.find!(Finder)(mapchipPathReplaceInfos);
+            if(founds.length == 1){
+                layerInfo.mapchipFilePath = founds[0].dst;
+            }
             // mapchipファイルが存在しないなら
             if(!std.file.exists(layerInfo.mapchipFilePath)){
                 MessageDialog d = new MessageDialog(
@@ -144,6 +161,7 @@ class ProjectInfo{
                 }
                 if( fs.run() == ResponseType.GTK_RESPONSE_OK )
                 {
+                    mapchipPathReplaceInfos ~= MapchipPathReplaceInfo(layerInfo.mapchipFilePath, fs.getFilename());
                     layerInfo.mapchipFilePath = fs.getFilename();
                     string splited[] = fs.getFilename().split("\\");
                     baseInfo.lastMapchipPath = "";
