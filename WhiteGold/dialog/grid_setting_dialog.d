@@ -12,26 +12,37 @@ class GridSettingDialog : Window{
 
         VBox leftBox = new VBox(false, 5);
         Table table1 = new Table(2,2,false);
-        table1.attach(new Label("幅:"),0,1,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table1.attach(new Label(format("%d パーツ",projectInfo.mapSizeH)),1,2,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table1.attach(new Label("高さ:"),0,1,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table1.attach(new Label(format("%d パーツ",projectInfo.mapSizeV)),1,2,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
+        table1.attach(new Label("表示"),0,1,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        table1.attach(new CheckButton(),1,2,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        table1.attach(new Label("グリッド間隔"),2,3,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        table1.attach(new SpinButton(new Adjustment(1, 1.0, 16.0, 1.0, 10.0, 0),1,0),3,4,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        table1.attach(new Label("種類"),4,5,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        ComboBox comboBox = new ComboBox(true);
+        comboBox.appendText("実線");
+		comboBox.appendText("破線");
+        comboBox.setActive(0);
+// 		comboBox.setActiveText("実線");
+        table1.attach(comboBox,5,6,0,1,AttachOptions.FILL,AttachOptions.EXPAND,1,1);
+        table1.attach(new Label("色"),6,7,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
+        DrawingArea da = new DrawingArea();
+        da.setSizeRequest(24,24);
+        da.modifyBg(GtkStateType.NORMAL, new Color(cast(char)(projectInfo.grid1Color >> 0), cast(char)(projectInfo.grid1Color >> 8), cast(char)(projectInfo.grid1Color >> 16)));
+        da.addOnButtonPress((GdkEventButton* event, Widget widget){
+                ColorSelectionDialog dialog = new ColorSelectionDialog("色選択");
+                ColorSelection colorSelection = dialog.getColorSelection();
+                colorSelection.setCurrentColor(new Color(0, 255, 255));
+                dialog.run();
+                dialog.destroy();
+                Color color = new Color(255,255,255);
+                colorSelection.getCurrentColor(color);
+                printf("color = %x\n",color.getValue24());
+                da.modifyBg(GtkStateType.NORMAL, color);
+				return true;
+            });
+        table1.attach(da,7,8,0,1,AttachOptions.FILL,AttachOptions.FILL,1,1);
         table1.setBorderWidth(10);
-        Frame frame1 = new Frame(table1, "変更前");
+        Frame frame1 = new Frame(table1, "グリッド１");
         leftBox.packStart(frame1, false, false, 0);
-
-        Table table2 = new Table(3,2,false);
-        table2.attach(new Label("幅:"),0,1,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        SpinButton spinMapH = new SpinButton(new Adjustment(projectInfo.mapSizeH, 1.0, 256.0, 1.0, 10.0, 0),1,0);
-        table2.attach(spinMapH,1,2,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table2.attach(new Label("パーツ"),2,3,0,1,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table2.attach(new Label("高さ:"),0,1,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        SpinButton spinMapV = new SpinButton(new Adjustment(projectInfo.mapSizeV, 1.0, 256.0, 1.0, 10.0, 0),1,0);
-        table2.attach(spinMapV,1,2,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        table2.attach(new Label("パーツ"),2,3,1,2,AttachOptions.FILL,AttachOptions.FILL,4,4);
-        Frame frame2 = new Frame(table2, "変更後");
-        leftBox.packStart(frame2, false, false, 0);
-        mainBox.packStart(leftBox, false, false, 0);
 
         mainBox.packStart(leftBox, false, false, 0);
 
