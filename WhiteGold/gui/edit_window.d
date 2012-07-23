@@ -6,6 +6,7 @@ import project_info;
 import dialog.new_project_dialog;
 import dialog.resize_dialog;
 import dialog.export_setting_dialog;
+import dialog.grid_setting_dialog;
 
 /**
    エディット用ウインドウ
@@ -209,6 +210,11 @@ class EditWindow : MainWindow{
             dialog.onMapSizeChangedFunction = onMapSizeChangedFunction;
         }
     }
+    void OpenGridSettingDialog(){
+        GridSettingDialog dialog = new GridSettingDialog();
+        dialog.setModal(true);
+        dialog.showAll();
+    }
     void Undo(){
         if(onUndoFunction !is null){
             onUndoFunction();
@@ -287,6 +293,7 @@ class EditWindow : MainWindow{
             editMenu.append(menuItemRedo);
             editMenu.append(new SeparatorMenuItem());
             editMenu.append(new MenuItem(&onMenuActivate, "リサイズ","edit.resize", true));
+            editMenu.append(new MenuItem(&onMenuActivate, "グリッド設定","edit.grid_setting", true));
             editMenu.append(new MenuItem(&onMenuActivate, "エクスポート設定","edit.export_setting", true));
             editMenu.append(new MenuItem(&onMenuActivate, "プロジェクト設定","edit.setting", true));
             Menu windowMenu = append("ウインドウ");
@@ -377,6 +384,9 @@ class EditWindow : MainWindow{
                 break;
             case "edit.resize":
                 OpenResizeDialog();
+                break;
+            case "edit.grid_setting":
+                OpenGridSettingDialog();
                 break;
             case "edit.export_setting":
                 ExportSetting();

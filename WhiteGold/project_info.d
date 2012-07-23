@@ -14,7 +14,10 @@ enum EWindowType{
     PARTS,
     OVERVIEW,
 }
-
+enum EGridType{
+    NORMAL,
+    DOTTED,
+}
 enum EAnchor{
     DIRECTION_1,
     DIRECTION_2,
@@ -63,6 +66,9 @@ class ProjectInfo{
     int exportStartGridY = 0;
     int exportEndGridX = 20 - 1;
     int exportEndGridY = 20 - 1;
+    int grid1Color = 0xAAAAAA;
+    int grid1Type = EGridType.NORMAL;
+    int grid1Interval = 1;
     string projectPath = null;
     bool changeExists = false;
     // レイヤー関連
@@ -101,6 +107,9 @@ class ProjectInfo{
         ret.exportStartGridY = exportStartGridY;
         ret.exportEndGridX = exportEndGridX;
         ret.exportEndGridY = exportEndGridY;
+        ret.grid1Color = grid1Color;
+        ret.grid1Type = grid1Type;
+        ret.grid1Interval = grid1Interval;
         foreach(layerInfo;layerInfos){
             ret.layerInfos ~= layerInfo.getSerializable();
         }
@@ -116,6 +125,9 @@ class ProjectInfo{
         exportStartGridY = serializableProjectInfo.exportStartGridY;
         exportEndGridX = serializableProjectInfo.exportEndGridX;
         exportEndGridY = serializableProjectInfo.exportEndGridY;
+        grid1Color = serializableProjectInfo.grid1Color;
+        grid1Type = serializableProjectInfo.grid1Type;
+        grid1Interval = serializableProjectInfo.grid1Interval;
         layerInfos.clear;
         foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
             LayerInfo layerInfo = new LayerInfo();
@@ -789,8 +801,11 @@ class SerializableProjectInfo{
     int exportStartGridY = 0;
     int exportEndGridX = 20 - 1;
     int exportEndGridY = 20 - 1;
+    int grid1Color = 0xAAAAAA;
+    int grid1Type = EGridType.NORMAL;
+    int grid1Interval = 1;
     string projectPath = null;
-   SerializableLayerInfo layerInfos[];
+    SerializableLayerInfo layerInfos[];
     void describe(T)(T ar){
         ar.describe(mapSizeH);
         ar.describe(mapSizeV);
@@ -802,6 +817,9 @@ class SerializableProjectInfo{
         ar.describe(exportStartGridY);
         ar.describe(exportEndGridX);
         ar.describe(exportEndGridY);
+        ar.describe(grid1Color);
+        ar.describe(grid1Type);
+        ar.describe(grid1Interval);
     }
 }
 
