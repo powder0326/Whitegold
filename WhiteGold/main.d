@@ -182,36 +182,45 @@ Pixbuf CreateGridPixbuf(int mapSizeH, int mapSizeV, int partsSizeH, int partsSiz
     gridPixbuf.fill(0x00000000);
     char* pixels = gridPixbuf.getPixels();
     int length = mapSizeH * mapSizeV * partsSizeH * partsSizeV * 4;
-    static if(true){
-        void DrawHorizontalLine(int x1, int x2, int y, bool dotted){
-            for(int x = x1 ; x <= x2 ; ++ x){
-                if(dotted){
-                    if((x + 2) % 8 < 4){
-                        continue;
-                    }
+    void DrawHorizontalLine(int x1, int x2, int y, bool dotted){
+        for(int x = x1 ; x <= x2 ; ++ x){
+            if(dotted){
+                if((x + 2) % 8 < 4){
+                    continue;
                 }
-                int index = x * 4 + (y * partsSizeH * mapSizeH * 4);
-                pixels[index+0]=cast(char)(projectInfo.grid1Color >> 16);
-                pixels[index+1]=cast(char)(projectInfo.grid1Color >> 8);
-                pixels[index+2]=cast(char)(projectInfo.grid1Color >> 0);
-                pixels[index+3]=255;
             }
+            int index = x * 4 + (y * partsSizeH * mapSizeH * 4);
+            pixels[index+0]=cast(char)(projectInfo.grid1Color >> 16);
+            pixels[index+1]=cast(char)(projectInfo.grid1Color >> 8);
+            pixels[index+2]=cast(char)(projectInfo.grid1Color >> 0);
+            pixels[index+3]=255;
         }
-        for(int y = 0 ; y < partsSizeV * mapSizeV ; ++ y){
+    }
+    void DrawVerticalLine(int y1, int y2, int x, bool dotted){
+        for(int y = y1 ; y <= y2 ; ++ y){
+            if(dotted){
+                if((y + 2) % 8 < 4){
+                    continue;
+                }
+            }
+            int index = x * 4 + (y * partsSizeH * mapSizeH * 4);
+            pixels[index+0]=cast(char)(projectInfo.grid1Color >> 16);
+            pixels[index+1]=cast(char)(projectInfo.grid1Color >> 8);
+            pixels[index+2]=cast(char)(projectInfo.grid1Color >> 0);
+            pixels[index+3]=255;
+        }
+    }
+    for(int y = 0 ; y < partsSizeV * mapSizeV ; ++ y){
+        if(projectInfo.grid1Visible){
             if(y % partsSizeV == 0 && (y / partsSizeV) % projectInfo.grid1Interval == 0){
                 DrawHorizontalLine(0, partsSizeH * mapSizeH - 1, y, projectInfo.grid1Type == EGridType.DOTTED);
             }
         }
-    }else{
-        int intervalH = partsSizeH * 4;
-        int pixelNumH = mapSizeH * partsSizeH;
-        pixels[0..length] = 0;
-        for(int i=0;i<length;i+=4){
-            if(((i / 4) / pixelNumH) % partsSizeV == 0 || i % intervalH == 0){
-                pixels[i+0]=cast(char)(projectInfo.grid1Color >> 16);
-                pixels[i+1]=cast(char)(projectInfo.grid1Color >> 8);
-                pixels[i+2]=cast(char)(projectInfo.grid1Color >> 0);
-                pixels[i+3]=255;
+    }
+    for(int x = 0 ; x < partsSizeH * mapSizeH ; ++ x){
+        if(projectInfo.grid1Visible){
+            if(x % partsSizeH == 0 && (x / partsSizeH) % projectInfo.grid1Interval == 0){
+                DrawVerticalLine(0, partsSizeV * mapSizeV - 1, x, projectInfo.grid1Type == EGridType.DOTTED);
             }
         }
     }

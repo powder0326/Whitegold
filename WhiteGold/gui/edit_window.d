@@ -37,6 +37,7 @@ class EditWindow : MainWindow{
     void delegate(int,int,EAnchor) onMapSizeChangedFunction;
     void delegate(int,int,int,int) onExportSettingChangedFunction;
     void delegate(int,int,int,int) onNewProjectFunction;
+    void delegate(bool,int,EGridType,int) onGridSettingChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
     void delegate(int,int,int,int,int,int) onSelectionMovedFunction;
@@ -214,6 +215,9 @@ class EditWindow : MainWindow{
         GridSettingDialog dialog = new GridSettingDialog();
         dialog.setModal(true);
         dialog.showAll();
+        if(onGridSettingChangedFunction !is null){
+            dialog.onGridSettingChangedFunction = onGridSettingChangedFunction;
+        }
     }
     void Undo(){
         if(onUndoFunction !is null){

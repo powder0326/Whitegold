@@ -66,6 +66,7 @@ class ProjectInfo{
     int exportStartGridY = 0;
     int exportEndGridX = 20 - 1;
     int exportEndGridY = 20 - 1;
+    bool grid1Visible = true;
     int grid1Color = 0xAAAAAA;
     int grid1Type = EGridType.NORMAL;
     int grid1Interval = 1;
@@ -107,6 +108,7 @@ class ProjectInfo{
         ret.exportStartGridY = exportStartGridY;
         ret.exportEndGridX = exportEndGridX;
         ret.exportEndGridY = exportEndGridY;
+        ret.grid1Visible = grid1Visible;
         ret.grid1Color = grid1Color;
         ret.grid1Type = grid1Type;
         ret.grid1Interval = grid1Interval;
@@ -125,6 +127,7 @@ class ProjectInfo{
         exportStartGridY = serializableProjectInfo.exportStartGridY;
         exportEndGridX = serializableProjectInfo.exportEndGridX;
         exportEndGridY = serializableProjectInfo.exportEndGridY;
+        grid1Visible = serializableProjectInfo.grid1Visible;
         grid1Color = serializableProjectInfo.grid1Color;
         grid1Type = serializableProjectInfo.grid1Type;
         grid1Interval = serializableProjectInfo.grid1Interval;
@@ -201,6 +204,7 @@ class ProjectInfo{
         this.editWindow.onWindowShowHideFunction = &onWindowShowHide;
         this.editWindow.onNewProjectFunction = &onNewProject;
         this.editWindow.onMapSizeChangedFunction = &onMapSizeChanged;
+        this.editWindow.onGridSettingChangedFunction = &onGridSettingChanged;
         this.editWindow.onExportSettingChangedFunction = &onExportSettingChanged;
         this.editWindow.onCsvLoadedFunction = &onCsvLoaded;
         this.editWindow.onChipReplacedFunction = &onChipReplaced;
@@ -323,6 +327,13 @@ class ProjectInfo{
         this.exportEndGridY = this.mapSizeV - 1;
         editWindow.Reload();
         overviewWindow.Reload();
+    }
+    void onGridSettingChanged(bool visible1, int interval1, EGridType type1, int color1){
+        grid1Visible = visible1;
+        grid1Interval = interval1;
+        grid1Type = type1;
+        grid1Color = color1;
+        editWindow.Reload();
     }
     void onExportSettingChanged(int startX, int endX, int startY, int endY){
         this.exportStartGridX = startX;
@@ -801,6 +812,7 @@ class SerializableProjectInfo{
     int exportStartGridY = 0;
     int exportEndGridX = 20 - 1;
     int exportEndGridY = 20 - 1;
+    bool grid1Visible = true;
     int grid1Color = 0xAAAAAA;
     int grid1Type = EGridType.NORMAL;
     int grid1Interval = 1;
@@ -817,6 +829,7 @@ class SerializableProjectInfo{
         ar.describe(exportStartGridY);
         ar.describe(exportEndGridX);
         ar.describe(exportEndGridY);
+        ar.describe(grid1Visible);
         ar.describe(grid1Color);
         ar.describe(grid1Type);
         ar.describe(grid1Interval);
