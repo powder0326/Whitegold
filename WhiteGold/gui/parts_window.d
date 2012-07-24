@@ -24,7 +24,7 @@ class PartsWindow : MainWindow{
         mapchipArea = new PartsWindowMapchipArea();
 		mainBox.packStart(mapchipArea,true,true,0);
         statusbar = new Statusbar();
-        statusbar.push(1, "選択パーツ:なし");
+        statusbar.push(1, "選択範囲なし");
 		mainBox.packStart(statusbar,false,false,0);
         add(mainBox);
         setDeletable(false);
@@ -39,10 +39,16 @@ class PartsWindow : MainWindow{
         statusbar.pop(1);
         with(projectInfo.currentLayerInfo){
             if(gridSelection is null){
-                statusbar.push(1, "選択パーツ:なし");
+                statusbar.push(1, "選択範囲なし");
             }else{
-                int chipId = GetChipIdInMapchip(gridSelection.startGridX, gridSelection.startGridY);
-                statusbar.push(1, format("選択パーツ:%d",chipId));
+                if(gridSelection.startGridX == gridSelection.endGridX && gridSelection.startGridY == gridSelection.endGridY){
+                    int chipId = GetChipIdInMapchip(gridSelection.startGridX, gridSelection.startGridY);
+                    statusbar.push(1, format("選択(%d)",chipId));
+                }else{
+                    int chipId1 = GetChipIdInMapchip(gridSelection.startGridX, gridSelection.startGridY);
+                    int chipId2 = GetChipIdInMapchip(gridSelection.endGridX, gridSelection.endGridY);
+                    statusbar.push(1, format("選択(%d ... %d)",chipId1,chipId2));
+                }
             }
         }
     }
