@@ -70,6 +70,10 @@ class ProjectInfo{
     int grid1Color = 0xAAAAAA;
     int grid1Type = EGridType.NORMAL;
     int grid1Interval = 1;
+    bool grid2Visible = true;
+    int grid2Color = 0xFFAAAA;
+    int grid2Type = EGridType.NORMAL;
+    int grid2Interval = 2;
     string projectPath = null;
     bool changeExists = false;
     // レイヤー関連
@@ -112,6 +116,10 @@ class ProjectInfo{
         ret.grid1Color = grid1Color;
         ret.grid1Type = grid1Type;
         ret.grid1Interval = grid1Interval;
+        ret.grid2Visible = grid2Visible;
+        ret.grid2Color = grid2Color;
+        ret.grid2Type = grid2Type;
+        ret.grid2Interval = grid2Interval;
         foreach(layerInfo;layerInfos){
             ret.layerInfos ~= layerInfo.getSerializable();
         }
@@ -131,6 +139,10 @@ class ProjectInfo{
         grid1Color = serializableProjectInfo.grid1Color;
         grid1Type = serializableProjectInfo.grid1Type;
         grid1Interval = serializableProjectInfo.grid1Interval;
+        grid2Visible = serializableProjectInfo.grid2Visible;
+        grid2Color = serializableProjectInfo.grid2Color;
+        grid2Type = serializableProjectInfo.grid2Type;
+        grid2Interval = serializableProjectInfo.grid2Interval;
         layerInfos.clear;
         foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
             LayerInfo layerInfo = new LayerInfo();
@@ -328,11 +340,15 @@ class ProjectInfo{
         editWindow.Reload();
         overviewWindow.Reload();
     }
-    void onGridSettingChanged(bool visible1, int interval1, EGridType type1, int color1){
+    void onGridSettingChanged(bool visible1, int interval1, EGridType type1, int color1, bool visible2, int interval2, EGridType type2, int color2){
         grid1Visible = visible1;
         grid1Interval = interval1;
         grid1Type = type1;
         grid1Color = color1;
+        grid2Visible = visible2;
+        grid2Interval = interval2;
+        grid2Type = type2;
+        grid2Color = color2;
         editWindow.Reload();
     }
     void onExportSettingChanged(int startX, int endX, int startY, int endY){
@@ -816,6 +832,10 @@ class SerializableProjectInfo{
     int grid1Color = 0xAAAAAA;
     int grid1Type = EGridType.NORMAL;
     int grid1Interval = 1;
+    bool grid2Visible = true;
+    int grid2Color = 0xFFAAAA;
+    int grid2Type = EGridType.NORMAL;
+    int grid2Interval = 2;
     string projectPath = null;
     SerializableLayerInfo layerInfos[];
     void describe(T)(T ar){
@@ -833,6 +853,10 @@ class SerializableProjectInfo{
         ar.describe(grid1Color);
         ar.describe(grid1Type);
         ar.describe(grid1Interval);
+        ar.describe(grid2Visible);
+        ar.describe(grid2Color);
+        ar.describe(grid2Type);
+        ar.describe(grid2Interval);
     }
 }
 

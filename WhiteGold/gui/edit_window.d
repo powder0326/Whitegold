@@ -35,9 +35,9 @@ class EditWindow : MainWindow{
     void delegate() onHideFunction;
     void delegate(EWindowType windowType, bool show) onWindowShowHideFunction;
     void delegate(int,int,EAnchor) onMapSizeChangedFunction;
+    void delegate(bool,int,EGridType,int,bool,int,EGridType,int) onGridSettingChangedFunction;
     void delegate(int,int,int,int) onExportSettingChangedFunction;
     void delegate(int,int,int,int) onNewProjectFunction;
-    void delegate(bool,int,EGridType,int) onGridSettingChangedFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
     void delegate(int,int,int,int,int,int) onSelectionMovedFunction;
