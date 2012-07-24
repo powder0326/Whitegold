@@ -11,6 +11,7 @@ private import project_info;
  */
 class PartsWindow : MainWindow{
     PartsWindowMapchipArea mapchipArea;
+    Statusbar statusbar;
     void delegate(string mapchipFilePath) onMapchipFileLoadedFunction;
     void delegate(double startX, double startY, double endX, double endY) onSelectionChangedFunction;
     this(){
@@ -22,6 +23,9 @@ class PartsWindow : MainWindow{
 		mainBox.packStart(new PartsWindowToolArea(),false,false,0);
         mapchipArea = new PartsWindowMapchipArea();
 		mainBox.packStart(mapchipArea,true,true,0);
+        statusbar = new Statusbar();
+        statusbar.push(1, "選択パーツ:なし");
+		mainBox.packStart(statusbar,false,false,0);
         add(mainBox);
         setDeletable(false);
         addOnRealize((Widget widget){
@@ -30,6 +34,17 @@ class PartsWindow : MainWindow{
     }
     void Reload(){
         mapchipArea.Reload();
+    }
+    void UpdateStatusBar(){
+        statusbar.pop(1);
+        with(projectInfo.currentLayerInfo){
+            if(gridSelection is null){
+                statusbar.push(1, "選択パーツ:なし");
+            }else{
+                int chipId = GetChipIdInMapchip(gridSelection.startGridX, gridSelection.startGridY);
+                statusbar.push(1, format("選択パーツ:%d",chipId));
+            }
+        }
     }
 /**
    パーツ用ウインドウ上部のツールボタン郡表示領域
