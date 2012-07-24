@@ -553,23 +553,17 @@ class ProjectInfo{
             overviewWindow.queueDraw();
         }
     }
-    static if(true){
-        void onSyringeUsed(ClipBoardInfo clipBoard[]){
-            LayerInfo layerInfo = currentLayerInfo;
-            if(clipBoard.length == 1){
-                layerInfo.SetSelectionByChipId(clipBoard[0].chipId);
-                partsWindow.queueDraw();
-            }else{
-                // 複数マスが選択された場合はクリップボードに格納し、そのチップ群を描画するように。
-                layerInfo.clipBoard = clipBoard;
-                layerInfo.gridSelection = null;
-                partsWindow.queueDraw();
-            }
-        }
-    }else{
-        void onSyringeUsed(int chipId){
-            LayerInfo layerInfo = currentLayerInfo;
-            layerInfo.SetSelectionByChipId(chipId);
+    void onSyringeUsed(ClipBoardInfo clipBoard[]){
+        LayerInfo layerInfo = currentLayerInfo;
+        if(clipBoard.length == 1){
+            layerInfo.SetSelectionByChipId(clipBoard[0].chipId);
+            partsWindow.UpdateStatusBar();
+            partsWindow.queueDraw();
+        }else{
+            // 複数マスが選択された場合はクリップボードに格納し、そのチップ群を描画するように。
+            layerInfo.clipBoard = clipBoard;
+            layerInfo.gridSelection = null;
+            partsWindow.UpdateStatusBar();
             partsWindow.queueDraw();
         }
     }
