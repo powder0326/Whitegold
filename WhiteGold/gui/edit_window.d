@@ -53,6 +53,7 @@ class EditWindow : MainWindow{
     EditWindowEditArea editArea = null;
     EditWindowMenubar menuBar = null;
     EditWindowToolArea toolArea = null;
+    EditWindowStatusbarArea statusBar = null;
     bool showGrid = false;
     this(){
         super(APPLICATION_NAME ~ " " ~ "名称未設定");
@@ -67,7 +68,8 @@ class EditWindow : MainWindow{
 		mainBox.packStart(toolArea,false,false,0);
         editArea = new EditWindowEditArea();
 		mainBox.packStart(editArea,true,true,0);
-		mainBox.packStart(new EditWindowStatusbarArea(),false,false,0);
+        statusBar = new EditWindowStatusbarArea();
+		mainBox.packStart(statusBar,false,false,0);
         toolArea.penButton.setActive(1);
         add(mainBox);
         addOnHide(&onHide);
@@ -239,6 +241,10 @@ class EditWindow : MainWindow{
     }
     void UpdateGuide(){
         editArea.drawingArea.queueDraw();
+    }
+    void UpdateStatusbar(){
+        statusBar.bar1.pop(1);
+        statusBar.bar1.push(1, format("カーソル座標(%d, %d)",editArea.mouseGridX,editArea.mouseGridY));
     }
     /**
        視界情報取得
@@ -1414,6 +1420,7 @@ class EditWindow : MainWindow{
                 mouseGridY = min(cast(int)(event.y / projectInfo.partsSizeV), projectInfo.mapSizeV - 1);
                 if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
                     UpdateGuide();
+                    UpdateStatusbar();
                     queueDraw();
                 }
                 if(syringeGridSelection){
@@ -1461,16 +1468,19 @@ class EditWindow : MainWindow{
    現在のグリッド座標とかを表示。
 */
     class EditWindowStatusbarArea : HBox{
+        Statusbar bar1;
+        Statusbar bar2;
+        Statusbar bar3;
         this(){
             super(true,0);
-            Statusbar statusbar1 = new Statusbar();
-            statusbar1.setHasResizeGrip(0);
-            packStart(statusbar1, true, true, 1);
-            Statusbar statusbar2 = new Statusbar();
-            statusbar2.setHasResizeGrip(0);
-            packStart(statusbar2, true, true, 1);
-            Statusbar statusbar3 = new Statusbar();
-            packStart(statusbar3, true, true, 1);
+            bar1 = new Statusbar();
+            bar1.setHasResizeGrip(0);
+            packStart(bar1, true, true, 1);
+            bar2 = new Statusbar();
+            bar2.setHasResizeGrip(0);
+            packStart(bar2, true, true, 1);
+            bar3 = new Statusbar();
+            packStart(bar3, true, true, 1);
         }
     }
 }
