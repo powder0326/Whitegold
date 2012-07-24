@@ -383,6 +383,7 @@ class ProjectInfo{
         if(forceDraw || oldStartGridX != layerInfo.gridSelection.startGridX || oldStartGridY != layerInfo.gridSelection.startGridY || oldEndGridX != layerInfo.gridSelection.endGridX || oldEndGridY != layerInfo.gridSelection.endGridY){
             editWindow.UpdateGuide();
             editWindow.queueDraw();
+            partsWindow.UpdateStatusBar();
             partsWindow.queueDraw();
         }
         printf("onSelectionChanged 2\n");
