@@ -736,23 +736,18 @@ class EditWindow : MainWindow{
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
                 int lastGridX,lastGridY;
                 bool pressed = false;
-                override EDrawingType type(){
-                    return EDrawingType.PEN;
-                }
-                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                void doButtonPressedAction(){
                     pressed = true;
                     // チップ配置
                     drawChip(mouseGridX, mouseGridY);
-                    return true;
                 }
-                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                void doButtonReleasedAction(){
                     pressed = false;
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
                     }
-                    return true;
                 }
-                void checkDragging(){
+                void doCursorMovedAction(){
                     if(pressed){
                         // グリッドが変わったら描画
                         if(mouseGridX != lastGridX || mouseGridY != lastGridY){
@@ -762,26 +757,32 @@ class EditWindow : MainWindow{
                         }
                     }
                 }
+                override EDrawingType type(){
+                    return EDrawingType.PEN;
+                }
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    doButtonPressedAction();
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    doButtonReleasedAction();
+                    return true;
+                }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    checkDragging();
+                    doCursorMovedAction();
                     return true;
                 }
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
-                    if(event.keyval == GdkKeysyms.GDK_z){
-                        pressed = true;
-                        // チップ配置
-                        drawChip(mouseGridX, mouseGridY);
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonPressedAction();
                     }else{
-                        checkDragging();
+                        doCursorMovedAction();
                     }
                     return true;
                 }
                 override bool onKeyRelease(GdkEventKey* event, Widget widget){
-                    if(event.keyval == GdkKeysyms.GDK_z){
-                        pressed = false;
-                        if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
-                            this.outer.outer.outer.onChipReplaceCompletedFunction();
-                        }
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonReleasedAction();
                     }
                     return true;
                 }
@@ -1377,6 +1378,42 @@ class EditWindow : MainWindow{
                 printf("EditWindow.exposeCallback 2\n");
                 return true;
             }
+            void doCursorMovedAction(int lastMouseGridX, int lastMouseGridY){
+                if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
+                    UpdateGuide();
+                    UpdateStatusbar();
+                    queueDraw();
+                }
+                if(syringeGridSelection){
+                    syringeGridSelection.endGridX = mouseGridX;
+                    syringeGridSelection.endGridY = mouseGridY;
+                }
+            }
+            void doRightButtonPressedAction(){
+                syringeGridSelection = new GridSelection();
+                syringeGridSelection.startGridX = syringeGridSelection.endGridX = mouseGridX;
+                syringeGridSelection.startGridY = syringeGridSelection.endGridY = mouseGridY;
+            }
+            void doRightButtonReleasedAction(){
+                // 吸い取ったマスをsyringeClipBoardに格納する。
+                ClipBoardInfo syringeClipBoard[];
+                int leftGridX = min(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
+                int rightGridX = max(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
+                int topGridY = min(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
+                int bottomGridY = max(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
+                for(int gridY = topGridY, iy = 0 ; gridY <= bottomGridY ; ++ gridY, ++ iy){
+                    for(int gridX = leftGridX, ix = 0 ; gridX <= rightGridX ; ++ gridX, ++ ix){
+                        int chipId = projectInfo.currentLayerInfo.GetChipId(gridX, gridY);
+                        syringeClipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, ix, iy, chipId);
+                    }
+                }
+                if(this.outer.outer.onSyringeUsedFunction){
+                    this.outer.outer.onSyringeUsedFunction(syringeClipBoard);
+                }
+                printf("syringeClipBoard.length = %d\n",syringeClipBoard.length);
+                syringeGridSelection = null;
+                queueDraw();
+            }
             bool onButtonPress(GdkEventButton* event, Widget widget){
                 this.outer.outer.setFocus(this);
                 int lastMouseGridX = mouseGridX;
@@ -1389,9 +1426,7 @@ class EditWindow : MainWindow{
                 }
                 // 右クリックはスポイト専用なのでStrategyに渡さない
                 if(event.button == 3){
-                    syringeGridSelection = new GridSelection();
-                    syringeGridSelection.startGridX = syringeGridSelection.endGridX = mouseGridX;
-                    syringeGridSelection.startGridY = syringeGridSelection.endGridY = mouseGridY;
+                    doRightButtonPressedAction();
                     return true;
                 }else{
                     return chipDrawStrategy.onButtonPress(event, widget);
@@ -1408,24 +1443,7 @@ class EditWindow : MainWindow{
                 }
                 // 右クリックはスポイト専用なのでStrategyに渡さない
                 if(event.button == 3){
-                    // 吸い取ったマスをsyringeClipBoardに格納する。
-                    ClipBoardInfo syringeClipBoard[];
-                    int leftGridX = min(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
-                    int rightGridX = max(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
-                    int topGridY = min(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
-                    int bottomGridY = max(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
-                    for(int gridY = topGridY, iy = 0 ; gridY <= bottomGridY ; ++ gridY, ++ iy){
-                        for(int gridX = leftGridX, ix = 0 ; gridX <= rightGridX ; ++ gridX, ++ ix){
-                            int chipId = projectInfo.currentLayerInfo.GetChipId(gridX, gridY);
-                            syringeClipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, ix, iy, chipId);
-                        }
-                    }
-                    if(this.outer.outer.onSyringeUsedFunction){
-                        this.outer.outer.onSyringeUsedFunction(syringeClipBoard);
-                    }
-                    printf("syringeClipBoard.length = %d\n",syringeClipBoard.length);
-                    syringeGridSelection = null;
-                    queueDraw();
+                    doRightButtonReleasedAction();
                     return true;
                 }else{
                     return chipDrawStrategy.onButtonRelease(event, widget);
@@ -1436,25 +1454,15 @@ class EditWindow : MainWindow{
                 int lastMouseGridY = mouseGridY;
                 mouseGridX = min(cast(int)(event.x / projectInfo.partsSizeH), projectInfo.mapSizeH - 1);
                 mouseGridY = min(cast(int)(event.y / projectInfo.partsSizeV), projectInfo.mapSizeV - 1);
-                if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
-                    UpdateGuide();
-                    UpdateStatusbar();
-                    queueDraw();
-                }
-                if(syringeGridSelection){
-                    syringeGridSelection.endGridX = mouseGridX;
-                    syringeGridSelection.endGridY = mouseGridY;
-                    return true;
-                }else{
-                    return chipDrawStrategy.onMotionNotify(event, widget);
-                }
+                doCursorMovedAction(lastMouseGridX, lastMouseGridY);
+                return syringeGridSelection ? true : chipDrawStrategy.onMotionNotify(event, widget);
             }
             bool onKeyPress(GdkEventKey* event, Widget widget){
+                int lastMouseGridX = mouseGridX;
+                int lastMouseGridY = mouseGridY;
                 // 上下左右キーでグリッド座標を更新
                 switch(event.keyval){
                 case GdkKeysyms.GDK_Left:case GdkKeysyms.GDK_j:case GdkKeysyms.GDK_Right:case GdkKeysyms.GDK_l:case GdkKeysyms.GDK_Up:case GdkKeysyms.GDK_i:case GdkKeysyms.GDK_Down:case GdkKeysyms.GDK_k:
-                    int lastMouseGridX = mouseGridX;
-                    int lastMouseGridY = mouseGridY;
                     switch(event.keyval){
                     case GdkKeysyms.GDK_Left:case GdkKeysyms.GDK_j:
                         mouseGridX = max(0, mouseGridX - 1);
@@ -1469,51 +1477,23 @@ class EditWindow : MainWindow{
                         mouseGridY = min(cast(int)(mouseGridY + 1), projectInfo.mapSizeV - 1);
                         break;
                     }
-                    if(lastMouseGridX != mouseGridX || lastMouseGridY != mouseGridY){
-                        UpdateGuide();
-                        UpdateStatusbar();
-                        queueDraw();
-                    }
-                    if(syringeGridSelection){
-                        syringeGridSelection.endGridX = mouseGridX;
-                        syringeGridSelection.endGridY = mouseGridY;
-                        return true;
-                    }
+                    doCursorMovedAction(lastMouseGridX, lastMouseGridY);
                     break;
                 default:
                     break;
                 }
                 // 右クリックと同じ扱い
-                if(event.keyval == GdkKeysyms.GDK_x){
-                    syringeGridSelection = new GridSelection();
-                    syringeGridSelection.startGridX = syringeGridSelection.endGridX = mouseGridX;
-                    syringeGridSelection.startGridY = syringeGridSelection.endGridY = mouseGridY;
+                if(event.keyval == GdkKeysyms.GDK_x && !(event.state & GdkModifierType.CONTROL_MASK)){
+                    doRightButtonPressedAction();
                     return true;
                 }else{
-                    return chipDrawStrategy.onKeyPress(event, widget);
+                    return syringeGridSelection ? true : chipDrawStrategy.onKeyPress(event, widget);
                 }
             }
             bool onKeyRelease(GdkEventKey* event, Widget widget){
                 // 右クリックと同じ扱い
-                if(event.keyval == GdkKeysyms.GDK_x){
-                    // 吸い取ったマスをsyringeClipBoardに格納する。
-                    ClipBoardInfo syringeClipBoard[];
-                    int leftGridX = min(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
-                    int rightGridX = max(syringeGridSelection.startGridX, syringeGridSelection.endGridX);
-                    int topGridY = min(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
-                    int bottomGridY = max(syringeGridSelection.startGridY, syringeGridSelection.endGridY);
-                    for(int gridY = topGridY, iy = 0 ; gridY <= bottomGridY ; ++ gridY, ++ iy){
-                        for(int gridX = leftGridX, ix = 0 ; gridX <= rightGridX ; ++ gridX, ++ ix){
-                            int chipId = projectInfo.currentLayerInfo.GetChipId(gridX, gridY);
-                            syringeClipBoard ~= ClipBoardInfo(projectInfo.currentLayerIndex, ix, iy, chipId);
-                        }
-                    }
-                    if(this.outer.outer.onSyringeUsedFunction){
-                        this.outer.outer.onSyringeUsedFunction(syringeClipBoard);
-                    }
-                    printf("syringeClipBoard.length = %d\n",syringeClipBoard.length);
-                    syringeGridSelection = null;
-                    queueDraw();
+                if(event.keyval == GdkKeysyms.GDK_x && !(event.state & GdkModifierType.CONTROL_MASK)){
+                    doRightButtonReleasedAction();
                     return true;
                 }else{
                     return chipDrawStrategy.onKeyRelease(event, widget);
