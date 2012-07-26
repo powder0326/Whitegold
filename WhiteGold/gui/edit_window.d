@@ -795,19 +795,13 @@ class EditWindow : MainWindow{
                 EMode mode = EMode.NORMAL;
                 int startGridX = 0;
                 int startGridY = 0;
-                override EDrawingType type(){
-                    return EDrawingType.TILING_PEN;
-                }
-                override bool onButtonPress(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategyTilingPen.onButtonPress\n");
+                void doButtonPressedAction(){
                     mode = EMode.DRAGGING;
                     guideMode = EGuideMode.TILING;
                     tilingStartGridX = startGridX = mouseGridX;
                     tilingStartGridY = startGridY = mouseGridY;
-                    return true;
                 }
-                override bool onButtonRelease(GdkEventButton* event, Widget widget){
-                    printf("ChipDrawStrategyTilingPen.onButtonRelease\n");
+                void doButtonReleasedAction(){
                     mode = EMode.NORMAL;
                     guideMode = EGuideMode.CURSOR;
                     tilingChip(min(startGridX, mouseGridX),
@@ -817,16 +811,31 @@ class EditWindow : MainWindow{
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction !is null){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
                     }
+                }
+                override EDrawingType type(){
+                    return EDrawingType.TILING_PEN;
+                }
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    doButtonPressedAction();
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+                    doButtonReleasedAction();
                     return true;
                 }
                 override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-                    printf("ChipDrawStrategyTilingPen.onMotionNotify\n");
                     return true;
                 }
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonPressedAction();
+                    }
                     return true;
                 }
                 override bool onKeyRelease(GdkEventKey* event, Widget widget){
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonReleasedAction();
+                    }
                     return true;
                 }
             }
@@ -1047,26 +1056,21 @@ class EditWindow : MainWindow{
                 }
             }
             class ChipDrawStrategyFill : ChipDrawStrategyBase{
-                override EDrawingType type(){
-                    return EDrawingType.FILL;
-                }
-                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                void doButtonPressedAction(){
                     long time = std.datetime.Clock.currStdTime();
-                    int cursorGridX = cast(int)(event.x / projectInfo.partsSizeH);
-                    int cursorGridY = cast(int)(event.y / projectInfo.partsSizeV);
                     LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                    int layoutIndex = cursorGridY * projectInfo.mapSizeH + cursorGridX;
+                    int layoutIndex = mouseGridY * projectInfo.mapSizeH + mouseGridX;
                     int startChipId = layerInfo.chipLayout[layoutIndex];
                     int newChipId = -1;
                     if(!layerInfo.mapchipFileExists()){
-                        return true;
+                        return;
                     }
                     if(layerInfo.gridSelection !is null){
                         newChipId = layerInfo.GetChipIdInMapchip(layerInfo.gridSelection.startGridX, layerInfo.gridSelection.startGridY);
                     }
                     if(startChipId == newChipId){
                         // 同じチップIDなら塗りつぶす意味が無い。
-                        return true;
+                        return;
                     }
                     struct Info{
                         this(int gridX, int gridY){
@@ -1078,7 +1082,7 @@ class EditWindow : MainWindow{
                     }
                     EditInfo editInfos[];
                     Info infos[];
-                    infos ~= Info(cursorGridX, cursorGridY); 
+                    infos ~= Info(mouseGridX, mouseGridY); 
                     int i = 0;
                     ChipReplaceInfo[] chipReplaceInfos;
                     int[] tmpChipLayout = layerInfo.chipLayout.dup;
@@ -1162,6 +1166,16 @@ class EditWindow : MainWindow{
                     if(this.outer.outer.outer.onChipReplaceCompletedFunction){
                         this.outer.outer.outer.onChipReplaceCompletedFunction();
                     }
+                }
+                void doButtonReleasedAction(){
+                }
+                void doCursorMovedAction(){
+                }
+                override EDrawingType type(){
+                    return EDrawingType.FILL;
+                }
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+                    doButtonPressedAction();
                     return true;
                 }
                 override bool onButtonRelease(GdkEventButton* event, Widget widget){
@@ -1171,6 +1185,9 @@ class EditWindow : MainWindow{
                     return true;
                 }
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonPressedAction();
+                    }
                     return true;
                 }
                 override bool onKeyRelease(GdkEventKey* event, Widget widget){
