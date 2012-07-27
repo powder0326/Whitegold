@@ -1102,7 +1102,7 @@ class EditWindow : MainWindow{
                                 tmpChipLayout[tmpLayoutIndex] = newChipId;
                                 chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
                             }else{
-                                rightGridX = gridX;
+                                rightGridX = gridX - 1;
                                 break;
                             }
                         }
@@ -1115,7 +1115,7 @@ class EditWindow : MainWindow{
                                 tmpChipLayout[tmpLayoutIndex] = newChipId;
                                 chipReplaceInfos ~= ChipReplaceInfo(gridX, gridY, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridX : -1, layerInfo.gridSelection !is null ? layerInfo.gridSelection.startGridY : -1, projectInfo.currentLayerIndex);
                             }else{
-                                leftGridX = gridX;
+                                leftGridX = gridX + 1;
                                 break;
                             }
                         }
