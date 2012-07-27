@@ -14,6 +14,7 @@ class PartsWindow : MainWindow{
     Statusbar statusbar;
     void delegate(string mapchipFilePath) onMapchipFileLoadedFunction;
     void delegate(double startX, double startY, double endX, double endY) onSelectionChangedFunction;
+    void delegate(EWindowType) onWindowFocusChangedFunction;
     this(){
         super("パーツ");
 //         setSizeRequest(320, 320);
@@ -30,6 +31,37 @@ class PartsWindow : MainWindow{
         setDeletable(false);
         addOnRealize((Widget widget){
                 move(baseInfo.partsWindowInfo.x, baseInfo.partsWindowInfo.y);
+            });
+        addOnKeyPress((GdkEventKey* event, Widget widget){
+                switch(event.keyval){
+                case GdkKeysyms.GDK_F1: // EditWindow
+                case GdkKeysyms.GDK_F2: // PartsWindow
+                case GdkKeysyms.GDK_F3: // LayerWindow
+                case GdkKeysyms.GDK_F4: // OverviewWindow
+                    EWindowType windowType;
+                    switch(event.keyval){
+                    case GdkKeysyms.GDK_F1: // EditWindow
+                        windowType = EWindowType.EDIT;
+                        break;
+                    case GdkKeysyms.GDK_F2: // PartsWindow
+                        windowType = EWindowType.PARTS;
+                        break;
+                    case GdkKeysyms.GDK_F3: // LayerWindow
+                        windowType = EWindowType.LAYER;
+                        break;
+                    case GdkKeysyms.GDK_F4: // OverviewWindow
+                        windowType = EWindowType.OVERVIEW;
+                        break;
+                    }
+                    if(onWindowFocusChangedFunction){
+                        onWindowFocusChangedFunction(windowType);
+                    }
+                    return true;
+                    break;
+                default:
+                    break;
+                }
+                return false;
             });
     }
     void Reload(){

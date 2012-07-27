@@ -50,6 +50,7 @@ class EditWindow : MainWindow{
     }else{
         void delegate(int) onSyringeUsedFunction;
     }
+    void delegate(EWindowType) onWindowFocusChangedFunction;
     EditWindowEditArea editArea = null;
     EditWindowMenubar menuBar = null;
     EditWindowToolArea toolArea = null;
@@ -77,6 +78,38 @@ class EditWindow : MainWindow{
         addOnRealize((Widget widget){
                 move(baseInfo.editWindowInfo.x, baseInfo.editWindowInfo.y);
             });
+        addOnKeyPress((GdkEventKey* event, Widget widget){
+                switch(event.keyval){
+                case GdkKeysyms.GDK_F1: // EditWindow
+                case GdkKeysyms.GDK_F2: // PartsWindow
+                case GdkKeysyms.GDK_F3: // LayerWindow
+                case GdkKeysyms.GDK_F4: // OverviewWindow
+                    EWindowType windowType;
+                    switch(event.keyval){
+                    case GdkKeysyms.GDK_F1: // EditWindow
+                        windowType = EWindowType.EDIT;
+                        break;
+                    case GdkKeysyms.GDK_F2: // PartsWindow
+                        windowType = EWindowType.PARTS;
+                        break;
+                    case GdkKeysyms.GDK_F3: // LayerWindow
+                        windowType = EWindowType.LAYER;
+                        break;
+                    case GdkKeysyms.GDK_F4: // OverviewWindow
+                        windowType = EWindowType.OVERVIEW;
+                        break;
+                    }
+                    if(onWindowFocusChangedFunction){
+                        onWindowFocusChangedFunction(windowType);
+                    }
+                    return true;
+                    break;
+                default:
+                    break;
+                }
+                return false;
+            });
+
     }
     void Reload(){
         editArea.Reload();

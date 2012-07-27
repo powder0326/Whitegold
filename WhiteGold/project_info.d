@@ -29,7 +29,6 @@ enum EAnchor{
     DIRECTION_8,
     DIRECTION_9,
 }
-
 struct ChipReplaceInfo{
     int gridX;
     int gridY;
@@ -226,6 +225,7 @@ class ProjectInfo{
         this.editWindow.onRedoFunction = &onRedo;
         this.editWindow.onScrollChangedFunction = &onScrollChanged;
         this.editWindow.onSyringeUsedFunction = &onSyringeUsed;
+        this.editWindow.onWindowFocusChangedFunction = &onWindowFocusChanged;
     }
     void SetLayerWindow(LayerWindow layerWindow){
         this.layerWindow = layerWindow;
@@ -234,15 +234,18 @@ class ProjectInfo{
         this.layerWindow.onLayerAddedFunction = &onLayerAdded;
         this.layerWindow.onLayerDeletedFunction = &onLayerDeleted;
         this.layerWindow.onLayerMovedFunction = &onLayerMoved;
+        this.layerWindow.onWindowFocusChangedFunction = &onWindowFocusChanged;
     }
     void SetPartsWindow(PartsWindow partsWindow){
         this.partsWindow = partsWindow;
         this.partsWindow.onMapchipFileLoadedFunction = &onMapchipFileLoaded;
         this.partsWindow.onSelectionChangedFunction = &onSelectionChanged;
+        this.partsWindow.onWindowFocusChangedFunction = &onWindowFocusChanged;
     }
     void SetOverviewWindow(OverviewWindow overviewWindow){
         this.overviewWindow = overviewWindow;
         this.overviewWindow.onScrollCenterChangedFunction = &onScrollCenterChanged;
+        this.overviewWindow.onWindowFocusChangedFunction = &onWindowFocusChanged;
     }
     void onSelectedLayerChanged(int index){
         currentLayerIndex = index;
@@ -567,6 +570,26 @@ class ProjectInfo{
             layerInfo.gridSelection = null;
             partsWindow.UpdateStatusBar();
             partsWindow.queueDraw();
+        }
+    }
+    void onWindowFocusChanged(EWindowType windowType){
+        switch(windowType){
+        case EWindowType.EDIT:
+            editWindow.setModal(true);
+            editWindow.setModal(false);
+            break;
+        case EWindowType.PARTS:
+            partsWindow.setModal(true);
+            partsWindow.setModal(false);
+            break;
+        case EWindowType.LAYER:
+            layerWindow.setModal(true);
+            layerWindow.setModal(false);
+            break;
+        case EWindowType.OVERVIEW:
+            overviewWindow.setModal(true);
+            overviewWindow.setModal(false);
+            break;
         }
     }
     void onScrollCenterChanged(double centerX, double centerY){

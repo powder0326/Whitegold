@@ -15,6 +15,7 @@ class OverviewWindow : MainWindow{
     OverviewWindowViewArea viewArea = null;
     Statusbar statusbar = null;
     void delegate(double centerX, double cneterY) onScrollCenterChangedFunction;
+    void delegate(EWindowType) onWindowFocusChangedFunction;
     Cursor cursorNormal = null;
     Cursor cursorDragging = null;
     this(){
@@ -39,6 +40,37 @@ class OverviewWindow : MainWindow{
             });
         addOnRealize((Widget widget){
                 move(baseInfo.overviewWindowInfo.x, baseInfo.overviewWindowInfo.y);
+            });
+        addOnKeyPress((GdkEventKey* event, Widget widget){
+                switch(event.keyval){
+                case GdkKeysyms.GDK_F1: // EditWindow
+                case GdkKeysyms.GDK_F2: // PartsWindow
+                case GdkKeysyms.GDK_F3: // LayerWindow
+                case GdkKeysyms.GDK_F4: // OverviewWindow
+                    EWindowType windowType;
+                    switch(event.keyval){
+                    case GdkKeysyms.GDK_F1: // EditWindow
+                        windowType = EWindowType.EDIT;
+                        break;
+                    case GdkKeysyms.GDK_F2: // PartsWindow
+                        windowType = EWindowType.PARTS;
+                        break;
+                    case GdkKeysyms.GDK_F3: // LayerWindow
+                        windowType = EWindowType.LAYER;
+                        break;
+                    case GdkKeysyms.GDK_F4: // OverviewWindow
+                        windowType = EWindowType.OVERVIEW;
+                        break;
+                    }
+                    if(onWindowFocusChangedFunction){
+                        onWindowFocusChangedFunction(windowType);
+                    }
+                    return true;
+                    break;
+                default:
+                    break;
+                }
+                return false;
             });
     }
     void Reload(){

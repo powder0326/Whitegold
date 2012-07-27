@@ -13,6 +13,7 @@ version(UNUSE_TREEVIEW){
         void delegate() onLayerAddedFunction;
         void delegate() onLayerDeletedFunction;
         void delegate(bool isUp) onLayerMovedFunction;
+        void delegate(EWindowType) onWindowFocusChangedFunction;
         VBox mainBox;
 /**
    レイヤー用ウインドウ上部のメニュー
@@ -172,6 +173,37 @@ version(UNUSE_TREEVIEW){
             setDeletable(false);
             addOnRealize((Widget widget){
                     move(baseInfo.layerWindowInfo.x, baseInfo.layerWindowInfo.y);
+                });
+            addOnKeyPress((GdkEventKey* event, Widget widget){
+                    switch(event.keyval){
+                    case GdkKeysyms.GDK_F1: // EditWindow
+                    case GdkKeysyms.GDK_F2: // PartsWindow
+                    case GdkKeysyms.GDK_F3: // LayerWindow
+                    case GdkKeysyms.GDK_F4: // OverviewWindow
+                        EWindowType windowType;
+                        switch(event.keyval){
+                        case GdkKeysyms.GDK_F1: // EditWindow
+                            windowType = EWindowType.EDIT;
+                            break;
+                        case GdkKeysyms.GDK_F2: // PartsWindow
+                            windowType = EWindowType.PARTS;
+                            break;
+                        case GdkKeysyms.GDK_F3: // LayerWindow
+                            windowType = EWindowType.LAYER;
+                            break;
+                        case GdkKeysyms.GDK_F4: // OverviewWindow
+                            windowType = EWindowType.OVERVIEW;
+                            break;
+                        }
+                        if(onWindowFocusChangedFunction){
+                            onWindowFocusChangedFunction(windowType);
+                        }
+                        return true;
+                        break;
+                    default:
+                        break;
+                    }
+                    return false;
                 });
         }
         void Reload(){
