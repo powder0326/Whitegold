@@ -40,7 +40,7 @@ class EditWindow : MainWindow{
     void delegate(int,int,int,int) onNewProjectFunction;
     void delegate(CsvProjectInfo) onCsvLoadedFunction;
     void delegate(ChipReplaceInfo[]) onChipReplacedFunction;
-    void delegate(int,int,int,int,int,int) onSelectionMovedFunction;
+    void delegate(int,int,int,int,int,int,bool) onSelectionMovedFunction;
     void delegate() onChipReplaceCompletedFunction;
     void delegate() onUndoFunction;
     void delegate() onRedoFunction;
@@ -728,9 +728,9 @@ class EditWindow : MainWindow{
                 }
                 printf("tilingChip 2\n");
             }
-            void selectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
+            void selectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight, bool moveStartCopyMode){
                 if(this.outer.outer.onSelectionMovedFunction !is null){
-                    this.outer.outer.onSelectionMovedFunction(srcGridX, srcGridY, dstGridX, dstGridY, gridWidth, gridHeight);
+                    this.outer.outer.onSelectionMovedFunction(srcGridX, srcGridY, dstGridX, dstGridY, gridWidth, gridHeight, moveStartCopyMode);
                 }
             }
             class ChipDrawStrategyPen : ChipDrawStrategyBase{
@@ -877,6 +877,7 @@ class EditWindow : MainWindow{
                 ClipBoardInfo clipBoard[];
                 int moveStartGridX = 0;
                 int moveStartGridY = 0;
+                bool moveStartCopyMode = false;
                 override EDrawingType type(){
                     return EDrawingType.SELECT;
                 }
@@ -894,16 +895,19 @@ class EditWindow : MainWindow{
                            selection.endGridY >= mouseGridY){
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
+                            moveStartCopyMode = cast(bool)(event.state & GdkModifierType.CONTROL_MASK);
                             // 元の場所をSelection側にコピー(Todo! SHIFT押下時は全てのレイヤーを対象に)
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
                             layerInfo.layoutPixbuf.copyArea(projectInfo.partsSizeH * selection.startGridX, projectInfo.partsSizeV * selection.startGridY, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1), selection.pixbuf, 0, 0);
-                            // 元の場所を削除(Pixbufの表示だけ)(Todo! SHIFT押下時は全てのレイヤーを対象に)
-                            Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
-                            pixbuf.fill(0x00000000);
-                            for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
-                                for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
-                                    pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+                            if(!moveStartCopyMode){
+                                // 元の場所を削除(Pixbufの表示だけ)(Todo! SHIFT押下時は全てのレイヤーを対象に)
+                                Pixbuf pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH, projectInfo.partsSizeV);
+                                pixbuf.fill(0x00000000);
+                                for(int y = selection.startGridY ; y <= selection.endGridY ; ++ y){
+                                    for(int x = selection.startGridX ; x <= selection.endGridX ; ++ x){
+                                        pixbuf.copyArea(0, 0, projectInfo.partsSizeH, projectInfo.partsSizeV, layerInfo.layoutPixbuf, x * projectInfo.partsSizeH, y * projectInfo.partsSizeV);
+                                    }
                                 }
                             }
                             mode = EMode.MOVING;
@@ -926,7 +930,7 @@ class EditWindow : MainWindow{
                     else if(mode == EMode.MOVING){
                         mode = EMode.NORMAL;
                         // 移動を確定
-                        selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX + 1, selection.endGridY - selection.startGridY + 1);
+                        selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX + 1, selection.endGridY - selection.startGridY + 1, moveStartCopyMode);
 //                         drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
                     }
                     return true;

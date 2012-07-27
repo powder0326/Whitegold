@@ -445,7 +445,7 @@ class ProjectInfo{
         overviewWindow.queueDraw();
 //         printf("onChipReplaced 2\n");
     }
-    void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight){
+    void onSelectionMoved(int srcGridX, int srcGridY, int dstGridX, int dstGridY, int gridWidth, int gridHeight, bool moveStartCopyMode){
         LayerInfo layerInfo = currentLayerInfo;
         struct ReplaceInfo{
             int gridX;
@@ -460,14 +460,16 @@ class ProjectInfo{
         ReplaceInfo replaceInfos[];
         EditInfo editInfos[];
         // 元の場所の削除
-        for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
-            for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
-                int newChipId = -1;
-                int oldChipId = layerInfo.GetChipId(gridX, gridY);
-                int layoutIndex = gridX + gridY * mapSizeH;
-                replaceInfos ~= ReplaceInfo(gridX, gridY, newChipId);
-                editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
-                printf("(%d,%d) %d->%d\n",gridX,gridY,oldChipId,newChipId);
+        if(!moveStartCopyMode){
+            for(int gridY = srcGridY ; gridY < srcGridY + gridHeight ; ++ gridY){
+                for(int gridX = srcGridX ; gridX < srcGridX + gridWidth ; ++ gridX){
+                    int newChipId = -1;
+                    int oldChipId = layerInfo.GetChipId(gridX, gridY);
+                    int layoutIndex = gridX + gridY * mapSizeH;
+                    replaceInfos ~= ReplaceInfo(gridX, gridY, newChipId);
+                    editInfos ~= EditInfo(currentLayerIndex,layoutIndex,oldChipId,newChipId);
+                    printf("(%d,%d) %d->%d\n",gridX,gridY,oldChipId,newChipId);
+                }
             }
         }
         // 移動後の反映
