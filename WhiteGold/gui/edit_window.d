@@ -104,6 +104,18 @@ class EditWindow : MainWindow{
                     }
                     return true;
                     break;
+                case GdkKeysyms.GDK_1:
+                    toolArea.penButton.setActive(1);
+                    break;
+                case GdkKeysyms.GDK_2:
+                    toolArea.tilingPenButton.setActive(1);
+                    break;
+                case GdkKeysyms.GDK_3:
+                    toolArea.fillButton.setActive(1);
+                    break;
+                case GdkKeysyms.GDK_4:
+                    toolArea.selectButton.setActive(1);
+                    break;
                 default:
                     break;
                 }
