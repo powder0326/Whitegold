@@ -923,15 +923,7 @@ class EditWindow : MainWindow{
                 int moveStartGridX = 0;
                 int moveStartGridY = 0;
                 bool moveStartCopyMode = false;
-                override EDrawingType type(){
-                    return EDrawingType.SELECT;
-                }
-                override bool onButtonPress(GdkEventButton* event, Widget widget){
-//                     printf("ChipDrawStrategySelect.onButtonPress\n");
-                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
-                    if(!layerInfo.mapchipFileExists()){
-                        return true;
-                    }
+                void doButtonPressedAction(int state){
                     if(mode == EMode.NORMAL){
                         if(selection !is null &&
                            selection.startGridX <= mouseGridX &&
@@ -940,7 +932,7 @@ class EditWindow : MainWindow{
                            selection.endGridY >= mouseGridY){
                             moveStartGridX = mouseGridX;
                             moveStartGridY = mouseGridY;
-                            moveStartCopyMode = cast(bool)(event.state & GdkModifierType.CONTROL_MASK);
+                            moveStartCopyMode = cast(bool)(state & GdkModifierType.CONTROL_MASK);
                             // 元の場所をSelection側にコピー(Todo! SHIFT押下時は全てのレイヤーを対象に)
                             LayerInfo layerInfo = projectInfo.currentLayerInfo;
                             selection.pixbuf = new Pixbuf(GdkColorspace.RGB, true, 8, projectInfo.partsSizeH * (selection.endGridX - selection.startGridX + 1), projectInfo.partsSizeV * (selection.endGridY - selection.startGridY + 1));
@@ -962,10 +954,8 @@ class EditWindow : MainWindow{
                             queueDraw();
                         }
                     }
-                    return true;
                 }
-                override bool onButtonRelease(GdkEventButton* event, Widget widget){
-//                     printf("ChipDrawStrategySelect.onButtonRelease\n");
+                void doButtonReleasedAction(int state){
                     if(mode == EMode.DRAGGING){
                         mode = EMode.NORMAL;
                         selection.endGridX = mouseGridX;
@@ -978,19 +968,36 @@ class EditWindow : MainWindow{
                         selectionMoved(selection.startGridX,selection.startGridY,selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY, selection.endGridX - selection.startGridX + 1, selection.endGridY - selection.startGridY + 1, moveStartCopyMode);
 //                         drawChip(selection.startGridX + selection.moveGridX, selection.startGridY + selection.moveGridY);
                     }
-                    return true;
                 }
-                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
-//                     printf("ChipDrawStrategySelect.onMotionNotify\n");
+                void doCursorMovedAction(){
                     if(mode == EMode.DRAGGING){
                         selection.endGridX = mouseGridX;
                         selection.endGridY = mouseGridY;
-//                         selection.Normalize();
                     }
                     else if(mode == EMode.MOVING){
                         selection.moveGridX = mouseGridX - moveStartGridX;
                         selection.moveGridY = mouseGridY - moveStartGridY;
                     }
+                }
+                override EDrawingType type(){
+                    return EDrawingType.SELECT;
+                }
+                override bool onButtonPress(GdkEventButton* event, Widget widget){
+//                     printf("ChipDrawStrategySelect.onButtonPress\n");
+                    LayerInfo layerInfo = projectInfo.currentLayerInfo;
+                    if(!layerInfo.mapchipFileExists()){
+                        return true;
+                    }
+                    doButtonPressedAction(event.state);
+                    return true;
+                }
+                override bool onButtonRelease(GdkEventButton* event, Widget widget){
+//                     printf("ChipDrawStrategySelect.onButtonRelease\n");
+                    doButtonReleasedAction(event.state);
+                    return true;
+                }
+                override bool onMotionNotify(GdkEventMotion* event, Widget widget){
+                    doCursorMovedAction();
                     return true;
                 }
                 override bool onKeyPress(GdkEventKey* event, Widget widget){
@@ -1098,9 +1105,17 @@ class EditWindow : MainWindow{
                             break;
                         }
                     }
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonPressedAction(event.state);
+                    }else{
+                        doCursorMovedAction();
+                    }
                     return true;
                 }
                 override bool onKeyRelease(GdkEventKey* event, Widget widget){
+                    if(event.keyval == GdkKeysyms.GDK_z && !(event.state & GdkModifierType.CONTROL_MASK)){
+                        doButtonReleasedAction(event.state);
+                    }
                     return true;
                 }
             }
