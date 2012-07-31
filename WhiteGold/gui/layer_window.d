@@ -28,7 +28,6 @@ version(UNUSE_TREEVIEW){
                 Menu editMenu = append("編集");
                 editMenu.append(new MenuItem(&onMenuActivate, "新規レイヤー作成","edit.add_layer", true));
                 editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを削除","edit.delete_layer", true));
-                editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを隠す","edit.hide_layer", true));
                 editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを上に移動","edit.moveup_layer", true));
                 editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーを下に移動","edit.movedown_layer", true));
                 editMenu.append(new MenuItem(&onMenuActivate, "選択レイヤーの設定","edit.edit_layer", true));
@@ -38,6 +37,26 @@ version(UNUSE_TREEVIEW){
                 string action = menuItem.getActionName();
                 switch( action )
                 {
+                case "edit.add_layer":
+                    if(onLayerAddedFunction !is null){
+                        onLayerAddedFunction();
+                    }
+                    break;
+                case "edit.delete_layer":
+                    if(onLayerDeletedFunction !is null){
+                        onLayerDeletedFunction();
+                    }
+                    break;
+                case "edit.moveup_layer":
+                    if(onLayerMovedFunction !is null){
+                        onLayerMovedFunction(true);
+                    }
+                    break;
+                case "edit.movedown_layer":
+                    if(onLayerMovedFunction !is null){
+                        onLayerMovedFunction(false);
+                    }
+                    break;
                 default:
                     break;
                 }
@@ -87,9 +106,6 @@ version(UNUSE_TREEVIEW){
                 Button editLayerButton = new Button();
                 editLayerButton.setImage(new Image(new Pixbuf("dat/icon/wrench-screwdriver.png")));
                 packStart(editLayerButton , false, false, 2 );
-                ToggleButton showHideLayerButton = new ToggleButton();
-                showHideLayerButton.setImage(new Image(new Pixbuf("dat/icon/eye.png")));
-                packStart(showHideLayerButton , false, false, 2 );
             }
         }
 /**

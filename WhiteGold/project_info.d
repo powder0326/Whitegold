@@ -280,10 +280,14 @@ class ProjectInfo{
         if(isUp){
             if(currentLayerIndex >= 1){
                 swap(layerInfos[currentLayerIndex], layerInfos[currentLayerIndex - 1]);
+            }else{
+                return;
             }
         }else{
-            if(currentLayerIndex <= layerInfos.length - 2){
+            if(currentLayerIndex <= cast(int)(layerInfos.length - 2)){
                 swap(layerInfos[currentLayerIndex], layerInfos[currentLayerIndex + 1]);
+            }else{
+                return;
             }
         }
         layerWindow.Reload();
