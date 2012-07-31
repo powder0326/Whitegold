@@ -123,18 +123,7 @@ version(UNUSE_TREEVIEW){
                     add(hbox);
                     addOnButtonPress((GdkEventButton* event, Widget widget){
                             printf("EventBox.onClicked\n");
-                            foreach(i, layerInfoBox ; this.outer.layerInfoBoxes){
-                                if(i == layerIndex){
-                                    layerInfoBox.setState(GtkStateType.ACTIVE);
-//                                     layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(200,200,200));
-                                }else{
-                                    layerInfoBox.setState(GtkStateType.NORMAL);
-//                                     layerInfoBox.modifyBg(GtkStateType.NORMAL, new Color(255,255,255));
-                                }
-                            }
-                            if(this.outer.outer.onSelectedLayerChangedFunction !is null){
-                                this.outer.outer.onSelectedLayerChangedFunction(layerIndex);
-                            }
+                            this.outer.onSelectedLayerChanged(layerIndex);
                             return true;
                         });
                 }
@@ -156,6 +145,41 @@ version(UNUSE_TREEVIEW){
                         layerInfoBoxes[i].setState(GtkStateType.ACTIVE);
                     }
                     packStart(layerInfoBoxes[i],false,false,0);
+                }
+                addOnKeyPress((GdkEventKey* event, Widget widget){
+                        switch(event.keyval){
+                        case GdkKeysyms.GDK_Up:case GdkKeysyms.GDK_i:
+                            int layerIndex = max(projectInfo.currentLayerIndex - 1, 0);
+                            onSelectedLayerChanged(layerIndex);
+                            break;
+                        case GdkKeysyms.GDK_Down:case GdkKeysyms.GDK_k:
+                            int layerIndex = min(projectInfo.currentLayerIndex + 1, projectInfo.layerInfos.length - 1);
+                            onSelectedLayerChanged(layerIndex);
+                            break;
+                        case GdkKeysyms.GDK_space:
+                            with(layerInfoBoxes[projectInfo.currentLayerIndex].checkButton){
+                                setActive(!getActive());
+                                if(this.outer.onLayerVisibilityChangedFunction !is null){
+                                    this.outer.onLayerVisibilityChangedFunction(projectInfo.currentLayerIndex, getActive() == 1);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                        return true;
+                    });
+            }
+            void onSelectedLayerChanged(int layerIndex){
+                foreach(i, layerInfoBox ; layerInfoBoxes){
+                    if(i == layerIndex){
+                        layerInfoBox.setState(GtkStateType.ACTIVE);
+                    }else{
+                        layerInfoBox.setState(GtkStateType.NORMAL);
+                    }
+                }
+                if(this.outer.onSelectedLayerChangedFunction !is null){
+                    this.outer.onSelectedLayerChangedFunction(layerIndex);
                 }
             }
         }
