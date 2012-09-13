@@ -84,7 +84,7 @@ class ProjectInfo{
     // マップチップ関連
     Pixbuf[string] mapchipPixbufList;
     void AddMapchipFile(string mapchipFilePath){
-        printf("AddMapchipFile %s\n",toMBSz(mapchipFilePath));
+		version(WIN32){printf("AddMapchipFile %s\n",toMBSz(mapchipFilePath));}
         if(mapchipFilePath !in mapchipPixbufList){
             mapchipPixbufList[mapchipFilePath] = new Pixbuf(mapchipFilePath);
         }
@@ -146,10 +146,10 @@ class ProjectInfo{
         foreach(serializableLayerInfo;serializableProjectInfo.layerInfos){
             LayerInfo layerInfo = new LayerInfo();
             layerInfo.initBySerializable(serializableLayerInfo);
-            printf("ProjectInfo.initBySerializable 1 %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));
-            printf("[%x] ProjectInfo.initBySerializable 2 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            version(WIN32){printf("ProjectInfo.initBySerializable 1 %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));}
+            version(WIN32){printf("[%x] ProjectInfo.initBySerializable 2 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));}
             layerInfos ~= layerInfo;
-            printf("[%x] ProjectInfo.initBySerializable 3 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+            version(WIN32){printf("[%x] ProjectInfo.initBySerializable 3 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));}
         }
         // 基本データは設定完了したので画像など生成処理
         struct MapchipPathReplaceInfo{
@@ -162,7 +162,7 @@ class ProjectInfo{
         }
         MapchipPathReplaceInfo mapchipPathReplaceInfos[];
         foreach(layerInfo;layerInfos){
-            printf("[%x] ProjectInfo.initBySerializable 4 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));
+					version(WIN32){printf("[%x] ProjectInfo.initBySerializable 4 %s\n",layerInfo,toMBSz(layerInfo.mapchipFilePath));}
             // mapchipファイルパスの置換情報が存在するなら
             bool Finder(MapchipPathReplaceInfo info){
                 return info.src == layerInfo.mapchipFilePath;
@@ -397,7 +397,7 @@ class ProjectInfo{
         overviewWindow.Reload();
     }
     void onSelectionChanged(double startX, double startY, double endX, double endY){
-        printf("onSelectionChanged 1\n");
+		printf("onSelectionChanged 1\n");
         LayerInfo layerInfo = currentLayerInfo;
 		bool forceDraw = false;
 		if(layerInfo.gridSelection is null){
@@ -673,7 +673,7 @@ class LayerInfo{
         gridSelection = new GridSelection();
     }
     void initBySerializable(SerializableLayerInfo serializableLayerInfo){
-        printf("LayerInfo.initBySerializable %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));
+			version(WIN32){printf("LayerInfo.initBySerializable %s\n",toMBSz(serializableLayerInfo.mapchipFilePath));}
         name = serializableLayerInfo.name;
         visible = serializableLayerInfo.visible;
         mapchipFilePath = serializableLayerInfo.mapchipFilePath;
